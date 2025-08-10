@@ -1,0 +1,699 @@
+{
+    "HomePage": {
+        "title": "Home Page",
+        "description": "Home Page Description"
+    },
+ 
+    "Hero": {
+        "tagline": "Beyond Research Boundaries",
+        "title": "Unlock Business Success with Shared Expert Knowldge",
+        "description":"Explore a hub of data, insights, and business intelligence tailored for your business growth.",
+        "searchPlaceholder":"Search data, reports, insights, HS Code, ISIC Code... ",
+        "searchPlaceholderMobile":"Search in data, reports, insights...",
+        "direction": "ltr"
+    },
+    "HeroInsighter":{
+        "title":"Welcome to Knoldg",
+        "description":"Where your expertise becomes a valuable currency"
+    },
+    "InsighterFeatures":{
+        "title":"Welcome to Knoldg",
+        "description":"Where your expertise becomes a valuable currency",
+        "section3":{
+            "title":"A Sustainable Knowledge Ecosystem",
+            "description":"Knoldg empowers experts like you to share knowledge continuously—turning expertise into sustainable income with every upload, whether new or updated."
+        },
+        "section4":{
+            "title":"A Sustainable Revenue Stream",
+            "description":"Start earning by sharing your insights and experience on Knoldg. You Set the Value: Choose your price, and every time your work is downloaded, you're paid Directly."
+        },
+        "section1":{
+            "title":"Bring your knowledge to light by sharing it on the platform",
+            "description":"Start earning today by Bringing your data, studies, reports, and insights out from the confines of your desk. Share them with the world to discover, value, and invest in."
+        },
+        "section2":{
+            "title":"Don't let your expertise fade to silence; let it bloom into sustainable revenue",
+            "description":"Start earning by sharing your knowledge and experience on Knoldg. You Set the Value: Choose your price, and every time your work is downloaded, you're paid Directly."
+        },
+        "section5":{
+            "title":"Join our knowledge Ecosystem to Unlock a Recurring Revenue Stream",
+            "description":"Start earning by sharing your insights and experience on Knoldg. You Set the Value: Choose your price, and every time your work is downloaded, you're paid directly."
+        },
+        "section6":{
+            "title":"Knoldg ecosystem keeps you aligned with client demand",
+            "description":"Start creating what clients truly need in your field. Once you register as an Insighter, you'll receive notifications about client requests, enabling you to produce relevant data, reports, and insights from your area of expertise.\n\nOn-Demand Knowledge Production\n\nSmart Alerts for You & Your Clients\n\nWork Anytime, Anywhere"
+        },
+        "dataTypeSection":{
+            "title":"What data, insights, reports, or expertise have you locked away?",
+            "description":"Knoldg is your platform to showcase and monetize your intellectual assets. The platform organizes all your published material—including data and insights by category, making it easy for global audiences to find and purchase your work."
+        },
+        "showMore": "Show More",
+        "insighter": {
+            "title": "What is an ",
+            "insighterText": "Insighter ?",
+            "insighterText2": "Insighter ?",
+            "point1": "A subject matter expert, practitioner, consultant, strategist, technician, or field professional with hands-on experience,",
+            "point2": "who shares valuable data, reports, insights, case studies, or practical tools on Knoldg platform to empower others and help businesses grow;",
+            "point3": "A knowledge contributor who earns income each time their expertise is accessed.",
+            "roles": {
+              "fieldExpert": "Field expert",
+              "strategist": "Strategist",
+              "consultant": "Consultant",
+              "technician": "Technician"
+            },
+            "uploadTitle": "What data, reports and insights can you upload as",
+            "cta": "Become an Insighter",
+            "readMore": "Read more",
+            "joinUs": "You can join now, it's easy,free, and worth it.",
+            "uploadTypes": {
+            "businessReports": "Business Reports & Market Insights",
+            "playbooks": "Playbooks & Strategy Documents",
+            "manuals": "Operational Manuals & SOPs",
+            "technicalGuides": "Technical Guides & Field Knowledge",
+            "trainingMaterials": "Training Materials & Courses",
+            "dataSets": "Data Sets & Templates",
+            "supplyChain": "Supply Chain",
+            "marketSize": "Market Size",
+            "customerBehavior": "Customer Behavior",
+            "internationalTrade": "International Trade",
+            "investmentOpportunities": "Investment Opportunities",
+            "investmentGrowthStrategies": "Investment & Growth Strategies",
+            "businessStrategiesPlans": "Business Strategies & Plans",
+            "currentStateAnalysis": "Current State Analysis",
+            "benchmarkingStudies": "Benchmarking Studies",
+            "statistics": "General & Sector-Specific Statistics",
+            "regulatoryPolicies": "Official Policies & Procedures",
+            "technicalStudies": "Specialized Technical Studies",
+            "supplierListsPriceQuotes": "Supplier Lists & Price Quotes",
+            "pricingStrategies": "Pricing Policies & Strategies",
+            "marketTrendsPriceForecasts": "Market Trends & Price Forecasts",
+            "periodicReportsMarketInsights": "Periodic Reports & Market Insights",
+            "competitorAnalysis": "Competitor Analysis",
+            "marketEntryStrategies": "Market Entry Strategies",
+            "exportOpportunities": "Export Opportunities & Potential Clients",
+            "feasibilityStudies": "Feasibility Studies",
+            "digitalTransformation": "Digital Transformation & Automation",
+            "complianceGovernance": "Compliance & Governance Policies",
+            "organizationalChangePlans": "Organizational Change Plans",
+            "projectIdeasSolutions": "Project Ideas & Practical Solutions",
+            "focusGroupWorkshopOutputs": "Focus Group & Workshop Outputs",
+            "supplyChainSources": "Supply Chain & Input Sources",
+            "salesDataConsumerBehavior": "Sales Data & Consumer Behavior",
+            "operationalWorkEnvironment": "Operational Conditions & Work Environment",
+            "qualityMetrics": "Quality Metrics & Statistics",
+            "operationalCaseStudies": "Operational Case Studies",
+            "rootCauseAnalysis": "Results & Root Cause Analysis",
+            "productionAssessment": "Production Line & Equipment Assessment",
+            "financialAnalysis": "Financial Data & Analysis",
+            "businessNews": "Business News & Updates",
+            "trainingContent": "Training & Educational Content",
+            "skillDevelopmentPlans": "Skill Development Plans",
+            "businessTemplates": "Business Tools & Templates (Excel, BI)",
+            "decisionMakingTools": "Data Analysis & Decision-Making Tools"
+          }
+        },
+        "items": [
+            {
+                "title": "A Sustainable Revenue Stream",
+                "description": "Start earning by sharing your insights and experience on Knoldiq. You Set the Value: Choose your price, and every time your work is downloaded, you're paid directly.",
+                "image": "/images/insighter-2.png",
+                "icon": "/images/insighter-2-icon.svg",
+                "position": "right"
+            },
+            {
+              "title": "Bring your knowledge to light by sharing it on the platform",
+              "description": "Start earning today by bringing your data, studies, reports, and insights out from the confines of your desk. Share them with the world to discover, value, and invest in.",
+              "image": "/images/insighter-1.png",
+              "icon": "/images/insighter-1-icon.svg",
+              "position": "left"
+            },
+            {
+              "title": "Don't let your expertise fade to silence; let it bloom into sustainable revenue",
+              "description": "Start earning by sharing your knowledge and experience on Knoldiq. You Set the Value: Choose your price, and every time your work is downloaded, you're paid directly.",
+              "image": "/images/insighter-3.png",
+              "icon": "/images/insighter-3-icon.svg",
+              "position": "right"
+            }
+          ],
+          "ctaButton": "Get Started",
+        "knowledgeSection": {
+            "title": "What data, insights, reports, or expertise have you locked away?",
+            "description": "Knoldg is your platform to showcase and monetize your intellectual assets. The platform organizes all your published material—including data and insights by category, making it easy for global audiences to find and purchase your work."
+        }
+    },
+    "Header": {
+        "navigation": {
+            "industries": "Industries",
+            "reports": "Reports",
+            "data": "Data",
+            "insights": "Insights",
+            "manuals": "Manuals",
+            "courses": "Courses"
+        },
+        "industriesDropdown": {
+            "featuredTitle": "Featured Industries",
+            "viewAll": "View all industries",
+            "exploreText": "Explore insights and trends",
+            "exploreAllTitle": "Explore All Industries",
+            "exploreAllDescription": "Discover comprehensive insights across various sectors",
+            "browseAll": "Browse All"
+        },
+        "auth": {
+            "login": "Login"
+        },
+        "language": {
+            "switchToArabic": "العربية",
+            "switchToEnglish": "English"
+        },
+        "beta": {
+            "notice": "🚀 Welcome to Knoldg Beta. Some features and tools are still being refined. Stay tuned for upcoming updates!"
+        }
+    },
+    "Features": {
+        "tagline": "We pave the way",
+        "title": "Make Smarter, Faster Decisions",
+        "description": "Accelerate your decision-making by accessing authentic subject matter expertise instantly through AI-enhanced search capabilities.",
+        "tabs": {
+            "preciseResults": {
+                "title": "Smart Search Engine",
+                "alt": "Features Illustration"
+            },
+            "variableData": {
+                "title": "International Database Structure (ISIC, HS Code)"
+            },
+            "fasterDecisions": {
+                "title": "AI-Powered Assistance"
+            },
+            "titleIndustry":{
+                    "title":""
+            }
+        },
+        "direction": "ltr"
+    },
+    "Testimonials": {
+        "tagline": "Bringing You Closer to Resolution",
+        "title":"Latest Reports",
+        "description":"Stay ahead with newly uploaded expert reports, technical guides, and real-world analyses",
+        "insights": {
+            "title": "Insights",
+            "description": "Explore the latest insights and analysis in your field",
+            "alt": "Insights Icon"
+        },
+        "reports": {
+            "title": "Reports",
+            "description": "Access comprehensive, specialized reports across various domains",
+            "alt": "Reports Icon"
+        },
+        "manuals": {
+            "title": "Manuals",
+            "description": "Your comprehensive guide to professional practices and best methods",
+            "alt": "Manuals Icon"
+        },
+        "data": {
+            "title": "Data",
+            "description": "Accurate data and statistics to support your decisions",
+            "alt": "Data Icon"
+        },
+        "courses": {
+            "title": "Courses",
+            "description": "Learn from industry experts and develop your professional skills",
+            "alt": "Courses Icon"
+        },
+        "common": {
+            "learnMore": "Learn More"
+        },
+        "navigation": {
+            "previous": "Previous",
+            "next": "Next"
+        }
+    },
+    "Features2": {
+        "tagline": "Quality and Reliability",
+        "title": "Reliable, High-quality insights from Business Specialists",
+        "description": "Access verified insights and engage with rated business expert professionals",
+        "direction": "ltr",
+        "tabs": {
+            "directExpertEngagement": {
+                "title": "Direct Expert Engagement – Connect and communicate with Subject Matter Experts"
+            },
+            "expertRatings": {
+                "title": "Transparent Expert Ratings and AI-verified Content"
+            },
+            "consultingSessions": {
+                "title": "Personalized Consulting Sessions – Request one-on-one consultations with expert authors"
+            }
+        }
+    },
+    "Features3": {
+        "tagline": "Value for the Money",
+        "title": "Tailored Pricing,  Pay only for what Matters",
+        "description": "Purchase exactly what you need without paying the price of full reports. Our platform offers on-demand buying options tailored to your specific needs.",
+        "direction": "ltr",
+        "tabs": {
+            "no-monthly-subscription": {
+                "title":"Purchase part of a report, section or file"
+            },
+            "payAsYouGo": {
+                "title": "No monthly fees- Pay as You Go"
+            },
+            "purchaseSpecific": {
+                "title": "Pay for Only for the Targeted Insight or Data"
+            }
+        }
+    },
+    "Features4": {
+        "Features4": "Feature 4 (Backup)",
+        "searchTitle": "Search all assets",
+        "searchButton": "Search",
+        "searchResult": "Search All Results",
+        "searchFilters": "Filters",
+        "searchFilterPrice": "Price",
+        "searchFilterAll": "All",
+        "searchFilterFree": "Free",
+        "searchFilterPaid": "Paid",
+        "searchIndustries": "Industries",
+        "searchIndustriesPlaceHolder": "Choose Industries",
+        "searchCounsulting": "Counsulting Field",
+        "searchCounsultingPlaceHolder": "Choose Counsulting Field",
+        "searchRegions": "Regions",
+        "searchRegionsPlaceHolder": "Choose Regions",
+        "searchCountries": "Countries",
+        "searchCountriesPlaceHolder": "Choose Countries",
+        "searchEconomicBlocks": "Economic Blocks",
+        "searchEconomicBlocksPlaceHolder": "Choose Economic Blocks",
+        "searchISIC": "ISIC Code",
+        "searchISICPlaceHolder": "Choose ISIC Code",
+        "searchHSCode": "HS Code",
+        "searchHSCodePlaceHolder": "Choose HS Code",
+        "searchTags": "Tags",
+        "exploreKnowledge": "Explore Our Knowledge Database",
+        "filterByCategory": "Filter your search by category",
+        "searchTypeKnowledge": "Knowledge",
+        "searchTypeInsighter": "Insighter"
+    },
+    "Features02": {
+        "stayInformed": {
+            "title": "Stay Informed",
+            "description": "Get notified instantly when new reports, insights, and valuable resources are published on topics that matters to you."
+        },
+        "connectWithExpert": {
+            "title": "Connect With an Expert",
+            "description": "The platform engages you directly with SMEs for additional details, inquiries, and tailored guidance."
+        },
+        "discover": "Discover"
+    },
+    "Cta": {
+        "tagline": "",
+        "title": "Turn Your Expertise into Profit—Share Your Knowledge with the World!",
+        "description": "Start monetizing your knowledge and connect with prospective clients who need your expertise.",
+        "button": "Get Started",
+        "contact": "For inquiries and collaborations, reach out to us at",
+        "topTag":"Do you have valuable intellectual property data, reports, insights,",
+        "topTag2":"ready to deliver measurable impact?"
+    },
+    "Footer": {
+        "copyright": " 2025 foresighta.co. All Rights Reserved.",
+        "knowledge": {
+            "title": "Knowledge",
+            "insights": "Insights",
+            "reports": "Reports",
+            "data": "Data",
+            "manual": "Manuals",
+            "courses": "Courses"
+        },
+        "company": {
+            "title": "Company",
+            "about": "About us",
+            "blog": "Blog",
+            "contact": "Contact us"
+        },
+        "resources": {
+            "title": "Resources",
+            "helpCenter": "Help Center",
+            "faqs": "FAQs",
+            "userGuide": "User Guide"
+        },
+        "legals": {
+            "title": "Legals",
+            "terms": "Terms & Conditions",
+            "privacy": "Privacy Policy",
+            "dataLicensing": "Data Licensing Agreement",
+            "cookies": "Cookies Policy"
+        }
+    },
+    "aboutUsPage":{
+        "mainTitle":"About Knoldg",
+        "mainSubTitle":"Where Knowledge Meets Opportunity",
+        "firstParagraph":"Knoldg is a pioneering digital platform that provides individuals and businesses with access to high-quality business knowledge, such as data, reports, insights, and manuals across various industries. Our mission is to facilitate seamless knowledge sharing by offering a structured and accessible marketplace for expert-driven content.",
+        "firstParagraphPartTwo": "Whether you're a professional seeking valuable knowledge or an industry expert looking to monetize your expertise, Knoldg is your gateway to trusted insights.",
+        "ourVision": "Our Vision",
+        "ourVisionPart1": "At Knoldg, we envision a world where expertise is easily accessible, enabling businesses and professionals to make informed decisions with confidence.",
+        "ourVisionPart2": "We aim to bridge the gap between knowledge seekers and knowledge creators",
+        "ourVisionPart3": ", fostering a dynamic ecosystem of learning and growth.",
+        "whatOffer": "What We Offer",
+        "whatOffer1": "Flexible Knowledge Access",
+        "whatOffer1P": " – Users can browse and access a variety of knowledge types, including reports, data sets, insights, and manuals. Knowledge files are available for both personal and business use, with some being free and others available for purchase. Additionally, users can buy full reports or specific sections, such as individual chapters or particular datasets, on a pay-as-you-go basis.",
+        "whatOffer2": "Expert Consultation & Inquiries",
+        "whatOffer2P": " – Users can connect directly with knowledge experts for additional insights related to a particular uploaded knowledge file. They can also book consultation sessions with experts for deeper discussions and personalized guidance.",
+        "whatOffer3": "AI-Powered Search & Data Structuring",
+        "whatOffer3P": " – Knoldg features an advanced AI-supported search engine that enhances discoverability and accessibility of insights, making it easier for users to find relevant information. Our data is structured based on international standards such as ISIC and HS Codes, ensuring seamless integration into global business frameworks.",
+        "whatOffer4": "Monetization for Experts",
+        "whatOffer4P": " – Subject matter experts, consultants, and analysts can publish and sell their data, report and insights, earning revenue from their knowledge contributions.",
+         "whatOffer5": "Company & Expert Collaboration",
+        "whatOffer5P": " – Experts on Knoldg can be individual professionals or companies. The platform supports company creation, allowing company owners to invite experts—both from within the platform and external professionals—to contribute knowledge, upload insights, and sell data and reports.",
+        "whatOffer6": "Global Accessibility",
+        "whatOffer6P": " – Serving professionals and businesses worldwide, with a focus on the EU, GCC region, U.S., and Jordan.",
+        "benefitKnoldg":"Who Can Benefit from Knoldg?",
+        "benefitKnoldg1":"Businesses & Investors",
+        "benefitKnoldgp1":" – Gain access to industry reports, market research, and expert analyses.",
+        "benefitKnoldg2":"Consultants & Experts",
+        "benefitKnoldgp2":" – Share your expertise, grow your audience, and earn from your knowledge.",
+        "benefitKnoldg3":"Academics & Researchers",
+        "benefitKnoldgp3":" – Distribute valuable insights to a wider professional audience.",
+        "benefitKnoldg4":"Government & Policy Makers",
+        "benefitKnoldgp4":" – Utilize expert insights for informed policymaking and economic development.",
+        "parentCompanyTitle":"Our Parent Company - A&B Consulting",
+        "parentCompanyParagraph":"Knoldg is proudly owned and operated by A&B Consulting, a firm dedicated to driving business success through strategic insights and sustainable solutions. With a strong foundation in consulting and research, A&B Consulting ensures that Knoldg remains a trusted and professional platform for knowledge exchange."
+    },
+    "Resources": {
+        "user-guide": "User Guide",
+        "user-guide-title": "KNOLDG User Guide",
+        "user-guide-description": "Welcome to the KNOLDG User Guide. Here you'll find everything you need to know about using our platform.",
+        "welcome-to-user-guide": "Welcome to the User Guide",
+        "user-guide-welcome-message": "This guide will help you navigate through all the features and functionalities of KNOLDG platform.",
+        "user-guide-navigation-instruction": "Use the sidebar navigation to find specific topics you're interested in.",
+        "user-guide-help-instruction": "If you can't find what you're looking for, don't hesitate to contact our support team.",
+        "getting-started": "Getting Started",
+        "getting-started-description": "Learn the basics of using KNOLDG platform and start your journey.",
+        "quick-start": "Quick Start Guide",
+        "create-account-step": "Create an account or sign in to your existing account",
+        "complete-profile-step": "Complete your profile with relevant information",
+        "explore-content-step": "Start exploring content from the home page",
+        "save-content-step": "Save interesting content for later reference",
+        "next-steps": "Next Steps",
+        "next-steps-description": "After getting familiar with the basics, continue exploring:",
+        "account-management-next": "Learn more about account management options",
+        "content-features-next": "Discover advanced content features",
+        "search-tips-next": "Check out search tips to find exactly what you need",
+        "account-management": "Account Management",
+        "profile-setup": "Profile Setup",
+        "security": "Security",
+        "subscriptions": "Subscriptions",
+        "content-features": "Content Features",
+        "browsing-content": "Browsing Content",
+        "saving-content": "Saving Content",
+        "sharing": "Sharing",
+        "search-tips": "Search Tips",
+        "faqs": "FAQs",
+        "troubleshooting": "Troubleshooting"
+    },
+    "Legals": {
+        "terms": {
+            "title": "Terms of Service",
+            "lastUpdated": "Last Updated"
+        },
+        "privacy": {
+            "title": "Privacy Policy",
+            "lastUpdated": "Last Updated"
+        },
+        "dataLicensing": {
+            "title": "Data Licensing Agreement",
+            "lastUpdated": "Last Updated"
+        },
+        "cookies": {
+            "title": "Cookies Policy",
+            "lastUpdated": "Last Updated"
+        }
+    },
+    "UserProfile": {
+        "login": "Login",
+        "insighter": "Insighter",
+        "manager": "Manager",
+         "myConsultingSchedule": "My Consulting Schedule",
+        "companyInsighter": "Company-Insighter",
+        "company": "Company",
+        "client": "Client",
+        "ReceivedMeetings": "Received Meetings",
+        "SentMeetings": "Sent Meetings",
+        "addKnowledge": "Add Knowledge +",
+        "knowledgeBase": "My knowledge library",
+        "myReadLater": "Bookmarks",
+        "myDownloads": "My Downloads",
+        "myProfile": "My Profile",
+        "dashboard": "Dashboard",
+        "myRequests": "Requests",
+        "accountSettings": "Account Settings",
+        "becomeInsighter": "Become an Insighter",
+        "becomeInsighterDescription": "Register as a knowledge provider and start uploading reports and data on the platform",
+        "myCompany": "My Team",
+        "signOut": "Sign Out"
+    },
+    "ProfilePage": {
+        "profileNotFound": "Profile not found",
+        "bio": "Personal Bio",
+        "titleTooShort": "Title must be at least 3 characters",
+        "descriptionTooShort": "Description must be at least 3 characters",
+        "industries": "Industries",
+        "country": "Country",
+        "manager": "Manager",
+        "compmay": "Company",
+        "location": "Location",
+        "minimum3Characters": "Minimum 3 characters",
+        "optional": "Optional",
+        "certifications": "Certifications",
+        "bookASession": "Book a Consultant Session",
+        "meetingDate": "Meeting Date",
+        "meetingTitle": "Meeting Title",
+        "enterMeetingTitle": "Enter a title for your meeting",
+        "titleTooLong": "Meeting title must be less than 50 characters",
+        "descriptionTooLong": "Meeting description must be less than 100 characters",
+        "meetingDescription": "Meeting Description",
+        "enterMeetingDescription": "Enter details about what you'd like to discuss",
+        "bookingFor": "Booking for",
+        "cancel": "Cancel",
+        "confirmBooking": "Confirm Booking",
+        "duplicateMeetingWarning": "Meeting Time Conflict",
+        "duplicateMeetingMessage": "You already have a meeting scheduled on {date} from {startTime} to {endTime}. Are you sure you want to book another meeting at the same time?",
+        "continueBooking": "Continue Booking",
+        "consultingFields": "Consulting Fields",
+        "knowledgeItems": "Knowledge Items",
+        "showMore": "Show More",
+        "noKnowledgeItems": "No knowledge content available yet",
+        "filterByType": "Filter by type",
+        "all": "All",
+        "insights": "Insights",
+        "reports": "Reports",
+        "data": "Data",
+        "manuals": "Manuals",
+        "courses": "Courses",
+        "loadMore": "Load More",
+        "companyInfo": "Company Information",
+        "websiteLabel": "Website",
+        "aboutUs": "About Us",
+        "address": "Address",
+        "verified": "Verified",
+        "notVerified": "Not Verified",
+        "follow": "Follow",
+        "meet":"Meet",
+        "scheduleAMeeting": "Schedule a Meeting",
+        "publishedKnowledge": "Published <br/> Knowledge",
+        "consultingSessions": "Sessions <br/> Held",
+        "aboutMe": "About Insighter",
+        "aboutCompany": "About Insighter",
+        "with": "with",
+        "previous":"Previous",
+        "next":"Next",
+      
+        "knowledge": "Knowledge Uploads",
+        "availableTimes": "Available Times",
+        "book": "Book",
+        "noConsultingSessions": "No consulting sessions available",
+        "checkBackLater": "Please check back later for availability",
+        "loginToView": "You need to login to view",
+        "loginRequired": "Login Required",
+        "login": "Login",
+        "socialMedia": "Social Media",
+        "noBioAvailable": "No bio available",
+        "comingSoon": "Coming Soon",
+        "contentUpdateSoon": "This section will be updated soon with insightful content",
+        "selectDate":"Select a Date",
+        "sessionRate": "Session Rate:"
+    },
+    "industries": "Industries",
+    "reports": "Reports",
+    "data": "Data",
+    "insights": "Insights",
+    "manuals": "Manuals",
+    "courses": "Courses",
+    "byIndustry": "by Industry",
+    "noSubIndustries": "No sub-industries available",
+    "Filters": {
+        "filterBy": "Filter by",
+        "all": "All",
+        "data": "Data",
+        "insight": "Insight",
+        "report": "Report",
+        "manual": "Manual",
+        "course": "Course"
+    },
+    "termsAndConditions": {
+        "mainTitle":"Terms of Service",
+        "Introduction":"Introduction",
+        "welcomeKnoldg":"Welcome to Knoldg, an online platform that provides access to high-quality business knowledge, such as data, reports, insights, and manuals across various industries. By accessing or using our platform, you agree to comply with these Terms of Service. If you do not agree, please refrain from using Knoldg.",
+        "Definitions":"Definitions",
+        "authorizedUsers":"Authorized Users: Individuals or businesses that have registered and obtained access to Knoldg's services according to their account type.",
+        "expertContributors":"Expert Contributors: Individuals or companies that upload reports, insights, or data for sale.",
+        "subscribersPurchasers":"Subscribers & Purchasers: Users who buy or subscribe to reports and insights.",
+        "userRoles":"User Roles",
+        "primaryUser":"Knoldg has four primary user types:",
+        "freeUsers":"Free Users: Can browse available content but have limited access to premium insights.",
+        "payYou":"Pay-as-You-Go Users: Purchase individual reports or insights on demand.",
+        "subscribers":"Subscribers: Access tiered subscription plans that provide broader access to reports and insights.",
+        "expertContributors2":"Expert Contributors: Individuals who upload insights, reports, or data for sale.",
+        "purchasingReports":"Purchasing Reports",
+        "UsersPurchaseReports":"Users can purchase reports individually or subscribe to tiered access plans:",
+        "payYou2":"Pay-as-you-go: One-time purchases of specific reports or insights.",
+        "subscription":"Subscription Tiers: Monthly or annual plans with varying levels of access.",
+        "enterpriseLicensing":"Enterprise Licensing: Custom solutions for businesses requiring multiple-user access.",
+        "purchasedreports":"Purchased reports are for personal or internal business use only and may not be redistributed, modified, or resold.",
+        "reportsRestrictions":"Reports may include usage restrictions or expiration terms as defined by the expert contributor.",
+        "reportsCreation":"Reports Creation",
+        "knoldgCurates":"Knoldg curates reports from expert contributors and develops its own proprietary insights.",
+        "expertEnsure":"Expert contributors must ensure their content is accurate, non-misleading, and compliant with applicable laws and regulations.",
+        "AccountRegistration":"Account Registration & Obligations",
+        "Usersaccurate":"Users must provide accurate and complete information upon registration.",
+        "Usersresponsible":"Users are responsible for maintaining the confidentiality of their login credentials.",
+        "Knoldgnotified":"Knoldg must be notified immediately of any unauthorized account activity.",
+        "PaymentsRefunds":"Payments, Refunds & Compliance",
+        "Acceptedpayment":"Accepted payment methods include credit cards, PayPal, bank transfers, and region-specific options.",
+        "RefundsNotAllowed":"Refunds are not allowed once content has been accessed, except in cases of technical errors (e.g., duplicate charges, corrupt downloads).",
+        "SubscriptionRenew":"Subscription plans will auto-renew unless canceled by the user.",
+        "ServiceModifications":"Service Modifications",
+        "KnoldgRight":"Knoldg reserves the right to modify, discontinue, or update features without prior notice.",
+        "Usersnotified":"Users will be notified of any significant changes that impact access or pricing.",
+        "LimitationLiability":"Limitation of Liability",
+        "ServicesMaterials":"Services and materials are provided \"as is\" without warranties of any kind.",
+        "Knoldgliable":"Knoldg is not liable for business decisions made based on purchased insights.",
+        "Liabilitycapped":"Liability is capped at the amount paid by the user for the disputed service.",
+        "GoverningDispute":"Governing Law & Dispute Resolution",
+        "ForEU":"For EU users: Governed by GDPR and EU consumer laws.",
+        "ForUS":"For U.S. users: Governed by CCPA and applicable state laws.",
+        "ForJordan":"For Jordan & GCC: Governed by local data protection and e-commerce laws.",
+        "Jordanianlaw":"Jordanian law applies to all disputes. Any disputes shall be resolved through arbitration or courts in Knoldg's registered jurisdiction.",
+        "lastUpdatedTerms":"Last Updated: March 26, 2025"
+    },
+    "privacyPage": {
+        "mainTitle":"Privacy Policy",
+        "DataCollection":"Data Collection & Usage",
+        "Knoldgcollects":"Knoldg collects personal data to enhance user experience, including:",
+        "Accountdetails":"Account details (name, email, payment information)",
+        "Browsingbehavior":"Browsing behavior (cookies, analytics, search queries)",
+        "PurchaseHistory":"Purchase history & interactions with experts",
+        "LegalBasis":"Legal Basis for Processing (GDPR Compliance)",
+        "WeProcess":"We process personal data based on:",
+        "UserConsent":"User consent (e.g., for marketing emails)",
+        "ContractuaNecessity":"Contractual necessity (e.g., processing payments)",
+        "LegitimateInterests":"Legitimate interests (e.g., improving our platform and fraud prevention)",
+        "DataSharing":"Data Sharing",
+        "PersonalData":"Personal data is not sold to third parties.",
+        "DataShared":"Data may be shared with service providers (e.g., payment processors, fraud prevention services) to facilitate platform operations.",
+        "InformationDisclosed":"Information may be disclosed if legally required (e.g., government compliance, legal disputes).",
+        "CookiesTracking":"Cookies & Tracking",
+        "KnoldgCookies":"Knoldg uses cookies and tracking technologies to enhance user experience and improve services.",
+        "UsersCookie":"Users can adjust cookie preferences via their browser settings.",
+        "UserRights":"User Rights",
+        "UsersHave":"Users have the right to:",
+        "AccessCorrect":"Access, correct, or delete personal data",
+        "OptCommunications":"Opt out of marketing communications",
+        "RequestPortability":"Request data portability (EU users)",
+        "Withdrawonsent":"Withdraw consent at any time",
+        "DataSecurity":"Data Security",
+        "Knoldgemploys":"Knoldg employs industry-standard encryption and access controls to protect user data.",
+        "StrictSecurity":"We follow strict security measures to prevent unauthorized access and breaches.",
+        "RetentionPeriod":"Retention Period",
+        "PersonalData2":"Personal data is stored only as long as necessary for service delivery and legal compliance.",
+        "privacyLastUpdate":"Last Updated: March 26, 2025"
+    },
+     "dataLicenseAgreement": {
+            "mainTitle": "Data Licensing Agreement",
+            "scopeTitle": "Scope of Licensing",
+            "scopeLine1": "Contributors grant Knoldg a non-exclusive, worldwide license to:",
+            "scopeLine2": "Distribute and sell insights",
+            "scopeLine3": "Display and promote content",
+            "scopeLine4": "Use insights for platform analytics",
+            "paymentsTitle": "Contributor Payments & Revenue Sharing",
+            "paymentsLine1": "Contributors earn a royalty per sale from each transaction.",
+            "paymentsLine2": "Knoldg will issue payouts within X days after each transaction.",
+            "paymentsLine3": "Taxes are the responsibility of the contributor.",
+            "ipProtectionTitle": "Intellectual Property Protection",
+            "ipLine1": "Contributors must own or have rights to any content they upload.",
+            "ipLine2": "Knoldg reserves the right to remove any content that infringes IP laws.",
+            "liabilityTitle": "Liability & Indemnification",
+            "liabilityLine1": "Experts must ensure content accuracy and comply with all applicable laws.",
+            "liabilityLine2": "Knoldg is not liable for damages resulting from reliance on purchased insights.",
+            "liabilityLine3": "Experts agree to indemnify Knoldg against legal claims arising from misleading or false content.",
+            "terminationTitle": "Termination of License",
+            "terminationLine1": "Contributors may request content removal, but existing sales and licenses remain valid.",
+            "terminationLine2": "Knoldg may terminate agreements with contributors who violate policies.",
+            "lastUpdatedLicensing": "Last Updated: March 26, 2025"
+        },
+        "cookiesPolicy": {
+        "mainTitle": "Cookies Policy",
+        "introTitle": "Introduction",
+        "introLine1": "This Cookies Policy explains how Knoldg uses cookies and similar technologies when you visit the platform.",
+        "consentTitle": "User Consent",
+        "consentLine1": "Upon your first visit to the platform, we will display a cookie consent banner asking for your permission to use certain categories of cookies.",
+        "consentLine2": "You may change or withdraw your consent at any time through your browser or privacy settings.",
+        "authTitle": "Authentication Approach",
+        "authLine1": "Our platform primarily uses localStorage for authentication instead of cookies.",
+        "authLine2": "This approach simplifies the authentication flow and resolves issues with users being unexpectedly logged out after login.",
+        "typesTitle": "Types of Cookies We Use",
+        "typeEssential": "Essential Cookies: Required for basic functionality of the platform.",
+        "typeAnalytics": "Analytical/Performance Cookies: Help us understand how visitors interact with our platform.",
+        "typeFunctionality": "Functionality Cookies: Allow the platform to remember choices you make.",
+        "typeTargeting": "Targeting Cookies: Record your visit to our platform, pages visited, and links followed.",
+        "typeConsent": "Consent Management Cookies: Store your cookie preferences and consent selections.",
+        "manageTitle": "Managing Cookies",
+        "manageLine1": "You can manage or disable cookies through your browser settings.",
+        "manageLine2": "However, disabling some cookies may affect the functionality of certain parts of the platform.",
+        "lastUpdatedCookies": "Last Updated: March 26, 2025"
+        },
+        "contactUsPage": {
+                "contactUsTitle": "Message us now — We'd be happy to help!",
+                "contactUsFirstName": "First Name",
+                "contactUsFirstNameplaceholder": "E.g., Mark",
+                "contactUsLastName": "Last Name",
+                "contactUsLastNameplaceholder": "E.g., Rossi",
+                "contactUsPhone": "Phone Number",
+                "contactUsPhoneplaceholder": "+9***********",
+                "contactUsEmail": "Email Address",
+                "contactUsEmailplaceholder": "example@email.com",
+                "contactUsMessage": "Message",
+                "contactUsMessageplaceholder": "Type your message here...",
+                "send": "Send Message",
+                "regionalOperations": "Regional Operations - Jordan",
+                "jordanPhone": "+962777771429",
+                "somethingWentWrong": "Something went wrong",
+                "contactUsSuccessMessage": "Your message has been sent successfully",
+                "sending": "Sending message...",
+                "contactUsSuccessSubtext": "We will get back to you as soon as possible"
+        },
+    "dataNotAvailable": "No Knowledge Available Yet",
+    "industryKnowledge": "Explore by knowledge type",
+    "subIndustry": "Sub Industry",
+    "subIndustryKnowledge": "Explore by knowledge type",
+    "topicLabel": "Topic",
+    "Notifications": {
+        "TITLE": "Notifications",
+        "NO_NEW": "No new notifications",
+        "VIEW": "View"
+    },
+     "typeLabel": {
+    "report": "Report",
+    "insight": "Insight",
+    "data": "Data",
+    "manual": "Manual",
+    "course": "Course"
+  }
+ 
+}

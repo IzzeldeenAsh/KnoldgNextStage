@@ -1,0 +1,78 @@
+.tp-course-details2-widget {
+    top: 180px;
+    margin-top: -300px;
+    position: sticky;
+    z-index: 25 !important;
+    max-width: 400px;
+}
+.tp-course-details2-widget-child {
+  background-color: #fff;
+  box-shadow: 0 0 24px 0 rgba(3, 31, 66, 0.05);
+  border: 1px solid #DFDFDF;
+
+  
+}
+
+@media (max-width: 991px) {
+    .tp-course-details2-widget {
+        position: relative;
+        top: 0;
+        margin-top: 0;
+        box-shadow: none;
+        max-width: 400px;
+    }
+}
+
+.tp-course-details2-widget-list-item {
+    margin-bottom: 5px;
+    padding-bottom: 5px;
+    border-bottom: 1px solid rgba(3, 31, 66, 0.1);
+}
+
+.tp-course-details2-widget-list-item span {
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.tp-course-details2-widget-list-item:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.tp-course-details2-widget-list-item span:first-child {
+    display: flex;
+    align-items: center;
+}
+
+
+
+.tp-course-details2-widget-content {
+    padding: 30px 10px;
+}
+
+@keyframes infinite-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+@keyframes infinite-scroll-rtl {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.animate-infinite-scroll {
+  animation: infinite-scroll 25s linear infinite;
+}
+
+.animate-infinite-scroll-rtl {
+  animation: infinite-scroll-rtl 25s linear infinite;
+}
