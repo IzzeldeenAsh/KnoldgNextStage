@@ -209,7 +209,7 @@ function PaymentForm({ orderUuid, amount, title, locale, isRTL, orderDetails }: 
         <Button
           size="lg"
           className="bg-gradient-to-r from-blue-500 to-teal-400"
-          onClick={() => window.location.href = "https://app.foresighta.co/app/insighter-dashboard/my-downloads"}
+          onClick={() => window.location.href = "http://localhost:4200/app/insighter-dashboard/my-downloads"}
         >
           {translations.goToDownloads}
         </Button>
@@ -289,7 +289,6 @@ function PaymentForm({ orderUuid, amount, title, locale, isRTL, orderDetails }: 
             <PaymentElement 
               options={{
                 layout: "tabs",
-                paymentMethodOrder: ["card"],
               }}
             />
           </Paper>
