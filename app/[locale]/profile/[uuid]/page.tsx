@@ -1976,7 +1976,7 @@ export default function ProfilePage() {
                       <p className="text-gray-500 mb-4">{t("loginToView")}</p>
                       <a
                         href={`https://app.foresighta.co/auth/login?returnUrl=${encodeURIComponent(
-                          `https://foresighta.co/${locale}/profile/${uuid}${
+                          `https://knoldg.com/${locale}/profile/${uuid}${
                             typeof window !== "undefined"
                               ? window.location.search
                               : ""

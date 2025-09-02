@@ -312,7 +312,7 @@
         "topTag2":"ready to deliver measurable impact?"
     },
     "Footer": {
-        "copyright": " 2025 foresighta.co. All Rights Reserved.",
+        "copyright": " 2025 Knoldg.com. All Rights Reserved.",
         "knowledge": {
             "title": "Knowledge",
             "insights": "Insights",
@@ -443,6 +443,7 @@
         "dashboard": "Dashboard",
         "myRequests": "Requests",
         "accountSettings": "Account Settings",
+        "settings":"Settings",
         "becomeInsighter": "Become an Insighter",
         "becomeInsighterDescription": "Register as a knowledge provider and start uploading reports and data on the platform",
         "myCompany": "My Team",

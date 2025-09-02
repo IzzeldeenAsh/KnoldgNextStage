@@ -359,8 +359,9 @@ export function UserProfile({ isHome }: { isHome: boolean }) {
                   onClick={() => setMenuOpen(false)}
                   style={{fontSize: '13px'}}
                 >
-                  {t("accountSettings")}
+                  {t("settings")}
                 </Link>
+              
               </>
             )}
             
