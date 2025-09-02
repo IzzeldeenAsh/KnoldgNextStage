@@ -78,7 +78,7 @@ export default function CheckoutPage() {
     searchParams
       .get("documents")
       ?.split(",")
-      .map((id) => parseInt(id)) || [];
+      .map((id:any) => parseInt(id)) || [];
   const [knowledge, setKnowledge] = useState<Knowledge | null>(null);
   const [selectedDocuments, setSelectedDocuments] =
     useState<number[]>(documentIds);
@@ -202,8 +202,8 @@ export default function CheckoutPage() {
   const calculateTotalPrice = () => {
     if (!knowledge) return 0;
 
-    return selectedDocuments.reduce((sum, docId) => {
-      const doc = knowledge.documents.find((d) => d.id === docId);
+    return selectedDocuments.reduce((sum:any, docId:any) => {
+      const doc = knowledge.documents.find((d:any) => d.id === docId);
       return sum + (doc ? parseFloat(doc.price) : 0);
     }, 0);
   };
@@ -223,9 +223,9 @@ export default function CheckoutPage() {
 
   // Handle document selection toggle
   const handleDocumentToggle = (documentId: number) => {
-    setSelectedDocuments((prev) =>
+    setSelectedDocuments((prev:any) =>
       prev.includes(documentId)
-        ? prev.filter((id) => id !== documentId)
+        ? prev.filter((id:any) => id !== documentId)
         : [...prev, documentId]
     );
   };
@@ -338,7 +338,7 @@ export default function CheckoutPage() {
   }
 
   // Filter documents to show only the ones that were initially selected
-  const documentsToShow = knowledge.documents.filter((doc) =>
+  const documentsToShow = knowledge.documents.filter((doc:any) =>
     documentIds.includes(doc.id)
   );
 
@@ -520,7 +520,7 @@ export default function CheckoutPage() {
                             />
                           </div>
                           <div style={{ flex: 1 }}>
-                            <Text fw={500}>{translations.foresightaWallet}</Text>
+                            <Text fw={500}>{translations.knoldgWallet}</Text>
                             <Text size="sm" fw={600} c={walletBalance < totalPrice ? "red" : "green"} mt={2}>
                               {isRTL ? "الرصيد المتاح: " : "Available Balance: "}
                               {formatCurrency(walletBalance)}
