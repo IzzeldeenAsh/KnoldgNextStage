@@ -5,7 +5,7 @@ export default function AppLoader() {
     <div className="fixed inset-0 bg-white dark:bg-slate-900 flex items-center justify-center z-50">
       <div className="w-25 h-25 relative">
         <Image 
-          src="/images/KNOLDG.gif" 
+          src="/images/FORESIGHTA.gif" 
           alt="Loading..." 
           fill
           style={{ objectFit: 'contain' }}

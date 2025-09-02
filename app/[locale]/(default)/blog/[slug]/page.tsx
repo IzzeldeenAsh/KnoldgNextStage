@@ -1,5 +1,5 @@
 export const metadata = {
-  title: 'The Most Valuable Asset in Business - Knoldg',
+  title: 'The Most Valuable Asset in Business - FORESIGHTA',
   description: 'Discover what truly matters for business success in today\'s competitive landscape and how to leverage it to your advantage.',
 }
 

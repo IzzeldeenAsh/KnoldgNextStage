@@ -41,7 +41,7 @@ interface Props {
 
 async function fetchPackageData(slug: string, locale: string = 'en') {
   const cookieStore = await cookies();
-  const tokenCookie = cookieStore.get("knoldg_session");
+  const tokenCookie = cookieStore.get("foresighta_session");
   const token = tokenCookie?.value;
   
   const response = await fetch(
@@ -82,13 +82,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   try {
     const packageData: PackageData = await fetchPackageData(slug, locale);
     return {
-      title: `${packageData.name} Package | KNOLDG`,
+      title: `${packageData.name} Package | FORESIGHTA`,
       description: `Explore the ${packageData.name} package, including exclusive knowledge and insights.`,
     };
   } catch (error) {
     console.error("Metadata generation error:", error);
     return {
-      title: "Package | KNOLDG",
+      title: "Package | FORESIGHTA",
       description: "Exclusive packages and insights",
     };
   }

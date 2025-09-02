@@ -66,7 +66,7 @@ export default function IntegrationsCarousel() {
 
   return (
     <>
-      <div className="Knoldg-carousel swiper-container group">
+      <div className="FORESIGHTA-carousel swiper-container group">
         <div className="swiper-wrapper w-fit">
           {/* Carousel items */}
           <div className="swiper-slide h-auto bg-gradient-to-tr from-slate-800 to-slate-800/25 rounded-3xl border border-slate-800 hover:border-slate-700/60 transition-colors group relative">
@@ -79,7 +79,7 @@ export default function IntegrationsCarousel() {
                 <Link className="font-semibold bg-clip-text text-transparent bg-gradient-to-r from-slate-200/60 via-slate-200 to-slate-200/60 group-hover:before:absolute group-hover:before:inset-0" href="/integrations/single-post">Retool</Link>
               </div>
               <div className="grow mb-4">
-                <div className="text-sm text-slate-400">Knoldg makes it easy to build extensions by providing an authentication provider that handles the OAuth flow.</div>
+                <div className="text-sm text-slate-400">FORESIGHTA makes it easy to build extensions by providing an authentication provider that handles the OAuth flow.</div>
               </div>
               <div className="flex justify-between">
                 <div className="flex -space-x-3 -ml-0.5">
@@ -108,7 +108,7 @@ export default function IntegrationsCarousel() {
                 <Link className="font-semibold bg-clip-text text-transparent bg-gradient-to-r from-slate-200/60 via-slate-200 to-slate-200/60 group-hover:before:absolute group-hover:before:inset-0" href="/integrations/single-post">Zapier</Link>
               </div>
               <div className="grow mb-4">
-                <div className="text-sm text-slate-400">Knoldg makes it easy to build extensions by providing an authentication provider that handles the OAuth flow.</div>
+                <div className="text-sm text-slate-400">FORESIGHTA makes it easy to build extensions by providing an authentication provider that handles the OAuth flow.</div>
               </div>
               <div className="flex justify-between">
                 <div className="flex -space-x-3 -ml-0.5">
@@ -136,7 +136,7 @@ export default function IntegrationsCarousel() {
                 <Link className="font-semibold bg-clip-text text-transparent bg-gradient-to-r from-slate-200/60 via-slate-200 to-slate-200/60 group-hover:before:absolute group-hover:before:inset-0" href="/integrations/single-post">Airtable</Link>
               </div>
               <div className="grow mb-4">
-                <div className="text-sm text-slate-400">Knoldg makes it easy to build extensions by providing an authentication provider that handles the OAuth flow.</div>
+                <div className="text-sm text-slate-400">FORESIGHTA makes it easy to build extensions by providing an authentication provider that handles the OAuth flow.</div>
               </div>
               <div className="flex justify-between">
                 <div className="flex -space-x-3 -ml-0.5">
@@ -165,7 +165,7 @@ export default function IntegrationsCarousel() {
                 <Link className="font-semibold bg-clip-text text-transparent bg-gradient-to-r from-slate-200/60 via-slate-200 to-slate-200/60 group-hover:before:absolute group-hover:before:inset-0" href="/integrations/single-post">Jira</Link>
               </div>
               <div className="grow mb-4">
-                <div className="text-sm text-slate-400">Knoldg makes it easy to build extensions by providing an authentication provider that handles the OAuth flow.</div>
+                <div className="text-sm text-slate-400">FORESIGHTA makes it easy to build extensions by providing an authentication provider that handles the OAuth flow.</div>
               </div>
               <div className="flex justify-between">
                 <div className="flex -space-x-3 -ml-0.5">
@@ -194,7 +194,7 @@ export default function IntegrationsCarousel() {
                 <Link className="font-semibold bg-clip-text text-transparent bg-gradient-to-r from-slate-200/60 via-slate-200 to-slate-200/60 group-hover:before:absolute group-hover:before:inset-0" href="/integrations/single-post">GitLab</Link>
               </div>
               <div className="grow mb-4">
-                <div className="text-sm text-slate-400">Knoldg makes it easy to build extensions by providing an authentication provider that handles the OAuth flow.</div>
+                <div className="text-sm text-slate-400">FORESIGHTA makes it easy to build extensions by providing an authentication provider that handles the OAuth flow.</div>
               </div>
               <div className="flex justify-between">
                 <div className="flex -space-x-3 -ml-0.5">

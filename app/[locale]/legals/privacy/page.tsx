@@ -13,7 +13,7 @@ export default function PrivacyPolicy() {
           <h2 className="text-2xl font-semibold mt-8 mb-4 text-white">{t("mainTitle")}</h2>
           
           <h3 className="text-xl font-medium mt-6 mb-3 text-slate-200">{t("DataCollection")}</h3>
-          <p className="mb-4">{t("Knoldgcollects")}</p>
+          <p className="mb-4">{t("FORESIGHTAcollects")}</p>
           <ul className="list-disc pl-6 mb-4 space-y-2">
             <li>{t("Accountdetails")}</li>
             <li>{t("Browsingbehavior")}</li>
@@ -37,7 +37,7 @@ export default function PrivacyPolicy() {
           
           <h3 className="text-xl font-medium mt-6 mb-3 text-slate-200">{t("CookiesTracking")}</h3>
           <ul className="list-disc pl-6 mb-4 space-y-2">
-            <li>{t("KnoldgCookies")}</li>
+            <li>{t("FORESIGHTACookies")}</li>
             <li>{t("UsersCookie")}</li>
           </ul>
           
@@ -52,7 +52,7 @@ export default function PrivacyPolicy() {
           
           <h3 className="text-xl font-medium mt-6 mb-3 text-slate-200">{t("DataSecurity")}</h3>
           <ul className="list-disc pl-6 mb-4 space-y-2">
-            <li>{t("Knoldgemploys")}</li>
+            <li>{t("FORESIGHTAemploys")}</li>
             <li>{t("StrictSecurity")}</li>
           </ul>
           

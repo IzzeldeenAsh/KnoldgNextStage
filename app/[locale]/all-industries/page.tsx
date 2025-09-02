@@ -18,7 +18,7 @@ interface Props {
 }
 
 export const metadata: Metadata = {
-  title: 'Industries - KNOLDG',
+  title: 'Industries - FORESIGHTA',
   description: 'Explore all industries and their sub-categories.',
 }
 

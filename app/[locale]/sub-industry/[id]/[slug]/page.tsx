@@ -83,17 +83,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const { data } = await fetchSubIndustryData(id, slug, locale)
     
     return {
-      title: `${data.name} Sub-Industry Analysis | KNOLDG`,
+      title: `${data.name} Sub-Industry Analysis | FORESIGHTA`,
       description: `Detailed analysis and insights about ${data.name} sub-industry, including ${data.topic.map((topic: Topic) => topic.name).join(', ')}`,
       openGraph: {
-        title: `${data.name} Sub-Industry Analysis | KNOLDG`,
+        title: `${data.name} Sub-Industry Analysis | FORESIGHTA`,
         description: `Detailed analysis and insights about ${data.name} sub-industry, including ${data.topic.map((topic: Topic) => topic.name).join(', ')}`,
       }
     }
   } catch (error) {
     console.error('Metadata generation error:', error)
     return {
-      title: 'Sub-Industry Analysis | KNOLDG',
+      title: 'Sub-Industry Analysis | FORESIGHTA',
       description: 'Detailed sub-industry analysis and insights'
     }
   }
