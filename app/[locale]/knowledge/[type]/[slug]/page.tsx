@@ -154,17 +154,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const { data } = await fetchKnowledgeData(type, slug, locale);
 
     return {
-      title: `${data.title} | FORESIGHTA Knowledge`,
+      title: `${data.title} | KNOLDG Knowledge`,
       description: `Detailed knowledge and insights about ${data.title}`,
       openGraph: {
-        title: `${data.title} | FORESIGHTA Knowledge`,
+        title: `${data.title} | KNOLDG Knowledge`,
         description: `Detailed knowledge and insights about ${data.title}`,
       },
     };
   } catch (error) {
     // Let the not-found page handle this
     return {
-      title: "Knowledge Not Found | FORESIGHTA",
+      title: "Knowledge Not Found | KNOLDG",
       description: "The requested knowledge resource could not be found",
     };
   }

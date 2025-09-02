@@ -32,7 +32,7 @@ export default function IntegrationsList() {
     {
       img: IntegrationsImg06,
       name: 'Vercel',
-      description: 'FORESIGHTA makes it easy to build extensions by providing an authentication provider that handles the OAuth flow.',
+      description: 'Knoldg makes it easy to build extensions by providing an authentication provider that handles the OAuth flow.',
       link: '/integrations/single-post',
       featured: true,
       category: 'Engineering'
@@ -40,7 +40,7 @@ export default function IntegrationsList() {
     {
       img: IntegrationsImg07,
       name: 'Sentry',
-      description: 'FORESIGHTA makes it easy to build extensions by providing an authentication provider that handles the OAuth flow.',
+      description: 'Knoldg makes it easy to build extensions by providing an authentication provider that handles the OAuth flow.',
       link: '/integrations/single-post',
       featured: false,
       category: 'Engineering'
@@ -48,7 +48,7 @@ export default function IntegrationsList() {
     {
       img: IntegrationsImg04,
       name: 'Jira',
-      description: 'FORESIGHTA makes it easy to build extensions by providing an authentication provider that handles the OAuth flow.',
+      description: 'Knoldg makes it easy to build extensions by providing an authentication provider that handles the OAuth flow.',
       link: '/integrations/single-post',
       featured: true,
       category: 'Engineering'
@@ -56,7 +56,7 @@ export default function IntegrationsList() {
     {
       img: IntegrationsImg08,
       name: 'GitHub',
-      description: 'FORESIGHTA makes it easy to build extensions by providing an authentication provider that handles the OAuth flow.',
+      description: 'Knoldg makes it easy to build extensions by providing an authentication provider that handles the OAuth flow.',
       link: '/integrations/single-post',
       featured: true,
       category: 'Engineering'
@@ -64,7 +64,7 @@ export default function IntegrationsList() {
     {
       img: IntegrationsImg05,
       name: 'GitLab',
-      description: 'FORESIGHTA makes it easy to build extensions by providing an authentication provider that handles the OAuth flow.',
+      description: 'Knoldg makes it easy to build extensions by providing an authentication provider that handles the OAuth flow.',
       link: '/integrations/single-post',
       featured: true,
       category: 'Engineering'
@@ -72,7 +72,7 @@ export default function IntegrationsList() {
     {
       img: IntegrationsImg01,
       name: 'Retool',
-      description: 'FORESIGHTA makes it easy to build extensions by providing an authentication provider that handles the OAuth flow.',
+      description: 'Knoldg makes it easy to build extensions by providing an authentication provider that handles the OAuth flow.',
       link: '/integrations/single-post',
       featured: true,
       category: 'Engineering'
@@ -80,7 +80,7 @@ export default function IntegrationsList() {
     {
       img: IntegrationsImg02,
       name: 'Zapier',
-      description: 'FORESIGHTA makes it easy to build extensions by providing an authentication provider that handles the OAuth flow.',
+      description: 'Knoldg makes it easy to build extensions by providing an authentication provider that handles the OAuth flow.',
       link: '/integrations/single-post',
       featured: true,
       category: 'No-code'
@@ -88,7 +88,7 @@ export default function IntegrationsList() {
     {
       img: IntegrationsImg03,
       name: 'Airtable',
-      description: 'FORESIGHTA makes it easy to build extensions by providing an authentication provider that handles the OAuth flow.',
+      description: 'Knoldg makes it easy to build extensions by providing an authentication provider that handles the OAuth flow.',
       link: '/integrations/single-post',
       featured: true,
       category: 'No-code'
@@ -96,7 +96,7 @@ export default function IntegrationsList() {
     {
       img: IntegrationsImg09,
       name: 'Framer',
-      description: 'FORESIGHTA makes it easy to build extensions by providing an authentication provider that handles the OAuth flow.',
+      description: 'Knoldg makes it easy to build extensions by providing an authentication provider that handles the OAuth flow.',
       link: '/integrations/single-post',
       featured: true,
       category: 'No-code'
@@ -104,7 +104,7 @@ export default function IntegrationsList() {
     {
       img: IntegrationsImg10,
       name: 'Jotform',
-      description: 'FORESIGHTA makes it easy to build extensions by providing an authentication provider that handles the OAuth flow.',
+      description: 'Knoldg makes it easy to build extensions by providing an authentication provider that handles the OAuth flow.',
       link: '/integrations/single-post',
       featured: false,
       category: 'No-code'
@@ -112,7 +112,7 @@ export default function IntegrationsList() {
     {
       img: IntegrationsImg11,
       name: 'Webflow',
-      description: 'FORESIGHTA makes it easy to build extensions by providing an authentication provider that handles the OAuth flow.',
+      description: 'Knoldg makes it easy to build extensions by providing an authentication provider that handles the OAuth flow.',
       link: '/integrations/single-post',
       featured: true,
       category: 'No-code'
@@ -120,7 +120,7 @@ export default function IntegrationsList() {
     {
       img: IntegrationsImg12,
       name: 'Coda',
-      description: 'FORESIGHTA makes it easy to build extensions by providing an authentication provider that handles the OAuth flow.',
+      description: 'Knoldg makes it easy to build extensions by providing an authentication provider that handles the OAuth flow.',
       link: '/integrations/single-post',
       featured: false,
       category: 'No-code'
@@ -128,7 +128,7 @@ export default function IntegrationsList() {
     {
       img: IntegrationsImg13,
       name: 'Asana',
-      description: 'FORESIGHTA makes it easy to build extensions by providing an authentication provider that handles the OAuth flow.',
+      description: 'Knoldg makes it easy to build extensions by providing an authentication provider that handles the OAuth flow.',
       link: '/integrations/single-post',
       featured: true,
       category: 'Collaboration'
@@ -136,7 +136,7 @@ export default function IntegrationsList() {
     {
       img: IntegrationsImg14,
       name: 'Myngo',
-      description: 'FORESIGHTA makes it easy to build extensions by providing an authentication provider that handles the OAuth flow.',
+      description: 'Knoldg makes it easy to build extensions by providing an authentication provider that handles the OAuth flow.',
       link: '/integrations/single-post',
       featured: true,
       category: 'Collaboration'
@@ -144,7 +144,7 @@ export default function IntegrationsList() {
     {
       img: IntegrationsImg15,
       name: 'Bonsai',
-      description: 'FORESIGHTA makes it easy to build extensions by providing an authentication provider that handles the OAuth flow.',
+      description: 'Knoldg makes it easy to build extensions by providing an authentication provider that handles the OAuth flow.',
       link: '/integrations/single-post',
       featured: true,
       category: 'Collaboration'
@@ -152,7 +152,7 @@ export default function IntegrationsList() {
     {
       img: IntegrationsImg16,
       name: 'Decipad',
-      description: 'FORESIGHTA makes it easy to build extensions by providing an authentication provider that handles the OAuth flow.',
+      description: 'Knoldg makes it easy to build extensions by providing an authentication provider that handles the OAuth flow.',
       link: '/integrations/single-post',
       featured: true,
       category: 'Collaboration'
@@ -160,7 +160,7 @@ export default function IntegrationsList() {
     {
       img: IntegrationsImg17,
       name: 'Miro',
-      description: 'FORESIGHTA makes it easy to build extensions by providing an authentication provider that handles the OAuth flow.',
+      description: 'Knoldg makes it easy to build extensions by providing an authentication provider that handles the OAuth flow.',
       link: '/integrations/single-post',
       featured: true,
       category: 'Collaboration'
@@ -168,7 +168,7 @@ export default function IntegrationsList() {
     {
       img: IntegrationsImg18,
       name: 'Popform',
-      description: 'FORESIGHTA makes it easy to build extensions by providing an authentication provider that handles the OAuth flow.',
+      description: 'Knoldg makes it easy to build extensions by providing an authentication provider that handles the OAuth flow.',
       link: '/integrations/single-post',
       featured: true,
       category: 'Collaboration'
@@ -176,7 +176,7 @@ export default function IntegrationsList() {
     {
       img: IntegrationsImg19,
       name: 'Linear',
-      description: 'FORESIGHTA makes it easy to build extensions by providing an authentication provider that handles the OAuth flow.',
+      description: 'Knoldg makes it easy to build extensions by providing an authentication provider that handles the OAuth flow.',
       link: '/integrations/single-post',
       featured: true,
       category: 'Productivity'
@@ -184,7 +184,7 @@ export default function IntegrationsList() {
     {
       img: IntegrationsImg20,
       name: 'Microsoft',
-      description: 'FORESIGHTA makes it easy to build extensions by providing an authentication provider that handles the OAuth flow.',
+      description: 'Knoldg makes it easy to build extensions by providing an authentication provider that handles the OAuth flow.',
       link: '/integrations/single-post',
       featured: true,
       category: 'Productivity'
@@ -192,7 +192,7 @@ export default function IntegrationsList() {
     {
       img: IntegrationsImg21,
       name: 'Google Drive',
-      description: 'FORESIGHTA makes it easy to build extensions by providing an authentication provider that handles the OAuth flow.',
+      description: 'Knoldg makes it easy to build extensions by providing an authentication provider that handles the OAuth flow.',
       link: '/integrations/single-post',
       featured: true,
       category: 'Productivity'
@@ -200,7 +200,7 @@ export default function IntegrationsList() {
     {
       img: IntegrationsImg22,
       name: 'InVision',
-      description: 'FORESIGHTA makes it easy to build extensions by providing an authentication provider that handles the OAuth flow.',
+      description: 'Knoldg makes it easy to build extensions by providing an authentication provider that handles the OAuth flow.',
       link: '/integrations/single-post',
       featured: true,
       category: 'Productivity'
@@ -208,7 +208,7 @@ export default function IntegrationsList() {
     {
       img: IntegrationsImg23,
       name: 'WeTransfer',
-      description: 'FORESIGHTA makes it easy to build extensions by providing an authentication provider that handles the OAuth flow.',
+      description: 'Knoldg makes it easy to build extensions by providing an authentication provider that handles the OAuth flow.',
       link: '/integrations/single-post',
       featured: false,
       category: 'Productivity'
@@ -216,7 +216,7 @@ export default function IntegrationsList() {
     {
       img: IntegrationsImg24,
       name: 'Hotjar',
-      description: 'FORESIGHTA makes it easy to build extensions by providing an authentication provider that handles the OAuth flow.',
+      description: 'Knoldg makes it easy to build extensions by providing an authentication provider that handles the OAuth flow.',
       link: '/integrations/single-post',
       featured: true,
       category: 'Productivity'

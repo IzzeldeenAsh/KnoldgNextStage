@@ -112,34 +112,34 @@ export default function AboutContent() {
               
               {/* Who Can Benefit section */}
               <div className="mt-10">
-                <h3 className="h4 bg-clip-text text-transparent bg-gradient-to-r from-slate-200/80 via-slate-200 to-slate-200/80 pt-4 pb-3">{t("benefitFORESIGHTA")}</h3>
+                <h3 className="h4 bg-clip-text text-transparent bg-gradient-to-r from-slate-200/80 via-slate-200 to-slate-200/80 pt-4 pb-3">{t("benefitKnoldg")}</h3>
                 
                 <ul className="space-y-3">
                   <li className="flex items-start">
                     <div className="flex items-center justify-center rounded-full bg-blue-500 w-2 h-2 mt-2.5 me-3 shrink-0"></div>
                     <div>
-                      <strong className="text-slate-50 font-medium">{t("benefitFORESIGHTA1")}</strong>{t("benefitFORESIGHTAp1")}
+                      <strong className="text-slate-50 font-medium">{t("benefitKnoldg1")}</strong>{t("benefitKnoldgp1")}
                     </div>
                   </li>
                   
                   <li className="flex items-start">
                     <div className="flex items-center justify-center rounded-full bg-blue-500 w-2 h-2 mt-2.5 me-3 shrink-0"></div>
                     <div>
-                      <strong className="text-slate-50 font-medium">{t("benefitFORESIGHTA2")}</strong>{t("benefitFORESIGHTAp2")}
+                      <strong className="text-slate-50 font-medium">{t("benefitKnoldg2")}</strong>{t("benefitKnoldgp2")}
                     </div>
                   </li>
                   
                   <li className="flex items-start">
                     <div className="flex items-center justify-center rounded-full bg-blue-500 w-2 h-2 mt-2.5 me-3 shrink-0 "></div>
                     <div>
-                      <strong className="text-slate-50 font-medium">{t("benefitFORESIGHTA3")}</strong>{t("benefitFORESIGHTAp3")}
+                      <strong className="text-slate-50 font-medium">{t("benefitKnoldg3")}</strong>{t("benefitKnoldgp3")}
                     </div>
                   </li>
                   
                   <li className="flex items-start">
                     <div className="flex items-center justify-center rounded-full bg-blue-500 w-2 h-2 mt-2.5 me-3 shrink-0"></div>
                     <div>
-                      <strong className="text-slate-50 font-medium">{t("benefitFORESIGHTA4")}</strong>{t("benefitFORESIGHTAp4")}
+                      <strong className="text-slate-50 font-medium">{t("benefitKnoldg4")}</strong>{t("benefitKnoldgp4")}
                     </div>
                   </li>
                 </ul>

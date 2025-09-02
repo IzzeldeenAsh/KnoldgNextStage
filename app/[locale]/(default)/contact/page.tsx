@@ -1,6 +1,6 @@
 export const metadata = {
-  title: 'Contact Us - FORESIGHTA',
-  description: 'Learn about FORESIGHTA - the digital platform where knowledge meets opportunity.',
+  title: 'Contact Us - Knoldg',
+  description: 'Learn about Knoldg - the digital platform where knowledge meets opportunity.',
 }
 
 import ContactContent from '@/components/contact'

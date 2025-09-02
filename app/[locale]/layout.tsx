@@ -30,8 +30,8 @@ const tajawal = Tajawal({
 });
 
 export const metadata = {
-  title: 'FORESIGHTA - Buy & Sell Knowledge',
-  description: 'FORESIGHTA is a platform for buying and selling knowledge resources, insights and expertise.',
+  title: 'KNOLDG - Buy & Sell Knowledge',
+  description: 'KNOLDG is a platform for buying and selling knowledge resources, insights and expertise.',
 };
 
 type LayoutProps = {

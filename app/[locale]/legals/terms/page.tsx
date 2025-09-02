@@ -13,7 +13,7 @@ export default function TermsOfService() {
           <h2 className="text-2xl font-semibold mt-8 mb-4 text-white">{t("mainTitle")}</h2>
           
           <h3 className="text-xl font-medium mt-6 mb-3 text-slate-200">{t("Introduction")}</h3>
-          <p className="mb-4">{t("welcomeFORESIGHTA")}</p>
+          <p className="mb-4">{t("welcomeKnoldg")}</p>
           
           <h3 className="text-xl font-medium mt-6 mb-3 text-slate-200">{t("Definitions")}</h3>
           <ul className="list-disc pl-6 mb-4 space-y-2">
@@ -45,7 +45,7 @@ export default function TermsOfService() {
           
           <h3 className="text-xl font-medium mt-6 mb-3 text-slate-200">{t("reportsCreation")}</h3>
           <ul className="list-disc pl-6 mb-4 space-y-2">
-            <li>{t("foresightaCurates")}</li>
+            <li>{t("knoldgCurates")}</li>
             <li>{t("expertEnsure")}</li>
           </ul>
 
@@ -53,7 +53,7 @@ export default function TermsOfService() {
           <ul className="list-disc pl-6 mb-4 space-y-2">
             <li>{t("Usersaccurate")}</li>
             <li>{t("Usersresponsible")}</li>
-            <li>{t("FORESIGHTAnotified")}</li>
+            <li>{t("Knoldgnotified")}</li>
           </ul>
 
           <h3 className="text-xl font-medium mt-6 mb-3 text-slate-200">{t("PaymentsRefunds")}</h3>
@@ -65,14 +65,14 @@ export default function TermsOfService() {
 
           <h3 className="text-xl font-medium mt-6 mb-3 text-slate-200">{t("ServiceModifications")}</h3>
           <ul className="list-disc pl-6 mb-4 space-y-2">
-            <li>{t("FORESIGHTARight")}</li>
+            <li>{t("KnoldgRight")}</li>
             <li>{t("Usersnotified")}</li>
           </ul>
 
           <h3 className="text-xl font-medium mt-6 mb-3 text-slate-200">{t("LimitationLiability")}</h3>
           <ul className="list-disc pl-6 mb-4 space-y-2">
             <li>{t("ServicesMaterials")}</li>
-            <li>{t("FORESIGHTAliable")}</li>
+            <li>{t("Knoldgliable")}</li>
             <li>{t("Liabilitycapped")}</li>
           </ul>
 

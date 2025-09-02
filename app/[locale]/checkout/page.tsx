@@ -78,7 +78,7 @@ export default function CheckoutPage() {
     searchParams
       .get("documents")
       ?.split(",")
-      .map((id:any) => parseInt(id)) || [];
+      .map((id) => parseInt(id)) || [];
   const [knowledge, setKnowledge] = useState<Knowledge | null>(null);
   const [selectedDocuments, setSelectedDocuments] =
     useState<number[]>(documentIds);
@@ -94,7 +94,7 @@ export default function CheckoutPage() {
     selectDocuments: isRTL ? "المستندات المحددة" : "Selected Documents",
     totalPrice: isRTL ? "السعر الإجمالي" : "Total Price",
     paymentMethod: isRTL ? "طريقة الدفع" : "Payment Method",
-    foresightaWallet: isRTL ? "محفظة نولدج" : "FORESIGHTA Wallet",
+    knoldgWallet: isRTL ? "محفظة نولدج" : "Knoldg Wallet",
     stripeProvider: isRTL ? "مزود سترايب" : "Stripe Provider",
     confirmOrder: isRTL ? "تأكيد الطلب" : "Checkout",
     download: isRTL ? "تحميل" : "Download",
@@ -202,8 +202,8 @@ export default function CheckoutPage() {
   const calculateTotalPrice = () => {
     if (!knowledge) return 0;
 
-    return selectedDocuments.reduce((sum:any, docId:any) => {
-      const doc = knowledge.documents.find((d:any) => d.id === docId);
+    return selectedDocuments.reduce((sum, docId) => {
+      const doc = knowledge.documents.find((d) => d.id === docId);
       return sum + (doc ? parseFloat(doc.price) : 0);
     }, 0);
   };
@@ -223,9 +223,9 @@ export default function CheckoutPage() {
 
   // Handle document selection toggle
   const handleDocumentToggle = (documentId: number) => {
-    setSelectedDocuments((prev:any) =>
+    setSelectedDocuments((prev) =>
       prev.includes(documentId)
-        ? prev.filter((id:any) => id !== documentId)
+        ? prev.filter((id) => id !== documentId)
         : [...prev, documentId]
     );
   };
@@ -338,7 +338,7 @@ export default function CheckoutPage() {
   }
 
   // Filter documents to show only the ones that were initially selected
-  const documentsToShow = knowledge.documents.filter((doc:any) =>
+  const documentsToShow = knowledge.documents.filter((doc) =>
     documentIds.includes(doc.id)
   );
 
@@ -513,14 +513,14 @@ export default function CheckoutPage() {
                           >
                             <MantineImage
                               src="https://app.foresighta.co/assets/media/logos/custom-2.svg"
-                              alt="FORESIGHTA Wallet"
+                              alt="Knoldg Wallet"
                               width={32}
                               height={32}
                               fit="contain"
                             />
                           </div>
                           <div style={{ flex: 1 }}>
-                            <Text fw={500}>{translations.foresightaWallet}</Text>
+                            <Text fw={500}>{translations.knoldgWallet}</Text>
                             <Text size="sm" fw={600} c={walletBalance < totalPrice ? "red" : "green"} mt={2}>
                               {isRTL ? "الرصيد المتاح: " : "Available Balance: "}
                               {formatCurrency(walletBalance)}

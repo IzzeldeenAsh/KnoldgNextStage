@@ -7,7 +7,7 @@ const nextConfig = {
     domains: [
       'res.cloudinary.com',
       '4sighta-common.s3.eu-north-1.amazonaws.com',
-      'foresighta-common.s3.us-east-1.amazonaws.com'
+      'knoldg-common.s3.us-east-1.amazonaws.com'
     ],
   },
   async headers() {

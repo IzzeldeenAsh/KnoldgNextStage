@@ -1,5 +1,5 @@
 export const metadata = {
-  title: 'Changelog - FORESIGHTA',
+  title: 'Changelog - Knoldg',
   description: 'Page description',
 }
 

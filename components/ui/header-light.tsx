@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import Logo from "../../public/images/FORESIGHTA-LOGO-26.png";
+import Logo from "../../public/images/KNOLDG-LOGO-26.png";
 import { IndustriesMenu } from "./header/components/IndustriesMenu";
 import { UserProfile } from "./header/components/UserProfile";
 import Image from "next/image";

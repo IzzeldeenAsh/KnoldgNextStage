@@ -24,7 +24,7 @@ export default function TestimonialsCarousel() {
   const locale = useLocale()
   useEffect(() => {
     /* تمرير الموديولات عبر الخاصيّة modules */
-    new Swiper('.FORESIGHTA-carousel', {
+    new Swiper('.Knoldg-carousel', {
       modules: [Navigation, Autoplay],
 
       breakpoints: {
@@ -59,7 +59,7 @@ export default function TestimonialsCarousel() {
           {/* ===== السلايدر ===== */}
           <div className="relative before:absolute before:inset-0 before:-translate-x-full before:z-20 before:bg-gradient-to-l before:from-transparent before:to-slate-900 before:to-20% after:absolute after:inset-0 after:translate-x-full after:z-20 after:bg-gradient-to-r after:from-transparent after:to-slate-900 after:to-20%">
             {/* لاحظ استعمال .swiper بدل .swiper-container مع v11 */}
-            <div className="FORESIGHTA-carousel swiper group">
+            <div className="Knoldg-carousel swiper group">
               <Highlighter className="swiper-wrapper" refresh={swiperReady}>
 
                 {/* الشريحة 1 */}
