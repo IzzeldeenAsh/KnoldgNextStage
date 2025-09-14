@@ -15,7 +15,7 @@ import Particles from '@/components/particles'
 // Add CSS for text glow effect
 import './text-glow.css'
 import NotificationBell from './header/components/NotificationBell'
-import { useUserProfile } from '@/app/lib/useUserProfile';
+import { useUserProfile } from '@/components/ui/header/hooks/useUserProfile';
 import { startNotificationPolling, stopNotificationPolling } from '@/services/notifications.service';
 
 interface Industry {
@@ -208,7 +208,7 @@ const { isLoading: isAppLoading, setIsLoading: setAppLoading } = useLoading();
     setAppLoading(true);
     
     // Enhanced cookie setting for better browser compatibility (especially Safari/Firefox)
-    const isProduction = typeof window !== 'undefined' && window.location.hostname.includes('knoldg.com');
+    const isProduction = typeof window !== 'undefined' && window.location.hostname.includes('foresighta.co');
     const expirationDate = new Date();
     expirationDate.setFullYear(expirationDate.getFullYear() + 1); // 1 year from now
     
