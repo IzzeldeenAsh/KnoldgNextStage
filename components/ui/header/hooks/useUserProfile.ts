@@ -6,6 +6,8 @@ export interface User {
   id: number;
   uuid?: string;
   name: string;
+  country?: string;
+  country_id?: number;
   profile_photo_url: string | null;
   first_name: string;
   last_name: string;

@@ -9,10 +9,11 @@ import { Container, Text, Button, Paper, Group, Stack, Badge, Progress } from "@
 import { IconCreditCard, IconCheck, IconLock } from "@tabler/icons-react";
 import PageIllustration from "@/components/page-illustration";
 import { Elements, PaymentElement, useElements, useStripe } from "@stripe/react-stripe-js";
+import { getStripePublishableKey } from "@/app/config";
 import styles from "./payment.module.css";
 
 // Initialize Stripe
-const stripePromise = loadStripe("pk_test_51RpQiFL3mrWP7a0P1OYWGeFJWtgMwcWJtiEDLvn29CpYn5x8Ou77YViA1yoimlixKU5aUAeOeN5VTfoC4sMpvFVF00qq9a6BNm");
+const stripePromise = loadStripe("pk_test_51RvbpiRSMujJZykzGpYlMXB5BXcWcTKrBLcWVtvj3oM2vS9S0z1Ur8YVWPDVSoRTwIoYEDMkvnblr7VbQMCiwwx700TNlixQE6");
 
 // File icon mapping function
 const getFileIconByExtension = (extension: string) => {
@@ -448,11 +449,18 @@ function PaymentForm({ orderUuid, amount, title, locale, isRTL, orderDetails, se
         {/* Payment Element - Right Column */}
         <div className="space-y-6">
           <Paper  p="lg" radius="md" className="border border-gray-200">
-            <PaymentElement 
-              options={{
-                layout: "tabs",
-              }}
-            />
+          <PaymentElement
+  options={{
+    layout: "tabs",
+    fields: {
+      billingDetails: {
+        address: {
+          country: "auto",     // أو "never" أو "optional" أو "required"
+        },
+      },
+    },
+  }}
+/>
           </Paper>
 
           {/* Security Note */}

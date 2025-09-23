@@ -19,12 +19,13 @@ import { IconCheck } from "@tabler/icons-react";
 import Image from "next/image";
 import { useToast } from "@/components/toast/ToastContext";
 import PageIllustration from "@/components/page-illustration";
-import { 
-  VisaIcon, 
-  MasterCardIcon, 
-  GooglePayIcon, 
-  ApplePayIcon 
+import {
+  VisaIcon,
+  MasterCardIcon,
+  GooglePayIcon,
+  ApplePayIcon
 } from "@/components/payment-icons";
+import { useUserProfile } from "@/components/ui/header/hooks/useUserProfile";
 import styles from "./checkout.module.css";
 
 interface Document {
@@ -79,6 +80,9 @@ export default function CheckoutPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const toast = useToast();
+
+  // Hooks
+  const { user } = useUserProfile();
 
   const slug = searchParams.get("slug") || "";
   const documentIds =
@@ -168,7 +172,13 @@ export default function CheckoutPage() {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        const data = await response.json();
+        // Parse JSON response safely
+        const text = await response.text();
+        if (!text.trim()) {
+          throw new Error("Empty response from server");
+        }
+
+        const data = JSON.parse(text);
         setKnowledge(data.data);
       } catch (error) {
         console.error("Error fetching knowledge:", error);
@@ -204,8 +214,15 @@ export default function CheckoutPage() {
         );
 
         if (response.ok) {
-          const data = await response.json();
-          setWalletBalance(data.data.balance);
+          try {
+            const text = await response.text();
+            if (text.trim()) {
+              const data = JSON.parse(text);
+              setWalletBalance(data.data.balance);
+            }
+          } catch (parseError) {
+            console.warn("Wallet balance response is not valid JSON");
+          }
         }
       } catch (error) {
         console.error("Error fetching wallet balance:", error);
@@ -257,16 +274,23 @@ export default function CheckoutPage() {
       );
 
       if (response.ok) {
-        const data = await response.json();
-        console.log('Updated order details fetched:', data.data); // Debug log
-        const updatedOrderData = data.data;
-        
-        // Extract knowledge_download_ids if available
-        if (updatedOrderData.knowledge_download_ids) {
-          setKnowledgeDownloadIds(updatedOrderData.knowledge_download_ids);
+        try {
+          const text = await response.text();
+          if (text.trim()) {
+            const data = JSON.parse(text);
+            console.log('Updated order details fetched:', data.data); // Debug log
+            const updatedOrderData = data.data;
+
+            // Extract knowledge_download_ids if available
+            if (updatedOrderData.knowledge_download_ids) {
+              setKnowledgeDownloadIds(updatedOrderData.knowledge_download_ids);
+            }
+
+            return updatedOrderData;
+          }
+        } catch (parseError) {
+          console.warn("Order details response is not valid JSON");
         }
-        
-        return updatedOrderData;
       }
     } catch (error) {
       console.error("Error fetching updated order details:", error);
@@ -356,13 +380,36 @@ export default function CheckoutPage() {
         }
       );
 
-      const data = await response.json();
-      console.log('Checkout response:', data); // Debug log
-
       if (!response.ok) {
-        throw new Error(
-          data.message || `HTTP error! status: ${response.status}`
-        );
+        // Try to parse error response if it contains JSON
+        let errorMessage = `HTTP error! status: ${response.status}`;
+        try {
+          const text = await response.text();
+          if (text.trim()) {
+            const errorData = JSON.parse(text);
+            errorMessage = errorData.message || errorMessage;
+          }
+        } catch {
+          // If JSON parsing fails, use the default error message
+        }
+        throw new Error(errorMessage);
+      }
+
+      // Parse JSON response safely for successful responses
+      let data = null;
+      try {
+        const text = await response.text();
+        if (text.trim()) {
+          data = JSON.parse(text);
+          console.log('Checkout response:', data); // Debug log
+        }
+      } catch (parseError) {
+        console.warn("Checkout response is not valid JSON, but request was successful");
+        throw new Error("Invalid response format from server");
+      }
+
+      if (!data) {
+        throw new Error("Empty response from server");
       }
 
       // Extract order data
@@ -646,57 +693,60 @@ export default function CheckoutPage() {
 
                     <Stack gap="md">
                       {/* Wallet Method */}
-                      <div
-                        className={`${styles.paymentMethodCard} ${
-                          paymentMethod === "manual" ? styles.selected : ""
-                        } ${walletBalance < totalPrice ? styles.disabled : ""}`}
-                        onClick={() =>
-                          walletBalance >= totalPrice &&
-                          setPaymentMethod("manual")
-                        }
-                      >
-                        <Group gap="lg" align="center">
-                          <div className={styles.methodCheckbox}>
-                            <Checkbox
-                              checked={paymentMethod === "manual"}
-                              onChange={() =>
-                                walletBalance >= totalPrice &&
-                                setPaymentMethod("manual")
-                              }
-                              disabled={walletBalance < totalPrice}
-                              size="md"
-                            />
-                          </div>
-                          <div
-                            style={{
-                              width: 40,
-                              height: 40,
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                            }}
-                          >
-                            <MantineImage
-                              src="https://app.foresighta.co/assets/media/logos/custom-2.svg"
-                              alt="Knoldg Wallet"
-                              width={32}
-                              height={32}
-                              fit="contain"
-                            />
-                          </div>
-                          <div style={{ flex: 1 }}>
-                            <Text fw={500}>{translations.knoldgWallet}</Text>
-                            <Text size="sm" fw={600} c={walletBalance < totalPrice ? "red" : "green"} mt={2}>
-                              {isRTL ? "الرصيد المتاح: " : "Available Balance: "}
-                              {formatCurrency(walletBalance)}
-                            </Text>
-                            {walletBalance < totalPrice && (
-                              <Text size="xs" c="red">
-                                {translations.insufficientBalance}
+                      <div>
+                        <div
+                          className={`${styles.paymentMethodCard} ${
+                            paymentMethod === "manual" ? styles.selected : ""
+                          } ${walletBalance < totalPrice ? styles.disabled : ""}`}
+                          onClick={() =>
+                            walletBalance >= totalPrice &&
+                            setPaymentMethod("manual")
+                          }
+                        >
+                          <Group gap="lg" align="center">
+                            <div className={styles.methodCheckbox}>
+                              <Checkbox
+                                checked={paymentMethod === "manual"}
+                                onChange={() =>
+                                  walletBalance >= totalPrice &&
+                                  setPaymentMethod("manual")
+                                }
+                                disabled={walletBalance < totalPrice}
+                                size="md"
+                              />
+                            </div>
+                            <div
+                              style={{
+                                width: 40,
+                                height: 40,
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                              }}
+                            >
+                              <MantineImage
+                                src="https://app.foresighta.co/assets/media/logos/custom-2.svg"
+                                alt="Knoldg Wallet"
+                                width={32}
+                                height={32}
+                                fit="contain"
+                              />
+                            </div>
+                            <div style={{ flex: 1 }}>
+                              <Text fw={500}>{translations.knoldgWallet}</Text>
+                              <Text size="sm" fw={600} c={walletBalance < totalPrice ? "red" : "green"} mt={2}>
+                                {isRTL ? "الرصيد المتاح: " : "Available Balance: "}
+                                {formatCurrency(walletBalance)}
                               </Text>
-                            )}
-                          </div>
-                        </Group>
+                              {walletBalance < totalPrice && (
+                                <Text size="xs" c="red">
+                                  {translations.insufficientBalance}
+                                </Text>
+                              )}
+                            </div>
+                          </Group>
+                        </div>
+
                       </div>
 
                       {/* Stripe Method */}
