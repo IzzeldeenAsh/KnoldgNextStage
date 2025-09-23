@@ -1,0 +1,1 @@
+- Install `replace-in-file` module using npm.

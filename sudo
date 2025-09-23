@@ -1,0 +1,2 @@
+/etc/sudoers
+izzeddinashour ALL=(ALL) NOPASSWD: ALL /etc/sudoers
