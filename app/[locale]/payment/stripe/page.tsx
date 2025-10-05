@@ -55,8 +55,8 @@ interface OrderDetails {
   amount: number;
   currency: string;
   date: string;
-  suborders: Suborder[];
-  knowledge_download_ids?: string[];
+  orderable: Suborder;
+  knowledge_download_id?: string;
 }
 
 interface PaymentFormProps {
@@ -88,7 +88,7 @@ function PaymentForm({ orderUuid, amount, title, locale, isRTL, orderDetails, se
     return token;
   };
 
-  // Fetch updated order details to get knowledge_download_ids
+  // Fetch updated order details to get knowledge_download_id
   const fetchUpdatedOrderDetails = useCallback(async (uuid: string, setOrderDetails: (details: OrderDetails) => void) => {
     try {
       setIsFetchingDownloadIds(true);
@@ -263,7 +263,7 @@ function PaymentForm({ orderUuid, amount, title, locale, isRTL, orderDetails, se
             clearInterval(timer);
             setTimeout(async () => {
               setShowDocumentsAdded(true);
-              // Recall the API to get updated knowledge_download_ids after documents are processed
+              // Recall the API to get updated knowledge_download_id after documents are processed
               console.log('Documents processed, fetching updated order details...'); // Debug log
               await fetchUpdatedOrderDetails(orderUuid, setOrderDetails);
             }, 300);
@@ -344,15 +344,15 @@ function PaymentForm({ orderUuid, amount, title, locale, isRTL, orderDetails, se
           disabled={isFetchingDownloadIds}
           onClick={() => {
             console.log('Download button clicked. Order details:', orderDetails); // Debug log
-            // Use knowledge_download_ids if available, otherwise fall back to title search
-            if (orderDetails?.knowledge_download_ids && orderDetails.knowledge_download_ids.length > 0) {
-              const uuidsParam = `?uuids=${orderDetails.knowledge_download_ids.join(',')}`;
-              console.log('Redirecting with UUIDs:', uuidsParam); // Debug log
+            // Use knowledge_download_id if available, otherwise fall back to title search
+            if (orderDetails?.knowledge_download_id) {
+              const uuidsParam = `?uuids=${orderDetails.knowledge_download_id}`;
+              console.log('Redirecting with UUID:', uuidsParam); // Debug log
               window.location.href = `https://app.foresighta.co/app/insighter-dashboard/my-downloads${uuidsParam}`;
             } else {
-              console.log('No UUIDs available, falling back to search'); // Debug log
-              // Fallback to title search if no UUIDs available
-              const searchTitle = orderDetails?.suborders?.[0]?.knowledge?.[0]?.title || "";
+              console.log('No UUID available, falling back to search'); // Debug log
+              // Fallback to title search if no UUID available
+              const searchTitle = orderDetails?.orderable?.knowledge?.[0]?.title || "";
               const searchParam = searchTitle ? `?search=${encodeURIComponent(searchTitle)}` : "";
               console.log('Redirecting with search:', searchParam); // Debug log
               window.location.href = `https://app.foresighta.co/app/insighter-dashboard/my-downloads${searchParam}`;
@@ -412,27 +412,25 @@ function PaymentForm({ orderUuid, amount, title, locale, isRTL, orderDetails, se
             </Group>
             
             {/* Display ordered files */}
-            {orderDetails && orderDetails.suborders && orderDetails.suborders.length > 0 && (
+            {orderDetails && orderDetails.orderable && orderDetails.orderable.knowledge_documents && (
               <div className="mt-2">
                 <div className="flex flex-col  flex-wrap gap-3">
-                  {orderDetails.suborders.map((suborder, subIndex) => 
-                    suborder.knowledge_documents.flat().map((doc, docIndex) => (
-                      <div key={`${subIndex}-${docIndex}`} className="flex items-center gap-2 bg-gray-50 rounded-md px-3 py-2">
-                        <Image
-                          src={getFileIconByExtension(doc.file_extension)}
-                          alt={`${doc.file_extension.toUpperCase()} file`}
-                          width={20}
-                          height={20}
-                        />
-                        <Text size="xs" c="dimmed" style={{ maxWidth: '150px' }} truncate>
-                          {doc.file_name}
-                        </Text>
-                        <Badge size="xs" color="blue" variant="light" className="bg-blue-100">
-                          ${doc.price}
-                        </Badge>
-                      </div>
-                    ))  
-                  )}
+                  {orderDetails.orderable.knowledge_documents.flat().map((doc, docIndex) => (
+                    <div key={docIndex} className="flex items-center gap-2 bg-gray-50 rounded-md px-3 py-2">
+                      <Image
+                        src={getFileIconByExtension(doc.file_extension)}
+                        alt={`${doc.file_extension.toUpperCase()} file`}
+                        width={20}
+                        height={20}
+                      />
+                      <Text size="xs" c="dimmed" style={{ maxWidth: '150px' }} truncate>
+                        {doc.file_name}
+                      </Text>
+                      <Badge size="xs" color="blue" variant="light" className="bg-blue-100">
+                        ${doc.price}
+                      </Badge>
+                    </div>
+                  ))}
                 </div>
               </div>
             )}
