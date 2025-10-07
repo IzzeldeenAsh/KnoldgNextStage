@@ -70,7 +70,9 @@ export default function UpdateCountryPage() {
       throw new Error(errorData?.message || `Failed to update country: ${response.status}`);
     }
 
-    return response.json();
+    // Handle empty response body
+    const text = await response.text();
+    return text ? JSON.parse(text) : {};
   };
 
   // Handle form submission
@@ -151,7 +153,7 @@ export default function UpdateCountryPage() {
     if (isLocalhost) {
       document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
     } else {
-      document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.foresighta.co; Secure; SameSite=None;`;
+      document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; Domain=.foresighta.co; Secure; SameSite=None;`;
     }
   };
 
