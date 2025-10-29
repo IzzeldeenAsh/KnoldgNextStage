@@ -22,7 +22,7 @@ import { VisaIcon, MasterCardIcon, GooglePayIcon, ApplePayIcon } from "@/compone
 import { useUserProfile } from "@/app/lib/useUserProfile";
 
 // Initialize Stripe
-const stripePromise = loadStripe("pk_test_51RpQiFL3mrWP7a0P1OYWGeFJWtgMwcWJtiEDLvn29CpYn5x8Ou77YViA1yoimlixKU5aUAeOeN5VTfoC4sMpvFVF00qq9a6BNm");
+const stripePromise = loadStripe("pk_test_51RvbpiRSMujJZykzGpYlMXB5BXcWcTKrBLcWVtvj3oM2vS9S0z1Ur8YVWPDVSoRTwIoYEDMkvnblr7VbQMCiwwx700TNlixQE6");
 
 interface MeetingTime {
   start_time: string;
@@ -510,7 +510,7 @@ export default function MeetTab({
             <p className="text-gray-500 mb-4">{t("loginToView")}</p>
             <a
               href={`https://app.foresighta.co/auth/login?returnUrl=${encodeURIComponent(
-                `https://foresighta.co/${locale}/profile/${uuid}${
+                `https://knoldg.com/${locale}/profile/${uuid}${
                   typeof window !== "undefined"
                     ? window.location.search
                     : ""

@@ -120,11 +120,11 @@ export async function fetchStatisticsPerType(
   isicCodeFilter: number | null = null,
   industryFilter: number | null = null,
   priceFilter: string | null = null,
-  priceRangeStart: number | null = null,
-  priceRangeEnd: number | null = null,
   hsCodeFilter: number | null = null,
   accuracyFilter: 'any' | 'all' = 'any',
   roleFilter: 'all' | 'company' | 'individual' = 'all',
+  rangeStartFilter: string | null = null,
+  rangeEndFilter: string | null = null,
   onError?: (errorMessage: any) => void
 ) {
   try {
@@ -175,17 +175,18 @@ export async function fetchStatisticsPerType(
       url.searchParams.append('paid', priceFilter);
     }
     
-    if ((priceRangeStart !== null && priceRangeStart !== 0) || priceRangeEnd !== null) {
-      const startValue = priceRangeStart ?? 0;
-      url.searchParams.append('range_start', startValue.toString());
-      if (priceRangeEnd !== null) {
-        url.searchParams.append('range_end', priceRangeEnd.toString());
-      }
-    }
-    
     // Add role parameter
     if (roleFilter !== null && roleFilter !== 'all') {
       url.searchParams.append('role', roleFilter);
+    }
+
+    // Add range price parameters
+    if (rangeStartFilter !== null) {
+      url.searchParams.append('range_start', rangeStartFilter);
+    }
+
+    if (rangeEndFilter !== null) {
+      url.searchParams.append('range_end', rangeEndFilter);
     }
     
     // Get token from cookies (primary) or localStorage (fallback)
@@ -245,11 +246,11 @@ export async function fetchSearchResults(
   onError?: (errorMessage: any) => void,
   industryFilter: number | null = null,
   priceFilter: string | null = null,
-  priceRangeStart: number | null = null,
-  priceRangeEnd: number | null = null,
   hsCodeFilter: number | null = null,
   accuracyFilter: 'any' | 'all' = 'any',
-  roleFilter: 'all' | 'company' | 'individual' = 'all'
+  roleFilter: 'all' | 'company' | 'individual' = 'all',
+  rangeStartFilter: string | null = null,
+  rangeEndFilter: string | null = null
 ) {
   try {
     // Always use the search API endpoint
@@ -329,17 +330,18 @@ export async function fetchSearchResults(
       url.searchParams.append('paid', priceFilter);
     }
     
-    if ((priceRangeStart !== null && priceRangeStart !== 0) || priceRangeEnd !== null) {
-      const startValue = priceRangeStart ?? 0;
-      url.searchParams.append('range_start', startValue.toString());
-      if (priceRangeEnd !== null) {
-        url.searchParams.append('range_end', priceRangeEnd.toString());
-      }
-    }
-    
     // Add role parameter for role filtering
     if (roleFilter !== null && roleFilter !== 'all') {
       url.searchParams.append('role', roleFilter);
+    }
+
+    // Add range price parameters
+    if (rangeStartFilter !== null) {
+      url.searchParams.append('range_start', rangeStartFilter);
+    }
+
+    if (rangeEndFilter !== null) {
+      url.searchParams.append('range_end', rangeEndFilter);
     }
     
     // Keep the filters[country_id] for backward compatibility if needed

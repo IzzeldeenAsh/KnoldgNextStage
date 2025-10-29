@@ -1,9 +1,9 @@
 'use client'
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { Select, Modal, Loader, Chip, Combobox, Input, InputBase, useCombobox, Drawer } from '@mantine/core';
 import { useMediaQuery } from '@mantine/hooks';
-import { IconRefresh, IconCode, IconBuildingFactory, IconWorldSearch, IconBuildingBank, IconMap, IconWorld, IconLanguage, IconCoin } from '@tabler/icons-react';
+import { IconRefresh, IconCode, IconBuildingFactory, IconWorldSearch, IconBuildingBank, IconMap, IconWorld, IconLanguage, IconCoin, IconSearch, IconX } from '@tabler/icons-react';
 
 import { useTranslations } from 'next-intl';
 import { getApiUrl } from '@/app/config';
@@ -89,10 +89,10 @@ interface FilterBoxProps {
   setIndustryFilter?: (filter: number | null) => void;
   priceFilter?: string | null;
   setPriceFilter?: (filter: string | null) => void;
-  priceRangeStart?: number | null;
-  setPriceRangeStart?: (value: number | null) => void;
-  priceRangeEnd?: number | null;
-  setPriceRangeEnd?: (value: number | null) => void;
+  rangeStartFilter?: string | null;
+  setRangeStartFilter?: (filter: string | null) => void;
+  rangeEndFilter?: string | null;
+  setRangeEndFilter?: (filter: string | null) => void;
   accuracyFilter?: 'any' | 'all';
   setAccuracyFilter?: (filter: 'any' | 'all') => void;
   roleFilter?: 'all' | 'company' | 'individual';
@@ -105,9 +105,8 @@ interface FilterBoxProps {
 }
 
 const noop = () => {};
-const PRICE_RANGE_DEBOUNCE_MS = 1000;
 
-const FilterBox: React.FC<FilterBoxProps> = ({
+const FilterBox: React.FC<FilterBoxProps> = React.memo(({
   locale,
   searchType = 'knowledge',
   languageFilter,
@@ -126,10 +125,10 @@ const FilterBox: React.FC<FilterBoxProps> = ({
   setIndustryFilter = noop,
   priceFilter = null,
   setPriceFilter = noop,
-  priceRangeStart = 0,
-  setPriceRangeStart = noop,
-  priceRangeEnd = null,
-  setPriceRangeEnd = noop,
+  rangeStartFilter = null,
+  setRangeStartFilter = noop,
+  rangeEndFilter = null,
+  setRangeEndFilter = noop,
   accuracyFilter = 'all',
   setAccuracyFilter = noop,
   roleFilter = 'all',
@@ -140,29 +139,37 @@ const FilterBox: React.FC<FilterBoxProps> = ({
   setIsDrawerOpen = () => {},
   forceDrawerMode = false
 }) => {
-  console.log(`🔧 FilterBox rendered with searchType: ${searchType}`);
-  console.log(`🔧 Price/Language sections visible: ${searchType !== 'insighter'}`);
-  console.log(`🔧 Role section visible: ${searchType === 'insighter'}`);
-  
+  // Debug logs removed to prevent console spam during typing
+
   // Responsive breakpoint detection - tablet and mobile use drawer
   const isTabletOrMobile = useMediaQuery('(max-width: 1024px)');
   const shouldUseDrawer = forceDrawerMode || isTabletOrMobile;
-  
+
+  // API Data States
   const [countries, setCountries] = useState<Country[]>([]);
   const [regions, setRegions] = useState<Region[]>([]);
   const [economicBlocs, setEconomicBlocs] = useState<EconomicBloc[]>([]);
   const [isicCodes, setIsicCodes] = useState<ISICCode[]>([]);
   const [hsCodes, setHsCodes] = useState<HSCode[]>([]);
   const [industries, setIndustries] = useState<IndustryNode[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [loadingRegions, setLoadingRegions] = useState(false);
-  const [loadingEconomicBlocs, setLoadingEconomicBlocs] = useState(false);
-  const [loadingIsicCodes, setLoadingIsicCodes] = useState(false);
-  const [loadingHsCodes, setLoadingHsCodes] = useState(false);
-  const [loadingIndustries, setLoadingIndustries] = useState(false);
+
+  // Loading States - Enhanced granular loading
+  const [apiLoading, setApiLoading] = useState(false); // Main API loading from parent
+  const [dataLoading, setDataLoading] = useState({
+    countries: false,
+    regions: false,
+    economicBlocs: false,
+    isicCodes: false,
+    hsCodes: false,
+    industries: false
+  });
+
+  // UI States
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isHsCodeModalOpen, setIsHsCodeModalOpen] = useState(false);
   const [isIndustryModalOpen, setIsIndustryModalOpen] = useState(false);
+
+  // Selection States
   const [selectedIsicCode, setSelectedIsicCode] = useState<{
     id: number;
     code: string;
@@ -178,141 +185,48 @@ const FilterBox: React.FC<FilterBoxProps> = ({
     label: string;
   } | null>(null);
 
-  // State for search term
+  // Search States
   const [searchTerm, setSearchTerm] = useState("");
   const [leafNodes, setLeafNodes] = useState<ISICCode[]>([]);
   const [filteredLeafNodes, setFilteredLeafNodes] = useState<ISICCode[]>([]);
-  
-  // State for HS code search
   const [hsCodeSearchTerm, setHsCodeSearchTerm] = useState("");
   const [filteredHsCodes, setFilteredHsCodes] = useState<HSCode[]>([]);
-  
-  // State for industry search
   const [industrySearchTerm, setIndustrySearchTerm] = useState("");
   const [industryLeafNodes, setIndustryLeafNodes] = useState<IndustryNode[]>([]);
   const [filteredIndustryLeafNodes, setFilteredIndustryLeafNodes] = useState<IndustryNode[]>([]);
 
-  // State for content types collapse - adjust based on search type and screen size
-  const [priceCollapsed, setpriceCollapsed] = useState(shouldUseDrawer);
+  // Collapse States - adjust based on search type and screen size
+  const [priceCollapsed, setPriceCollapsed] = useState(shouldUseDrawer);
   const [languageCollapsed, setLanguageCollapsed] = useState(shouldUseDrawer);
-  const [accuracyCollapsed, setAccuracyCollapsed] = useState(searchType === 'knowledge' || shouldUseDrawer); // Collapsed for knowledge or small screens, visible for insighter on large screens
-  const [industryCollapsed, setIndustryCollapsed] = useState(searchType === 'insighter' || shouldUseDrawer); // Collapsed for insighter or small screens, visible for knowledge on large screens
+  const [accuracyCollapsed, setAccuracyCollapsed] = useState(searchType === 'knowledge' || shouldUseDrawer);
+  const [industryCollapsed, setIndustryCollapsed] = useState(searchType === 'insighter' || shouldUseDrawer);
   const [targetMarketCollapsed, setTargetMarketCollapsed] = useState(true);
-  const [publicationDateCollapsed, setPublicationDateCollapsed] = useState(true);
-  const [archiveCollapsed, setArchiveCollapsed] = useState(true);
   const [roleCollapsed, setRoleCollapsed] = useState(shouldUseDrawer);
 
-  // State for publication date filter
-  const [publicationDateFilter, setPublicationDateFilter] = useState<'all' | 'last_month' | 'last_3_months' | 'last_6_months' | 'last_year'>('all');
-  
-  // State for archive filter  
-  const [archiveFilter, setArchiveFilter] = useState<'all' | 'with_archive' | 'without_archive'>('without_archive');
+  // Range price filter states - using refs to prevent re-renders
+  const tempRangeStartRef = useRef('');
+  const tempRangeEndRef = useRef('');
+  const [rangeError, setRangeError] = useState('');
 
-  // State for combobox search functionality
+  // Refs to maintain focus during re-renders and store values
+  const rangeStartInputRef = useRef<HTMLInputElement>(null);
+  const rangeEndInputRef = useRef<HTMLInputElement>(null);
+
+  // Note: Range inputs use refs instead of state to prevent re-renders
+
+
+  // Combobox Search States
   const [economicBlocSearch, setEconomicBlocSearch] = useState('');
   const [regionSearch, setRegionSearch] = useState('');
   const [countrySearch, setCountrySearch] = useState('');
-  const minPriceInputRef = useRef<HTMLInputElement>(null);
-  const maxPriceInputRef = useRef<HTMLInputElement>(null);
-  const priceRangeStartSetterRef = useRef(setPriceRangeStart);
-  const priceRangeEndSetterRef = useRef(setPriceRangeEnd);
-  const shouldApplyDefaultPriceRangeEndRef = useRef(priceRangeEnd === null);
-  const debounceTimeoutStartRef = useRef<NodeJS.Timeout | null>(null);
-  const debounceTimeoutEndRef = useRef<NodeJS.Timeout | null>(null);
-  const lastUserInputStartRef = useRef<number>(0);
-  const lastUserInputEndRef = useRef<number>(0);
+
   const searchParams = useSearchParams();
 
-  useEffect(() => {
-    priceRangeStartSetterRef.current = setPriceRangeStart;
-  }, [setPriceRangeStart]);
+  // Detect if we're in a loading state from parent component
+  // This assumes the parent passes some loading indication
+  const isDisabled = apiLoading || Object.values(dataLoading).some(loading => loading);
 
-  useEffect(() => {
-    priceRangeEndSetterRef.current = setPriceRangeEnd;
-  }, [setPriceRangeEnd]);
 
-  // Initialize input values from URL params on mount
-  useEffect(() => {
-    const urlRangeStart = searchParams.get('range_start');
-    const urlRangeEnd = searchParams.get('range_end');
-
-    if (minPriceInputRef.current) {
-      minPriceInputRef.current.value = urlRangeStart || (priceRangeStart ?? 0).toString();
-    }
-    if (maxPriceInputRef.current) {
-      if (urlRangeEnd) {
-        maxPriceInputRef.current.value = urlRangeEnd;
-      } else if (priceRangeEnd !== null && priceRangeEnd !== undefined) {
-        maxPriceInputRef.current.value = priceRangeEnd.toString();
-      } else {
-        maxPriceInputRef.current.value = '1000000';
-      }
-    }
-  }, []); // Only run on mount
-
-  // Handle price filter changes
-  useEffect(() => {
-    if (priceFilter === 'false') {
-      if (minPriceInputRef.current) {
-        minPriceInputRef.current.value = '0';
-      }
-      if (maxPriceInputRef.current) {
-        maxPriceInputRef.current.value = '';
-      }
-      priceRangeStartSetterRef.current(0);
-      priceRangeEndSetterRef.current(null);
-      shouldApplyDefaultPriceRangeEndRef.current = true;
-    } else if (priceRangeEnd === null && shouldApplyDefaultPriceRangeEndRef.current) {
-      if (maxPriceInputRef.current) {
-        maxPriceInputRef.current.value = '1000000';
-      }
-      priceRangeEndSetterRef.current(1000000);
-      shouldApplyDefaultPriceRangeEndRef.current = false;
-    }
-  }, [priceFilter, priceRangeEnd]);
-
-  // Sync input values with URL parameters (but not during user input)
-  useEffect(() => {
-    const now = Date.now();
-    const timeSinceLastInputStart = now - lastUserInputStartRef.current;
-    const timeSinceLastInputEnd = now - lastUserInputEndRef.current;
-
-    // Get values from URL params
-    const urlRangeStart = searchParams.get('range_start');
-    const urlRangeEnd = searchParams.get('range_end');
-
-    // Sync min price input if user hasn't typed recently
-    if (minPriceInputRef.current && timeSinceLastInputStart > 2000) {
-      const expectedValue = urlRangeStart || '0';
-      const currentValue = minPriceInputRef.current.value;
-
-      if (currentValue !== expectedValue) {
-        minPriceInputRef.current.value = expectedValue;
-      }
-    }
-
-    // Sync max price input if user hasn't typed recently
-    if (maxPriceInputRef.current && timeSinceLastInputEnd > 2000) {
-      const expectedValue = urlRangeEnd || '';
-      const currentValue = maxPriceInputRef.current.value;
-
-      if (currentValue !== expectedValue) {
-        maxPriceInputRef.current.value = expectedValue;
-      }
-    }
-  }, [searchParams]);
-
-  // Cleanup timeouts on unmount
-  useEffect(() => {
-    return () => {
-      if (debounceTimeoutStartRef.current) {
-        clearTimeout(debounceTimeoutStartRef.current);
-      }
-      if (debounceTimeoutEndRef.current) {
-        clearTimeout(debounceTimeoutEndRef.current);
-      }
-    };
-  }, []);
 
   // Combobox stores
   const economicBlocCombobox = useCombobox({
@@ -350,146 +264,119 @@ const FilterBox: React.FC<FilterBoxProps> = ({
 
   // Update collapsed states when search type or screen size changes
   useEffect(() => {
-    console.log(`🔧 FilterBox searchType changed to: ${searchType}, screen size drawer: ${shouldUseDrawer}, updating collapsed states`);
-    setAccuracyCollapsed(searchType === 'knowledge' || shouldUseDrawer); // Visible for insighter on large screens only
-    setIndustryCollapsed(searchType === 'insighter' || shouldUseDrawer); // Visible for knowledge on large screens only
-    setpriceCollapsed(shouldUseDrawer); // Closed on small screens by default
-    setLanguageCollapsed(shouldUseDrawer); // Closed on small screens by default  
-    setRoleCollapsed(shouldUseDrawer); // Closed on small screens by default
+    // Update collapsed states when searchType or screen size changes
+    setAccuracyCollapsed(searchType === 'knowledge' || shouldUseDrawer);
+    setIndustryCollapsed(searchType === 'insighter' || shouldUseDrawer);
+    setPriceCollapsed(shouldUseDrawer);
+    setLanguageCollapsed(shouldUseDrawer);
+    setRoleCollapsed(shouldUseDrawer);
   }, [searchType, shouldUseDrawer]);
 
+  // Enhanced API fetch functions with better loading states
+  const fetchWithLoading = useCallback(async (
+    fetchFn: () => Promise<any>,
+    loadingKey: keyof typeof dataLoading,
+    stateSetter: (data: any) => void
+  ) => {
+    setDataLoading(prev => ({ ...prev, [loadingKey]: true }));
+    try {
+      const data = await fetchFn();
+      stateSetter(data);
+    } catch (error) {
+      console.error(`Error fetching ${loadingKey}:`, error);
+      stateSetter([]);
+    } finally {
+      setDataLoading(prev => ({ ...prev, [loadingKey]: false }));
+    }
+  }, []);
+
+  // Fetch all data on mount
   useEffect(() => {
     const fetchCountries = async () => {
-      setLoading(true);
-      try {
-        const response = await fetch(getApiUrl('/api/common/setting/country/list'), {
-          headers: {
-            'Accept-Language': locale,
-            'Accept': 'application/json',
-            "X-Timezone": Intl.DateTimeFormat().resolvedOptions().timeZone,
-          }
-        });
-        
-        if (!response.ok) throw new Error('Failed to fetch countries');
-        
-        const data = await response.json();
-        setCountries(data.data || []);
-      } catch (error) {
-        console.error('Error fetching countries:', error);
-      } finally {
-        setLoading(false);
-      }
+      const response = await fetch(getApiUrl('/api/common/setting/country/list'), {
+        headers: {
+          'Accept-Language': locale,
+          'Accept': 'application/json',
+          "X-Timezone": Intl.DateTimeFormat().resolvedOptions().timeZone,
+        }
+      });
+      if (!response.ok) throw new Error('Failed to fetch countries');
+      const data = await response.json();
+      return data.data || [];
     };
 
     const fetchRegions = async () => {
-      setLoadingRegions(true);
-      try {
-        const response = await fetch(getApiUrl('/api/common/setting/region/list'), {
-          headers: {
-            'Accept-Language': locale,
-            'Accept': 'application/json',
-            "X-Timezone": Intl.DateTimeFormat().resolvedOptions().timeZone,
-          }
-        });
-        
-        if (!response.ok) throw new Error('Failed to fetch regions');
-        
-        const data = await response.json();
-        // Extract only the region data without countries
-        const regionsData = data.data ? data.data.map((region: Region) => ({
-          id: region.id,
-          name: region.name
-        })) : [];
-        setRegions(regionsData);
-      } catch (error) {
-        console.error('Error fetching regions:', error);
-      } finally {
-        setLoadingRegions(false);
-      }
+      const response = await fetch(getApiUrl('/api/common/setting/region/list'), {
+        headers: {
+          'Accept-Language': locale,
+          'Accept': 'application/json',
+          "X-Timezone": Intl.DateTimeFormat().resolvedOptions().timeZone,
+        }
+      });
+      if (!response.ok) throw new Error('Failed to fetch regions');
+      const data = await response.json();
+      return data.data ? data.data.map((region: Region) => ({
+        id: region.id,
+        name: region.name
+      })) : [];
     };
 
     const fetchEconomicBlocs = async () => {
-      setLoadingEconomicBlocs(true);
-      try {
-        const response = await fetch(getApiUrl('/api/common/setting/economic-bloc/list'), {
-          headers: {
-            'Accept-Language': locale,
-            'Accept': 'application/json',
-            "X-Timezone": Intl.DateTimeFormat().resolvedOptions().timeZone,
-          }
-        });
-        
-        if (!response.ok) throw new Error('Failed to fetch economic blocs');
-        
-        const data = await response.json();
-        // Extract only the economic bloc data without countries
-        const economicBlocsData = data.data ? data.data.map((bloc: EconomicBloc) => ({
-          id: bloc.id,
-          name: bloc.name
-        })) : [];
-        setEconomicBlocs(economicBlocsData);
-      } catch (error) {
-        console.error('Error fetching economic blocs:', error);
-      } finally {
-        setLoadingEconomicBlocs(false);
-      }
+      const response = await fetch(getApiUrl('/api/common/setting/economic-bloc/list'), {
+        headers: {
+          'Accept-Language': locale,
+          'Accept': 'application/json',
+          "X-Timezone": Intl.DateTimeFormat().resolvedOptions().timeZone,
+        }
+      });
+      if (!response.ok) throw new Error('Failed to fetch economic blocs');
+      const data = await response.json();
+      return data.data ? data.data.map((bloc: EconomicBloc) => ({
+        id: bloc.id,
+        name: bloc.name
+      })) : [];
     };
 
     const fetchIsicCodes = async () => {
-      setLoadingIsicCodes(true);
-      try {
-        const response = await fetch(getApiUrl('/api/common/setting/isic-code/tree-list'), {
-          headers: {
-            'Accept-Language': locale,
-            'Accept': 'application/json',
-            "X-Timezone": Intl.DateTimeFormat().resolvedOptions().timeZone,
-          }
-        });
-        
-        if (!response.ok) throw new Error('Failed to fetch ISIC codes');
-        
-        const data = await response.json();
-        setIsicCodes(data || []);
-      } catch (error) {
-        console.error('Error fetching ISIC codes:', error);
-      } finally {
-        setLoadingIsicCodes(false);
-      }
+      const response = await fetch(getApiUrl('/api/common/setting/isic-code/tree-list'), {
+        headers: {
+          'Accept-Language': locale,
+          'Accept': 'application/json',
+          "X-Timezone": Intl.DateTimeFormat().resolvedOptions().timeZone,
+        }
+      });
+      if (!response.ok) throw new Error('Failed to fetch ISIC codes');
+      const data = await response.json();
+      return data || [];
     };
 
     const fetchIndustries = async () => {
-      setLoadingIndustries(true);
-      try {
-        const response = await fetch(getApiUrl('/api/common/setting/industry/tree'), {
-          headers: {
-            'Accept-Language': locale,
-            'Accept': 'application/json',
-            "X-Timezone": Intl.DateTimeFormat().resolvedOptions().timeZone,
-          }
-        });
-        
-        if (!response.ok) throw new Error('Failed to fetch industries');
-        
-        const data = await response.json();
-        setIndustries(data || []);
-      } catch (error) {
-        console.error('Error fetching industries:', error);
-      } finally {
-        setLoadingIndustries(false);
-      }
+      const response = await fetch(getApiUrl('/api/common/setting/industry/tree'), {
+        headers: {
+          'Accept-Language': locale,
+          'Accept': 'application/json',
+          "X-Timezone": Intl.DateTimeFormat().resolvedOptions().timeZone,
+        }
+      });
+      if (!response.ok) throw new Error('Failed to fetch industries');
+      const data = await response.json();
+      return data || [];
     };
 
-    fetchCountries();
-    fetchRegions();
-    fetchEconomicBlocs();
-    fetchIsicCodes();
-    fetchIndustries();
-  }, [locale]);
+    // Run all fetches with loading states
+    Promise.all([
+      fetchWithLoading(fetchCountries, 'countries', setCountries),
+      fetchWithLoading(fetchRegions, 'regions', setRegions),
+      fetchWithLoading(fetchEconomicBlocs, 'economicBlocs', setEconomicBlocs),
+      fetchWithLoading(fetchIsicCodes, 'isicCodes', setIsicCodes),
+      fetchWithLoading(fetchIndustries, 'industries', setIndustries)
+    ]);
+  }, [locale, fetchWithLoading]);
 
   // Fetch HS codes when ISIC code is selected
   useEffect(() => {
     const fetchHsCodes = async (isicCodeId: number) => {
-      setLoadingHsCodes(true);
+      setDataLoading(prev => ({ ...prev, hsCodes: true }));
       try {
         const response = await fetch(getApiUrl(`/api/common/setting/hs-code/isic-code/${isicCodeId}`), {
           headers: {
@@ -498,30 +385,29 @@ const FilterBox: React.FC<FilterBoxProps> = ({
             "X-Timezone": Intl.DateTimeFormat().resolvedOptions().timeZone,
           }
         });
-        
+
         if (!response.ok) throw new Error('Failed to fetch HS codes');
-        
+
         const data = await response.json();
         setHsCodes(data.data || []);
       } catch (error) {
         console.error('Error fetching HS codes:', error);
         setHsCodes([]);
       } finally {
-        setLoadingHsCodes(false);
+        setDataLoading(prev => ({ ...prev, hsCodes: false }));
       }
     };
 
     if (selectedIsicCode?.id) {
       fetchHsCodes(selectedIsicCode.id);
     } else {
-      // Clear HS codes when no ISIC code is selected
       setHsCodes([]);
       setSelectedHsCode(null);
       setHsCodeFilter?.(null);
     }
   }, [selectedIsicCode?.id, locale, setHsCodeFilter]);
 
-  // Initialize selected ISIC code based on prop value
+  // Initialize selected codes based on prop values
   useEffect(() => {
     if (isicCodeFilter && leafNodes.length > 0) {
       const selectedCode = leafNodes.find(node => node.code === isicCodeFilter);
@@ -537,7 +423,6 @@ const FilterBox: React.FC<FilterBoxProps> = ({
     }
   }, [isicCodeFilter, leafNodes, locale]);
 
-  // Initialize selected HS code based on prop value
   useEffect(() => {
     if (hsCodeFilter && hsCodes.length > 0) {
       const selectedCode = hsCodes.find(code => code.code === hsCodeFilter);
@@ -553,7 +438,6 @@ const FilterBox: React.FC<FilterBoxProps> = ({
     }
   }, [hsCodeFilter, hsCodes, locale]);
 
-  // Initialize selected industry based on prop value
   useEffect(() => {
     if (industryFilter && industryLeafNodes.length > 0) {
       const selectedNode = industryLeafNodes.find(node => node.key === industryFilter);
@@ -568,7 +452,7 @@ const FilterBox: React.FC<FilterBoxProps> = ({
     }
   }, [industryFilter, industryLeafNodes]);
 
-  // Function to convert ISO2 country code to flag emoji
+  // Helper functions
   const getCountryFlagEmoji = (iso2?: string): string => {
     if (!iso2 || iso2.length !== 2) return '';
     try {
@@ -583,24 +467,23 @@ const FilterBox: React.FC<FilterBoxProps> = ({
     }
   };
 
-  // Convert countries to Mantine Select data format with flag emojis
+  // Convert data to select options
   const countryOptions = countries.map(country => ({
     value: country.id.toString(),
     label: `${getCountryFlagEmoji(country.iso2)} ${locale === 'ar' && country.names?.ar ? country.names.ar : country.name}`
   }));
-  // Convert regions to Mantine Select data format
+
   const regionOptions = regions.map((region: Region) => ({
     value: region.id.toString(),
     label: region.name
   }));
-  
-  // Convert economic blocs to Mantine Select data format
+
   const economicBlocOptions = economicBlocs.map((bloc: EconomicBloc) => ({
     value: bloc.id.toString(),
     label: bloc.name
   }));
 
-  // Helper functions to get display text for selected values
+  // Helper functions for selected values
   const getSelectedEconomicBlocLabel = () => {
     if (!economicBlocFilter) return null;
     const selected = economicBlocs.find(bloc => bloc.id === economicBlocFilter);
@@ -632,28 +515,20 @@ const FilterBox: React.FC<FilterBoxProps> = ({
     option.label.toLowerCase().includes(countrySearch.toLowerCase().trim())
   );
 
-  // Define language options for dropdown
-  const languageOptions = [
-    { value: 'all', label: locale === 'ar' ? '\u0627\u0644\u0643\u0644' : 'All' },
-    { value: 'arabic', label: locale === 'ar' ? '\u0627\u0644\u0639\u0631\u0628\u064a\u0629' : 'Arabic' },
-    { value: 'english', label: locale === 'ar' ? '\u0627\u0644\u0625\u0646\u062c\u0644\u064a\u0632\u064a\u0629' : 'English' }
-  ];
-
-  // Check if a node is a leaf node (has no children)
+  // Leaf node helpers
   const isLeafNode = (node: ISICCode): boolean => {
     return node.children.length === 0;
   };
-  
-  // Check if an industry node is a leaf node (has no children)
+
   const isIndustryLeafNode = (node: IndustryNode): boolean => {
     return node.children.length === 0;
   };
 
-  // Extract all leaf nodes from the tree structure
+  // Extract leaf nodes
   useEffect(() => {
     const extractLeafNodes = (nodes: ISICCode[]): ISICCode[] => {
       let result: ISICCode[] = [];
-      
+
       for (const node of nodes) {
         if (isLeafNode(node)) {
           result.push(node);
@@ -661,20 +536,19 @@ const FilterBox: React.FC<FilterBoxProps> = ({
           result = result.concat(extractLeafNodes(node.children));
         }
       }
-      
+
       return result;
     };
-    
+
     const allLeafNodes = extractLeafNodes(isicCodes);
     setLeafNodes(allLeafNodes);
     setFilteredLeafNodes(allLeafNodes);
   }, [isicCodes]);
-  
-  // Extract all industry leaf nodes from the tree structure
+
   useEffect(() => {
     const extractIndustryLeafNodes = (nodes: IndustryNode[]): IndustryNode[] => {
       let result: IndustryNode[] = [];
-      
+
       for (const node of nodes) {
         if (isIndustryLeafNode(node)) {
           result.push(node);
@@ -682,16 +556,16 @@ const FilterBox: React.FC<FilterBoxProps> = ({
           result = [...result, ...extractIndustryLeafNodes(node.children)];
         }
       }
-      
+
       return result;
     };
-    
+
     const allIndustryLeafNodes = extractIndustryLeafNodes(industries);
     setIndustryLeafNodes(allIndustryLeafNodes);
     setFilteredIndustryLeafNodes(allIndustryLeafNodes);
   }, [industries]);
 
-  // Filter leaf nodes based on search term
+  // Filter nodes based on search
   useEffect(() => {
     if (!searchTerm.trim()) {
       setFilteredLeafNodes(leafNodes);
@@ -709,8 +583,7 @@ const FilterBox: React.FC<FilterBoxProps> = ({
 
     setFilteredLeafNodes(filtered);
   }, [searchTerm, leafNodes]);
-  
-  // Filter industry leaf nodes based on search term
+
   useEffect(() => {
     if (!industrySearchTerm.trim()) {
       setFilteredIndustryLeafNodes(industryLeafNodes);
@@ -725,7 +598,6 @@ const FilterBox: React.FC<FilterBoxProps> = ({
     setFilteredIndustryLeafNodes(filtered);
   }, [industrySearchTerm, industryLeafNodes]);
 
-  // Filter HS codes based on search term
   useEffect(() => {
     if (!hsCodeSearchTerm.trim()) {
       setFilteredHsCodes(hsCodes);
@@ -744,19 +616,32 @@ const FilterBox: React.FC<FilterBoxProps> = ({
     setFilteredHsCodes(filtered);
   }, [hsCodeSearchTerm, hsCodes]);
 
-  // Render the list of leaf nodes
+  // Render functions
   const renderLeafNodes = () => {
+    if (dataLoading.isicCodes) {
+      return (
+        <div className="flex justify-center py-8">
+          <Loader size="md" />
+        </div>
+      );
+    }
+
     return (
       <div className="grid grid-cols-1 gap-2 max-h-[60vh] overflow-y-auto pr-2">
         {filteredLeafNodes.map((node) => {
           const isSelected = selectedIsicCode?.id === node.key;
           const marginClass = locale === 'ar' ? 'ml-2' : 'mr-2';
-          
+
           return (
             <button
               key={node.key}
-              className={`py-2 px-3 rounded-md text-sm flex text-start items-start w-full transition-colors ${isSelected ? ' text-blue-800 font-medium' : 'hover:bg-gray-100 border border-gray-200'}`}
-              onClick={() => handleSelectIsicCode(node)}
+              className={`py-2 px-3 rounded-md text-sm flex text-start items-start w-full transition-colors ${
+                isSelected
+                  ? 'bg-blue-50 border-blue-200 text-blue-800 font-medium'
+                  : 'hover:bg-gray-100 border border-gray-200'
+              } ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+              onClick={() => !isDisabled && handleSelectIsicCode(node)}
+              disabled={isDisabled}
             >
               <span className={`font-mono text-xs bg-gray-100 px-1.5 py-0.5 rounded ${marginClass}`}>{node.code}</span>
               <span className="flex-1">{locale === 'ar' ? node.names.ar : node.names.en}</span>
@@ -766,9 +651,16 @@ const FilterBox: React.FC<FilterBoxProps> = ({
       </div>
     );
   };
-  
-  // Render the list of HS codes
+
   const renderHsCodes = () => {
+    if (dataLoading.hsCodes) {
+      return (
+        <div className="flex justify-center py-8">
+          <Loader size="md" />
+        </div>
+      );
+    }
+
     if (filteredHsCodes.length === 0) {
       return (
         <div className="flex flex-col items-center justify-center py-8 text-center">
@@ -789,12 +681,17 @@ const FilterBox: React.FC<FilterBoxProps> = ({
         {filteredHsCodes.map((code) => {
           const isSelected = selectedHsCode?.id === code.id;
           const marginClass = locale === 'ar' ? 'ml-2' : 'mr-2';
-          
+
           return (
             <button
               key={code.id}
-              className={`py-2 px-3 rounded-md text-sm flex items-start text-start w-full transition-colors ${isSelected ? ' text-blue-800 font-medium' : 'hover:bg-gray-100 border border-gray-200'}`}
-              onClick={() => handleSelectHsCode(code)}
+              className={`py-2 px-3 rounded-md text-sm flex items-start text-start w-full transition-colors ${
+                isSelected
+                  ? 'bg-blue-50 border-blue-200 text-blue-800 font-medium'
+                  : 'hover:bg-gray-100 border border-gray-200'
+              } ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+              onClick={() => !isDisabled && handleSelectHsCode(code)}
+              disabled={isDisabled}
             >
               <span className={`font-mono text-xs bg-gray-100 px-1.5 py-0.5 rounded ${marginClass}`}>{code.code}</span>
               <span className="flex-1">{locale === 'ar' ? code.names.ar : code.names.en}</span>
@@ -804,19 +701,31 @@ const FilterBox: React.FC<FilterBoxProps> = ({
       </div>
     );
   };
-  
-  // Render the list of industry leaf nodes
+
   const renderIndustryLeafNodes = () => {
+    if (dataLoading.industries) {
+      return (
+        <div className="flex justify-center py-8">
+          <Loader size="md" />
+        </div>
+      );
+    }
+
     return (
       <div className="grid grid-cols-1 gap-2 max-h-[60vh] overflow-y-auto pr-2">
         {filteredIndustryLeafNodes.map((node) => {
           const isSelected = selectedIndustry?.id === node.key;
-          
+
           return (
             <button
               key={node.key}
-              className={`py-2 px-3 rounded-md text-sm flex items-start text-start w-full transition-colors ${isSelected ? ' text-blue-800 font-medium' : 'hover:bg-gray-100 border border-gray-200'}`}
-              onClick={() => handleSelectIndustry(node)}
+              className={`py-2 px-3 rounded-md text-sm flex items-start text-start w-full transition-colors ${
+                isSelected
+                  ? 'bg-blue-50 border-blue-200 text-blue-800 font-medium'
+                  : 'hover:bg-gray-100 border border-gray-200'
+              } ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+              onClick={() => !isDisabled && handleSelectIndustry(node)}
+              disabled={isDisabled}
             >
               <span className="flex-1">{node.label}</span>
             </button>
@@ -826,13 +735,12 @@ const FilterBox: React.FC<FilterBoxProps> = ({
     );
   };
 
-  // Handle ISIC code selection
+  // Selection handlers
   const handleSelectIsicCode = (node: ISICCode) => {
     if (isLeafNode(node)) {
-      // Clear HS code selection when ISIC code changes
       setSelectedHsCode(null);
       setHsCodeFilter?.(null);
-      
+
       setSelectedIsicCode({
         id: node.key,
         code: node.code,
@@ -842,306 +750,357 @@ const FilterBox: React.FC<FilterBoxProps> = ({
       setIsModalOpen(false);
     }
   };
-  
-  // Handle industry selection
+
   const handleSelectIndustry = (node: IndustryNode) => {
     if (isIndustryLeafNode(node)) {
       setSelectedIndustry({
         id: node.key,
         label: node.label
       });
-      
-      // Call the parent component's setIndustryFilter function to trigger the search
+
       if (setIndustryFilter) {
         setIndustryFilter(node.key);
       }
-      
-      // Close the modal
+
       setIsIndustryModalOpen(false);
     }
   };
-  
-  // Handle clearing the ISIC code filter
-  const handleClearIsicCode = (e: React.MouseEvent) => {
-    // Prevent the click from bubbling up to the parent div that opens the modal
-    e.stopPropagation();
-    
-    // Clear the selected ISIC code and HS code
-    setSelectedIsicCode(null);
-    setSelectedHsCode(null);
-    
-    // Call the parent component's filter functions to trigger a search without the filters
-    if (setIsicCodeFilter) {
-      setIsicCodeFilter(null);
-    }
-    if (setHsCodeFilter) {
-      setHsCodeFilter(null);
-    }
-  };
-  
-  // Handle clearing the industry filter
-  const handleClearIndustry = (e: React.MouseEvent) => {
-    // Prevent the click from bubbling up to the parent div that opens the modal
-    e.stopPropagation();
-    
-    // Clear the selected industry
-    setSelectedIndustry(null);
-    
-    // Call the parent component's setIndustryFilter function to trigger a search without the industry filter
-    if (setIndustryFilter) {
-      setIndustryFilter(null);
-    }
-  };
 
-  // Handle HS code selection
   const handleSelectHsCode = (code: HSCode) => {
     setSelectedHsCode({
       id: code.id,
       code: code.code,
       label: locale === 'ar' ? code.names.ar : code.names.en
     });
-    
-    // Call the parent component's setHsCodeFilter function to trigger the search
+
     if (setHsCodeFilter) {
       setHsCodeFilter(code.code);
     }
-    
-    // Close the modal
+
     setIsHsCodeModalOpen(false);
   };
 
-  // Handle clearing the HS code filter
-  const handleClearHsCode = (e: React.MouseEvent) => {
-    // Prevent the click from bubbling up to the parent div that opens the modal
+  // Clear handlers
+  const handleClearIsicCode = (e: React.MouseEvent) => {
     e.stopPropagation();
-    
-    // Clear the selected HS code
+    setSelectedIsicCode(null);
     setSelectedHsCode(null);
-    
-    // Call the parent component's setHsCodeFilter function to trigger a search without the HS code filter
-    if (setHsCodeFilter) {
-      setHsCodeFilter(null);
-    }
+    if (setIsicCodeFilter) setIsicCodeFilter(null);
+    if (setHsCodeFilter) setHsCodeFilter(null);
   };
 
-  // Reset all filters to default values
+  const handleClearIndustry = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setSelectedIndustry(null);
+    if (setIndustryFilter) setIndustryFilter(null);
+  };
+
+  const handleClearHsCode = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setSelectedHsCode(null);
+    if (setHsCodeFilter) setHsCodeFilter(null);
+  };
+
+  // Reset handler
   const handleResetFilters = async () => {
     try {
       console.log('Starting filter reset...');
-      
-      // Clear local component state
+
       setSelectedIsicCode(null);
       setSelectedHsCode(null);
       setSelectedIndustry(null);
-      shouldApplyDefaultPriceRangeEndRef.current = true;
 
-      // Reset input values directly
-      if (minPriceInputRef.current) {
-        minPriceInputRef.current.value = '0';
-      }
-      if (maxPriceInputRef.current) {
-        maxPriceInputRef.current.value = '1000000';
-      }
-      
-      // Call the parent resetFilters function to update URL and global state
-      // This is now async and will handle the search API call
       await resetFilters();
-      
+
       console.log('Filter reset completed successfully');
     } catch (error) {
       console.error('Error during filter reset:', error);
-      // You could add a toast notification here if needed
     }
   };
-  
-  // Handle price filter selection
+
+  // Filter handlers
   const handlePriceFilterChange = (value: string | null) => {
-    // Call the parent component's setPriceFilter function to trigger the search
     if (setPriceFilter) {
       setPriceFilter(value);
     }
 
-    if (value === 'false') {
-      if (minPriceInputRef.current) {
-        minPriceInputRef.current.value = '0';
-      }
-      if (maxPriceInputRef.current) {
-        maxPriceInputRef.current.value = '';
-      }
-      setPriceRangeStart(0);
-      setPriceRangeEnd(null);
-      shouldApplyDefaultPriceRangeEndRef.current = true;
-    } else if (value !== 'false' && priceRangeEnd === null) {
-      shouldApplyDefaultPriceRangeEndRef.current = true;
-      if (maxPriceInputRef.current) {
-        maxPriceInputRef.current.value = '1000000';
-      }
+    // Reset range filters when Free is selected
+    if (value === 'false') { // 'false' means Free
+      handleRangePriceClear();
     }
   };
 
-  // Handle price range minimum change with debouncing
-  const handlePriceRangeStartChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const value = event.currentTarget.value;
-
-    // Track when user last typed
-    lastUserInputStartRef.current = Date.now();
-
-    // Clear existing timeout
-    if (debounceTimeoutStartRef.current) {
-      clearTimeout(debounceTimeoutStartRef.current);
-    }
-
-    // Set new timeout
-    debounceTimeoutStartRef.current = setTimeout(() => {
-      if (priceFilter === 'false') return;
-
-      const rawValue = value.trim();
-      const parsed = rawValue === '' ? 0 : parseInt(rawValue, 10);
-      const sanitized = Number.isNaN(parsed) ? 0 : Math.max(0, parsed);
-
-      priceRangeStartSetterRef.current(sanitized);
-    }, PRICE_RANGE_DEBOUNCE_MS);
-  };
-
-  // Handle price range maximum change with debouncing
-  const handlePriceRangeEndChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const value = event.currentTarget.value;
-    shouldApplyDefaultPriceRangeEndRef.current = false;
-
-    // Track when user last typed
-    lastUserInputEndRef.current = Date.now();
-
-    // Clear existing timeout
-    if (debounceTimeoutEndRef.current) {
-      clearTimeout(debounceTimeoutEndRef.current);
-    }
-
-    // Set new timeout
-    debounceTimeoutEndRef.current = setTimeout(() => {
-      if (priceFilter === 'false') return;
-
-      const rawValue = value.trim();
-      if (rawValue === '') {
-        priceRangeEndSetterRef.current(null);
-        return;
-      }
-
-      const parsed = parseInt(rawValue, 10);
-      if (Number.isNaN(parsed)) {
-        priceRangeEndSetterRef.current(null);
-        return;
-      }
-
-      const sanitized = Math.max(0, parsed);
-      priceRangeEndSetterRef.current(sanitized);
-    }, PRICE_RANGE_DEBOUNCE_MS);
-  };
-
-  // Handle role filter selection
   const handleRoleFilterChange = (value: 'all' | 'company' | 'individual') => {
-    // Call the parent component's setRoleFilter function to trigger the search
     if (setRoleFilter) {
       setRoleFilter(value);
     }
   };
 
-  // Extract the filter content into a reusable component
+  // Range price filter handlers - memoized to prevent re-renders
+  const handleRangePriceSearch = useCallback(() => {
+    // Clear previous errors
+    setRangeError('');
+
+    // Validate inputs
+    const startValue = tempRangeStartRef.current.trim();
+    const endValue = tempRangeEndRef.current.trim();
+
+    // If both are empty, do nothing
+    if (!startValue && !endValue) {
+      setRangeError(locale === 'ar' ? 'يرجى إدخال قيمة واحدة على الأقل' : 'Please enter at least one value');
+      return;
+    }
+
+    // Parse values
+    const start = startValue ? parseFloat(startValue) : null;
+    const end = endValue ? parseFloat(endValue) : null;
+
+    // Validate numbers
+    if ((startValue && (isNaN(start!) || start! < 0)) ||
+        (endValue && (isNaN(end!) || end! < 0))) {
+      setRangeError(locale === 'ar' ? 'يرجى إدخال أرقام صحيحة وموجبة' : 'Please enter valid positive numbers');
+      return;
+    }
+
+    // Validate that max > min if both are provided
+    if (start !== null && end !== null && start >= end) {
+      setRangeError(locale === 'ar' ? 'يجب أن يكون الحد الأقصى أكبر من الحد الأدنى' : 'Maximum must be greater than minimum');
+      return;
+    }
+
+    // Apply filters
+    if (setRangeStartFilter) {
+      setRangeStartFilter(start !== null ? start.toString() : null);
+    }
+    if (setRangeEndFilter) {
+      setRangeEndFilter(end !== null ? end.toString() : null);
+    }
+  }, [locale, setRangeStartFilter, setRangeEndFilter]);
+
+  const handleRangePriceClear = useCallback(() => {
+    // Clear ref values
+    tempRangeStartRef.current = '';
+    tempRangeEndRef.current = '';
+
+    // Clear input fields
+    if (rangeStartInputRef.current) {
+      rangeStartInputRef.current.value = '';
+    }
+    if (rangeEndInputRef.current) {
+      rangeEndInputRef.current.value = '';
+    }
+
+    // Clear error state
+    setRangeError('');
+
+    // Clear applied filters
+    if (setRangeStartFilter) {
+      setRangeStartFilter(null);
+    }
+    if (setRangeEndFilter) {
+      setRangeEndFilter(null);
+    }
+  }, [setRangeStartFilter, setRangeEndFilter]);
+
+  // Memoized input change handlers using refs to prevent re-renders
+  const handleRangeStartChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    tempRangeStartRef.current = e.target.value;
+    if (rangeStartInputRef.current) {
+      rangeStartInputRef.current.value = e.target.value;
+    }
+  }, []);
+
+  const handleRangeEndChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    tempRangeEndRef.current = e.target.value;
+    if (rangeEndInputRef.current) {
+      rangeEndInputRef.current.value = e.target.value;
+    }
+  }, []);
+
+  // Memoized applied range display to prevent unnecessary re-renders
+  const appliedRangeDisplay = useMemo(() => {
+    if (rangeStartFilter || rangeEndFilter) {
+      return `${locale === 'ar' ? 'النطاق المطبق:' : 'Applied range:'} ${rangeStartFilter || '0'} - ${rangeEndFilter || '∞'}`;
+    }
+    return null;
+  }, [rangeStartFilter, rangeEndFilter, locale]);
+
+  // Enhanced LoadingOverlay component
+  const LoadingOverlay = ({ children, isLoading, message }: {
+    children: React.ReactNode;
+    isLoading: boolean;
+    message?: string;
+  }) => (
+    <div className="relative">
+      {children}
+      {isLoading && (
+        <div className="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center z-10 rounded">
+          <div className="flex flex-col items-center gap-2">
+            <Loader size="sm" />
+            {message && <span className="text-xs text-gray-600">{message}</span>}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+
+  // Filter content component
   const FilterContent = () => (
     <div className={`${shouldUseDrawer ? '' : 'bg-gray-50 rounded-xl shadow border border-gray-200 w-full max-w-xs'}`} dir={locale === 'ar' ? 'rtl' : 'ltr'}>
       {/* Top Bar */}
       <div className="flex items-center justify-between px-4 pt-4 pb-2 border-b border-gray-200">
         <h2 className="text-base font-semibold text-gray-800">{locale === 'ar' ? 'الفلاتر' : 'Filters'}</h2>
         <div className="flex items-center gap-3 text-xs font-medium">
-          <button className="text-blue-500 hover:underline" onClick={handleResetFilters}>{locale === 'ar' ? 'مسح' : 'Clear'}</button>
+          <button
+            className={`text-blue-500 hover:underline transition-colors ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+            onClick={handleResetFilters}
+            disabled={isDisabled}
+          >
+            {locale === 'ar' ? 'مسح' : 'Clear'}
+          </button>
         </div>
       </div>
+
       <div className="p-0 divide-y divide-gray-200">
         {/* Price Types Section */}
         {searchType !== 'insighter' && (
           <div data-debug={`Price section visible for ${searchType}`}>
             <button
-              onClick={() => setpriceCollapsed(!priceCollapsed)}
-              className="w-full flex items-center justify-between px-4 py-3 text-left bg-gray-50 hover:bg-gray-100 focus:outline-none"
+              onClick={() => !isDisabled && setPriceCollapsed(!priceCollapsed)}
+              disabled={isDisabled}
+              className={`w-full flex items-center justify-between px-4 py-3 text-left bg-gray-50 hover:bg-gray-100 focus:outline-none transition-colors ${
+                isDisabled ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
             >
               <span className="flex items-center gap-2 text-blue-500 font-semibold">
-                <IconCoin size={20} className="p-0.5  rounded-full" />
+                <IconCoin size={20} className="p-0.5 rounded-full" />
                 {locale === 'ar' ? 'السعر' : 'Price'}
               </span>
-              <svg className={`w-4 h-4 text-gray-400 transition-transform ${priceCollapsed ? '' : 'rotate-180'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
+              <div className="flex items-center gap-2">
+                {dataLoading.countries && <Loader size="xs" />}
+                <svg className={`w-4 h-4 text-gray-400 transition-transform ${priceCollapsed ? '' : 'rotate-180'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
             </button>
             {!priceCollapsed && (
-              <div className="px-4 py-3 bg-white space-y-3">
-                <div className="flex gap-1.5 flex-wrap">
-                  <Chip
-                    checked={priceFilter === null}
-                    onChange={() => handlePriceFilterChange(null)}
-                    variant="outline"
-                    size="sm"
-                  >
-                    {locale === 'ar' ? 'الكل' : 'All'}
-                  </Chip>
-                  <Chip
-                    checked={priceFilter === 'false'}
-                    onChange={() => handlePriceFilterChange('false')}
-                    variant="outline"
-                    size="sm"
-                  >
-                    {locale === 'ar' ? 'مجاني' : 'Free'}
-                  </Chip>
-                  <Chip
-                    checked={priceFilter === 'true'}
-                    onChange={() => handlePriceFilterChange('true')}
-                    variant="outline"
-                    size="sm"
-                >
-                  {locale === 'ar' ? 'مدفوع' : 'Paid'}
-                </Chip>
-              </div>
-                {priceFilter !== 'false' && (
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className="flex flex-col gap-1">
-                      <span className="text-xs text-gray-500">
-                        {locale === 'ar' ? 'السعر الأدنى' : 'Min price'}
-                      </span>
-                      <Input
-                        type="number"
-                        min={0}
-                        ref={minPriceInputRef}
-                        onChange={handlePriceRangeStartChange}
-                        placeholder="0"
-                        size="xs"
-                      />
+              <div className="px-4 py-3 bg-white">
+                <LoadingOverlay isLoading={isDisabled} message={locale === 'ar' ? 'جاري التحديث...' : 'Updating...'}>
+                  <div className="space-y-3">
+                    {/* Original Price Filter Chips */}
+                    <div className="flex gap-1.5 flex-wrap">
+                      <Chip
+                        checked={priceFilter === null}
+                        onChange={() => !isDisabled && handlePriceFilterChange(null)}
+                        variant="outline"
+                        size="sm"
+                        disabled={isDisabled}
+                      >
+                        {locale === 'ar' ? 'الكل' : 'All'}
+                      </Chip>
+                      <Chip
+                        checked={priceFilter === 'false'}
+                        onChange={() => !isDisabled && handlePriceFilterChange('false')}
+                        variant="outline"
+                        size="sm"
+                        disabled={isDisabled}
+                      >
+                        {locale === 'ar' ? 'مجاني' : 'Free'}
+                      </Chip>
+                      <Chip
+                        checked={priceFilter === 'true'}
+                        onChange={() => !isDisabled && handlePriceFilterChange('true')}
+                        variant="outline"
+                        size="sm"
+                        disabled={isDisabled}
+                      >
+                        {locale === 'ar' ? 'مدفوع' : 'Paid'}
+                      </Chip>
                     </div>
-                    <div className="flex flex-col gap-1">
-                      <span className="text-xs text-gray-500">
-                        {locale === 'ar' ? 'السعر الأقصى' : 'Max price'}
+
+                    {/* Range Price Filter - Hidden when Free is selected */}
+                    {priceFilter !== 'false' && (
+                      <div className="border-t pt-3">
+                      <span className="text-xs font-semibold text-gray-700 mb-2 block">
+                        {locale === 'ar' ? 'أو حسب النطاق السعري' : 'Or by price range'}
                       </span>
-                      <Input
-                        type="number"
-                        min={0}
-                        ref={maxPriceInputRef}
-                        onChange={handlePriceRangeEndChange}
-                        placeholder="1000000"
-                        size="xs"
-                      />
-                    </div>
+                      <div className="flex items-center gap-2 mb-2">
+                        <input
+                          ref={rangeStartInputRef}
+                          type="number"
+                          placeholder={locale === 'ar' ? 'الحد الأدنى' : 'Min price'}
+                          defaultValue=""
+                          onChange={handleRangeStartChange}
+                          className={`w-[100px] px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-transparent ${
+                            isDisabled ? 'opacity-50 cursor-not-allowed' : ''
+                          }`}
+                          disabled={isDisabled}
+                          min="0"
+                          step="0.01"
+                        />
+                        <input
+                          ref={rangeEndInputRef}
+                          type="number"
+                          placeholder={locale === 'ar' ? 'الحد الأقصى' : 'Max price'}
+                          defaultValue=""
+                          onChange={handleRangeEndChange}
+                          className={`w-[100px] px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-transparent ${
+                            isDisabled ? 'opacity-50 cursor-not-allowed' : ''
+                          }`}
+                          disabled={isDisabled}
+                          min="0"
+                          step="0.01"
+                        />
+                        <button
+                          onClick={handleRangePriceSearch}
+                          disabled={isDisabled}
+                          className={`p-1 text-blue-500 hover:text-blue-700 hover:bg-blue-50 rounded transition-colors ${
+                            isDisabled ? 'opacity-50 cursor-not-allowed' : ''
+                          }`}
+                          title={locale === 'ar' ? 'بحث' : 'Search'}
+                        >
+                          <IconSearch size={16} />
+                        </button>
+                        <button
+                          onClick={handleRangePriceClear}
+                          disabled={isDisabled}
+                          className={`p-1 text-gray-500 hover:text-red-500 hover:bg-red-50 rounded transition-colors ${
+                            isDisabled ? 'opacity-50 cursor-not-allowed' : ''
+                          }`}
+                          title={locale === 'ar' ? 'مسح' : 'Clear'}
+                        >
+                          <IconX size={16} />
+                        </button>
+                      </div>
+                      {rangeError && (
+                        <p className="text-xs text-red-500 mt-1">{rangeError}</p>
+                      )}
+                      {appliedRangeDisplay && (
+                        <p className="text-xs text-gray-600 mt-1">
+                          {appliedRangeDisplay}
+                        </p>
+                      )}
+                      </div>
+                    )}
                   </div>
-                )}
+                </LoadingOverlay>
               </div>
             )}
           </div>
         )}
+
         {/* Language Section */}
         {searchType !== 'insighter' && (
           <div data-debug={`Language section visible for ${searchType}`}>
             <button
-              onClick={() => setLanguageCollapsed(!languageCollapsed)}
-              className="w-full flex items-center justify-between px-4 py-3 text-left bg-gray-50 hover:bg-gray-100 focus:outline-none"
+              onClick={() => !isDisabled && setLanguageCollapsed(!languageCollapsed)}
+              disabled={isDisabled}
+              className={`w-full flex items-center justify-between px-4 py-3 text-left bg-gray-50 hover:bg-gray-100 focus:outline-none transition-colors ${
+                isDisabled ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
             >
               <span className="flex items-center gap-2 text-blue-500 font-semibold">
-                <IconLanguage size={20} className="p-0.5  rounded-full" />
+                <IconLanguage size={20} className="p-0.5 rounded-full" />
                 {locale === 'ar' ? 'اللغة' : 'Language'}
               </span>
               <svg className={`w-4 h-4 text-gray-400 transition-transform ${languageCollapsed ? '' : 'rotate-180'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1149,145 +1108,244 @@ const FilterBox: React.FC<FilterBoxProps> = ({
               </svg>
             </button>
             {!languageCollapsed && (
-              <div className="px-4 py-3 bg-white flex gap-2 flex-wrap">
-                <Chip
-                  checked={languageFilter === 'all'}
-                  onChange={() => setLanguageFilter('all')}
-                  variant="outline"
-                  size="sm"
-                >
-                  {locale === 'ar' ? 'الكل' : 'All'}
-                </Chip>
-                <Chip
-                  checked={languageFilter === 'english'}
-                  onChange={() => setLanguageFilter('english')}
-                  variant="outline"
-                  size="sm"
-                >
-                  {locale === 'ar' ? 'الإنجليزية' : 'English'}
-                </Chip>
-                <Chip
-                  checked={languageFilter === 'arabic'}
-                  onChange={() => setLanguageFilter('arabic')}
-                  variant="outline"
-                  size="sm"
-                >
-                  {locale === 'ar' ? 'العربية' : 'Arabic'}
-                </Chip>
+              <div className="px-4 py-3 bg-white">
+                <LoadingOverlay isLoading={isDisabled}>
+                  <div className="flex gap-2 flex-wrap">
+                    <Chip
+                      checked={languageFilter === 'all'}
+                      onChange={() => !isDisabled && setLanguageFilter('all')}
+                      variant="outline"
+                      size="sm"
+                      disabled={isDisabled}
+                    >
+                      {locale === 'ar' ? 'الكل' : 'All'}
+                    </Chip>
+                    <Chip
+                      checked={languageFilter === 'english'}
+                      onChange={() => !isDisabled && setLanguageFilter('english')}
+                      variant="outline"
+                      size="sm"
+                      disabled={isDisabled}
+                    >
+                      {locale === 'ar' ? 'الإنجليزية' : 'English'}
+                    </Chip>
+                    <Chip
+                      checked={languageFilter === 'arabic'}
+                      onChange={() => !isDisabled && setLanguageFilter('arabic')}
+                      variant="outline"
+                      size="sm"
+                      disabled={isDisabled}
+                    >
+                      {locale === 'ar' ? 'العربية' : 'Arabic'}
+                    </Chip>
+                  </div>
+                </LoadingOverlay>
               </div>
             )}
           </div>
         )}
+
         {/* Industry Section */}
         <div>
           <button
-            onClick={() => setIndustryCollapsed(!industryCollapsed)}
-            className="w-full flex items-center justify-between px-4 py-3 text-left bg-gray-50 hover:bg-gray-100 focus:outline-none"
+            onClick={() => !isDisabled && setIndustryCollapsed(!industryCollapsed)}
+            disabled={isDisabled}
+            className={`w-full flex items-center justify-between px-4 py-3 text-left bg-gray-50 hover:bg-gray-100 focus:outline-none transition-colors ${
+              isDisabled ? 'opacity-50 cursor-not-allowed' : ''
+            }`}
           >
             <span className="flex items-center gap-2 text-blue-500 font-semibold">
-              <IconBuildingFactory size={20} className="p-0.5  rounded-full" />
+              <IconBuildingFactory size={20} className="p-0.5 rounded-full" />
               {locale === 'ar' ? 'المجال' : 'Industry'}
             </span>
-            <svg className={`w-4 h-4 text-gray-400 transition-transform ${industryCollapsed ? '' : 'rotate-180'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-            </svg>
+            <div className="flex items-center gap-2">
+              {(dataLoading.industries || dataLoading.isicCodes) && <Loader size="xs" />}
+              <svg className={`w-4 h-4 text-gray-400 transition-transform ${industryCollapsed ? '' : 'rotate-180'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </div>
           </button>
           {!industryCollapsed && (
             <div className="px-4 py-3 bg-white space-y-2">
-              {/* Industry Filter */}
-              <div className="flex flex-col gap-1">
-                <span className="text-xs font-semibold text-gray-700">{locale === 'ar' ? 'المجال' : 'Industry'}</span>
-                <div onClick={() => setIsIndustryModalOpen(true)} className="border border-gray-200 bg-white py-2 px-3 rounded text-sm cursor-pointer flex justify-between items-center hover:border-blue-400 transition-colors">
-                  {selectedIndustry ? (
-                    <span className="truncate text-gray-800 font-semibold">{selectedIndustry.label.length > 30 ? `${selectedIndustry.label.substring(0, 30)}...` : selectedIndustry.label}</span>
-                  ) : (
-                    <span className="text-gray-400 font-medium">{locale === 'ar' ? 'اختر المجال' : 'Select Industry'}</span>
-                  )}
-                  {selectedIndustry && (
-                    <button onClick={handleClearIndustry} className="ml-2 text-gray-400 hover:text-red-500">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
-                    </button>
-                  )}
+              <LoadingOverlay isLoading={isDisabled}>
+                {/* Industry Filter */}
+                <div className="flex flex-col gap-1">
+                  <span className="text-xs font-semibold text-gray-700">{locale === 'ar' ? 'المجال' : 'Industry'}</span>
+                  <div
+                    onClick={() => !isDisabled && setIsIndustryModalOpen(true)}
+                    className={`border border-gray-200 bg-white py-2 px-3 rounded text-sm cursor-pointer flex justify-between items-center hover:border-blue-400 transition-colors ${
+                      isDisabled ? 'opacity-50 cursor-not-allowed' : ''
+                    }`}
+                  >
+                    {selectedIndustry ? (
+                      <span className="truncate text-gray-800 font-semibold">{selectedIndustry.label.length > 30 ? `${selectedIndustry.label.substring(0, 30)}...` : selectedIndustry.label}</span>
+                    ) : (
+                      <span className="text-gray-400 font-medium">{locale === 'ar' ? 'اختر المجال' : 'Select Industry'}</span>
+                    )}
+                    {selectedIndustry && !isDisabled && (
+                      <button onClick={handleClearIndustry} className="ml-2 text-gray-400 hover:text-red-500">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                      </button>
+                    )}
+                  </div>
                 </div>
-              </div>
-              {/* ISIC Code Filter */}
-              <div className="flex flex-col gap-1">
-                <span className="text-xs font-semibold text-gray-700">{locale === 'ar' ? 'رمز ISIC' : 'ISIC Code'}</span>
-                <div onClick={() => setIsModalOpen(true)} className="border border-gray-200 bg-white py-2 px-3 rounded text-sm cursor-pointer flex justify-between items-center hover:border-blue-400 transition-colors">
-                  {selectedIsicCode ? (
-                    <span className="truncate text-gray-800 font-semibold">{selectedIsicCode.code} - {selectedIsicCode.label.length > 30 ? `${selectedIsicCode.label.substring(0, 30)}...` : selectedIsicCode.label}</span>
-                  ) : (
-                    <span className="text-gray-400 font-medium">{locale === 'ar' ? 'اختر رمز ISIC' : 'Select ISIC Code'}</span>
-                  )}
-                  {selectedIsicCode && (
-                    <button onClick={handleClearIsicCode} className="ml-2 text-gray-400 hover:text-red-500">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
-                    </button>
-                  )}
+
+                {/* ISIC Code Filter */}
+                <div className="flex flex-col gap-1">
+                  <span className="text-xs font-semibold text-gray-700">{locale === 'ar' ? 'رمز ISIC' : 'ISIC Code'}</span>
+                  <div
+                    onClick={() => !isDisabled && setIsModalOpen(true)}
+                    className={`border border-gray-200 bg-white py-2 px-3 rounded text-sm cursor-pointer flex justify-between items-center hover:border-blue-400 transition-colors ${
+                      isDisabled ? 'opacity-50 cursor-not-allowed' : ''
+                    }`}
+                  >
+                    {selectedIsicCode ? (
+                      <span className="truncate text-gray-800 font-semibold">{selectedIsicCode.code} - {selectedIsicCode.label.length > 30 ? `${selectedIsicCode.label.substring(0, 30)}...` : selectedIsicCode.label}</span>
+                    ) : (
+                      <span className="text-gray-400 font-medium">{locale === 'ar' ? 'اختر رمز ISIC' : 'Select ISIC Code'}</span>
+                    )}
+                    {selectedIsicCode && !isDisabled && (
+                      <button onClick={handleClearIsicCode} className="ml-2 text-gray-400 hover:text-red-500">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                      </button>
+                    )}
+                  </div>
                 </div>
-              </div>
-              {/* HS Code Filter */}
-              <div className="flex flex-col gap-1">
-                <span className="text-xs font-semibold text-gray-700">{locale === 'ar' ? 'رمز HS' : 'HS Code'}</span>
-                <div 
-                  onClick={selectedIsicCode ? () => setIsHsCodeModalOpen(true) : undefined} 
-                  className={`border border-gray-200 py-2 px-3 rounded text-sm flex justify-between items-center transition-colors ${
-                    selectedIsicCode 
-                      ? 'bg-white cursor-pointer hover:border-blue-400' 
-                      : 'bg-gray-100 cursor-not-allowed opacity-60'
-                  }`}
-                >
-                  {selectedHsCode ? (
-                    <span className="truncate text-gray-800 font-semibold">{selectedHsCode.code} - {selectedHsCode.label.length > 30 ? `${selectedHsCode.label.substring(0, 30)}...` : selectedHsCode.label}</span>
-                  ) : (
-                    <span className="text-gray-400 font-medium">
-                      {selectedIsicCode 
-                        ? (locale === 'ar' ? 'اختر رمز HS' : 'Select HS Code')
-                        : (locale === 'ar' ? 'اختر رمز ISIC أولاً' : 'Select ISIC Code first')
-                      }
-                    </span>
-                  )}
-                  {selectedHsCode && selectedIsicCode && (
-                    <button onClick={handleClearHsCode} className="ml-2 text-gray-400 hover:text-red-500">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
-                    </button>
-                  )}
+
+                {/* HS Code Filter */}
+                <div className="flex flex-col gap-1">
+                  <span className="text-xs font-semibold text-gray-700">{locale === 'ar' ? 'رمز HS' : 'HS Code'}</span>
+                  <div
+                    onClick={selectedIsicCode && !isDisabled ? () => setIsHsCodeModalOpen(true) : undefined}
+                    className={`border border-gray-200 py-2 px-3 rounded text-sm flex justify-between items-center transition-colors ${
+                      selectedIsicCode && !isDisabled
+                        ? 'bg-white cursor-pointer hover:border-blue-400'
+                        : 'bg-gray-100 cursor-not-allowed opacity-60'
+                    }`}
+                  >
+                    {selectedHsCode ? (
+                      <span className="truncate text-gray-800 font-semibold">{selectedHsCode.code} - {selectedHsCode.label.length > 30 ? `${selectedHsCode.label.substring(0, 30)}...` : selectedHsCode.label}</span>
+                    ) : (
+                      <span className="text-gray-400 font-medium">
+                        {selectedIsicCode
+                          ? (locale === 'ar' ? 'اختر رمز HS' : 'Select HS Code')
+                          : (locale === 'ar' ? 'اختر رمز ISIC أولاً' : 'Select ISIC Code first')
+                        }
+                      </span>
+                    )}
+                    {selectedHsCode && selectedIsicCode && !isDisabled && (
+                      <button onClick={handleClearHsCode} className="ml-2 text-gray-400 hover:text-red-500">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                      </button>
+                    )}
+                    {dataLoading.hsCodes && (
+                      <div className="ml-2">
+                        <Loader size="xs" />
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
+              </LoadingOverlay>
             </div>
           )}
         </div>
+
         {/* Target Market Section */}
         <div>
           <button
-            onClick={() => setTargetMarketCollapsed(!targetMarketCollapsed)}
-            className="w-full flex items-center justify-between px-4 py-3 text-left bg-gray-50 hover:bg-gray-100 focus:outline-none"
+            onClick={() => !isDisabled && setTargetMarketCollapsed(!targetMarketCollapsed)}
+            disabled={isDisabled}
+            className={`w-full flex items-center justify-between px-4 py-3 text-left bg-gray-50 hover:bg-gray-100 focus:outline-none transition-colors ${
+              isDisabled ? 'opacity-50 cursor-not-allowed' : ''
+            }`}
           >
             <span className="flex items-center gap-2 text-blue-500 font-semibold">
-              <IconWorld size={20} className="p-0.5  rounded-full" />
+              <IconWorld size={20} className="p-0.5 rounded-full" />
               {locale === 'ar' ? (searchType === 'insighter' ? 'بلد الإنسايتر' : 'السوق المستهدف') : (searchType === 'insighter' ? 'Insighter Origin' : 'Target Market')}
             </span>
-            <svg className={`w-4 h-4 text-gray-400 transition-transform ${targetMarketCollapsed ? '' : 'rotate-180'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-            </svg>
+            <div className="flex items-center gap-2">
+              {(dataLoading.countries || dataLoading.regions || dataLoading.economicBlocs) && <Loader size="xs" />}
+              <svg className={`w-4 h-4 text-gray-400 transition-transform ${targetMarketCollapsed ? '' : 'rotate-180'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </div>
           </button>
           {!targetMarketCollapsed && (
             <div className="px-4 py-3 bg-white space-y-2">
-              {/* Economic Bloc, Region, Country Selects */}
-              {searchType !== 'insighter' && (
+              <LoadingOverlay isLoading={isDisabled}>
+                {/* Economic Bloc */}
+                {searchType !== 'insighter' && (
+                  <div className="flex flex-col gap-1">
+                    <span className="text-xs font-semibold text-gray-700">{locale === 'ar' ? 'المنطقة الاقتصادية' : 'By Economic Block'}</span>
+                    <Combobox
+                      store={economicBlocCombobox}
+                      withinPortal={false}
+                      onOptionSubmit={(val) => {
+                        if (!isDisabled) {
+                          console.log('🟦 Economic Bloc changed:', val, 'Clearing region and country filters');
+                          if (setEconomicBlocFilter) setEconomicBlocFilter(parseInt(val));
+                          if (setRegionFilter) setRegionFilter(null);
+                          if (setCountryFilter) setCountryFilter(null);
+                          economicBlocCombobox.closeDropdown();
+                        }
+                      }}
+                      disabled={isDisabled}
+                    >
+                      <Combobox.Target>
+                        <InputBase
+                          component="button"
+                          type="button"
+                          pointer
+                          rightSection={<Combobox.Chevron />}
+                          onClick={() => !isDisabled && economicBlocCombobox.toggleDropdown()}
+                          rightSectionPointerEvents="none"
+                          className={`text-sm font-semibold hover:border-blue-400 transition-colors ${
+                            isDisabled ? 'opacity-50 cursor-not-allowed' : ''
+                          }`}
+                          disabled={isDisabled}
+                        >
+                          {getSelectedEconomicBlocLabel() || <Input.Placeholder>{locale === 'ar' ? 'اختر المنطقة الاقتصادية' : 'Select an economic bloc'}</Input.Placeholder>}
+                        </InputBase>
+                      </Combobox.Target>
+                      <Combobox.Dropdown>
+                        <Combobox.Search
+                          value={economicBlocSearch}
+                          onChange={(event) => setEconomicBlocSearch(event.currentTarget.value)}
+                          placeholder={locale === 'ar' ? 'البحث في الكتل الاقتصادية' : 'Search economic blocs'}
+                          disabled={isDisabled}
+                        />
+                        <Combobox.Options>
+                          {filteredEconomicBlocOptions.length > 0 ? (
+                            filteredEconomicBlocOptions.map((option) => (
+                              <Combobox.Option value={option.value} key={option.value}>
+                                {option.label}
+                              </Combobox.Option>
+                            ))
+                          ) : (
+                            <Combobox.Empty>{locale === 'ar' ? 'لا توجد نتائج' : 'Nothing found'}</Combobox.Empty>
+                          )}
+                        </Combobox.Options>
+                      </Combobox.Dropdown>
+                    </Combobox>
+                  </div>
+                )}
+
+                {/* Region */}
                 <div className="flex flex-col gap-1">
-                  <span className="text-xs font-semibold text-gray-700">{locale === 'ar' ? 'المنطقة الاقتصادية' : 'By Economic Block'}</span>
+                  <span className="text-xs font-semibold text-gray-700">{locale === 'ar' ? 'اختر المنطقة الجغرافية' : 'Or By Region'}</span>
                   <Combobox
-                    store={economicBlocCombobox}
+                    store={regionCombobox}
                     withinPortal={false}
                     onOptionSubmit={(val) => {
-                      console.log('🟦 Economic Bloc changed:', val, 'Clearing region and country filters');
-                      if (setEconomicBlocFilter) setEconomicBlocFilter(parseInt(val));
-                      // Clear other target market filters when economic bloc is selected
-                      if (setRegionFilter) setRegionFilter(null);
-                      if (setCountryFilter) setCountryFilter(null);
-                      economicBlocCombobox.closeDropdown();
+                      if (!isDisabled) {
+                        console.log('🟩 Region changed:', val, 'Clearing economic bloc and country filters');
+                        if (setRegionFilter) setRegionFilter(parseInt(val));
+                        if (setEconomicBlocFilter) setEconomicBlocFilter(null);
+                        if (setCountryFilter) setCountryFilter(null);
+                        regionCombobox.closeDropdown();
+                      }
                     }}
+                    disabled={isDisabled}
                   >
                     <Combobox.Target>
                       <InputBase
@@ -1295,22 +1353,26 @@ const FilterBox: React.FC<FilterBoxProps> = ({
                         type="button"
                         pointer
                         rightSection={<Combobox.Chevron />}
-                        onClick={() => economicBlocCombobox.toggleDropdown()}
+                        onClick={() => !isDisabled && regionCombobox.toggleDropdown()}
                         rightSectionPointerEvents="none"
-                        className="text-sm font-semibold hover:border-blue-400 transition-colors"
+                        className={`text-sm font-semibold hover:border-blue-400 transition-colors ${
+                          isDisabled ? 'opacity-50 cursor-not-allowed' : ''
+                        }`}
+                        disabled={isDisabled}
                       >
-                        {getSelectedEconomicBlocLabel() || <Input.Placeholder>{locale === 'ar' ? 'اختر المنطقة الاقتصادية' : 'Select an economic bloc'}</Input.Placeholder>}
+                        {getSelectedRegionLabel() || <Input.Placeholder>{locale === 'ar' ? 'اختر منطقة' : 'Select a region'}</Input.Placeholder>}
                       </InputBase>
                     </Combobox.Target>
                     <Combobox.Dropdown>
                       <Combobox.Search
-                        value={economicBlocSearch}
-                        onChange={(event) => setEconomicBlocSearch(event.currentTarget.value)}
-                        placeholder={locale === 'ar' ? 'البحث في الكتل الاقتصادية' : 'Search economic blocs'}
+                        value={regionSearch}
+                        onChange={(event) => setRegionSearch(event.currentTarget.value)}
+                        placeholder={locale === 'ar' ? 'البحث في المناطق' : 'Search regions'}
+                        disabled={isDisabled}
                       />
                       <Combobox.Options>
-                        {filteredEconomicBlocOptions.length > 0 ? (
-                          filteredEconomicBlocOptions.map((option) => (
+                        {filteredRegionOptions.length > 0 ? (
+                          filteredRegionOptions.map((option) => (
                             <Combobox.Option value={option.value} key={option.value}>
                               {option.label}
                             </Combobox.Option>
@@ -1322,113 +1384,78 @@ const FilterBox: React.FC<FilterBoxProps> = ({
                     </Combobox.Dropdown>
                   </Combobox>
                 </div>
-              )}
-              <div className="flex flex-col gap-1">
-                <span className="text-xs font-semibold text-gray-700">{locale === 'ar' ? 'اختر المنطقة الجغرافية' : 'Or By Region'}</span>
-                <Combobox
-                  store={regionCombobox}
-                  withinPortal={false}
-                  onOptionSubmit={(val) => {
-                    console.log('🟩 Region changed:', val, 'Clearing economic bloc and country filters');
-                    if (setRegionFilter) setRegionFilter(parseInt(val));
-                    // Clear other target market filters when region is selected
-                    if (setEconomicBlocFilter) setEconomicBlocFilter(null);
-                    if (setCountryFilter) setCountryFilter(null);
-                    regionCombobox.closeDropdown();
-                  }}
-                >
-                  <Combobox.Target>
-                    <InputBase
-                      component="button"
-                      type="button"
-                      pointer
-                      rightSection={<Combobox.Chevron />}
-                      onClick={() => regionCombobox.toggleDropdown()}
-                      rightSectionPointerEvents="none"
-                      className=" text-sm font-semibold hover:border-blue-400 transition-colors"
-                    >
-                      {getSelectedRegionLabel() || <Input.Placeholder>{locale === 'ar' ? 'اختر منطقة' : 'Select a region'}</Input.Placeholder>}
-                    </InputBase>
-                  </Combobox.Target>
-                  <Combobox.Dropdown>
-                    <Combobox.Search
-                      value={regionSearch}
-                      onChange={(event) => setRegionSearch(event.currentTarget.value)}
-                      placeholder={locale === 'ar' ? 'البحث في المناطق' : 'Search regions'}
-                    />
-                    <Combobox.Options>
-                      {filteredRegionOptions.length > 0 ? (
-                        filteredRegionOptions.map((option) => (
-                          <Combobox.Option value={option.value} key={option.value}>
-                            {option.label}
-                          </Combobox.Option>
-                        ))
-                      ) : (
-                        <Combobox.Empty>{locale === 'ar' ? 'لا توجد نتائج' : 'Nothing found'}</Combobox.Empty>
-                      )}
-                    </Combobox.Options>
-                  </Combobox.Dropdown>
-                </Combobox>
-              </div>
-              <div className="flex flex-col gap-1">
-                <span className="text-xs font-semibold text-gray-700">{locale === 'ar' ? 'الدولة' : 'Or By Country'}</span>
-                <Combobox
-                  store={countryCombobox}
-                  withinPortal={false}
-                  onOptionSubmit={(val) => {
-                    console.log('🟨 Country changed:', val, 'Clearing economic bloc and region filters');
-                    if (setCountryFilter) setCountryFilter(parseInt(val));
-                    // Clear other target market filters when country is selected
-                    if (setEconomicBlocFilter) setEconomicBlocFilter(null);
-                    if (setRegionFilter) setRegionFilter(null);
-                    countryCombobox.closeDropdown();
-                  }}
-                >
-                  <Combobox.Target>
-                    <InputBase
-                      component="button"
-                      type="button"
-                      pointer
-                      rightSection={<Combobox.Chevron />}
-                      onClick={() => countryCombobox.toggleDropdown()}
-                      rightSectionPointerEvents="none"
-                      className=" text-sm font-semibold hover:border-blue-400 transition-colors"
-                    >
-                      {getSelectedCountryLabel() || <Input.Placeholder>{locale === 'ar' ? 'اختر دولة' : 'Select a country'}</Input.Placeholder>}
-                    </InputBase>
-                  </Combobox.Target>
-                  <Combobox.Dropdown>
-                    <Combobox.Search
-                      value={countrySearch}
-                      onChange={(event) => setCountrySearch(event.currentTarget.value)}
-                      placeholder={locale === 'ar' ? 'البحث في البلدان' : 'Search countries'}
-                    />
-                    <Combobox.Options className="max-h-60 overflow-y-auto">
-                      {filteredCountryOptions.length > 0 ? (
-                        filteredCountryOptions.map((option) => (
-                          <Combobox.Option value={option.value} key={option.value}>
-                            {option.label}
-                          </Combobox.Option>
-                        ))
-                      ) : (
-                        <Combobox.Empty>{locale === 'ar' ? 'لا توجد نتائج' : 'Nothing found'}</Combobox.Empty>
-                      )}
-                    </Combobox.Options>
-                  </Combobox.Dropdown>
-                </Combobox>
-              </div>
+
+                {/* Country */}
+                <div className="flex flex-col gap-1">
+                  <span className="text-xs font-semibold text-gray-700">{locale === 'ar' ? 'الدولة' : 'Or By Country'}</span>
+                  <Combobox
+                    store={countryCombobox}
+                    withinPortal={false}
+                    onOptionSubmit={(val) => {
+                      if (!isDisabled) {
+                        console.log('🟨 Country changed:', val, 'Clearing economic bloc and region filters');
+                        if (setCountryFilter) setCountryFilter(parseInt(val));
+                        if (setEconomicBlocFilter) setEconomicBlocFilter(null);
+                        if (setRegionFilter) setRegionFilter(null);
+                        countryCombobox.closeDropdown();
+                      }
+                    }}
+                    disabled={isDisabled}
+                  >
+                    <Combobox.Target>
+                      <InputBase
+                        component="button"
+                        type="button"
+                        pointer
+                        rightSection={<Combobox.Chevron />}
+                        onClick={() => !isDisabled && countryCombobox.toggleDropdown()}
+                        rightSectionPointerEvents="none"
+                        className={`text-sm font-semibold hover:border-blue-400 transition-colors ${
+                          isDisabled ? 'opacity-50 cursor-not-allowed' : ''
+                        }`}
+                        disabled={isDisabled}
+                      >
+                        {getSelectedCountryLabel() || <Input.Placeholder>{locale === 'ar' ? 'اختر دولة' : 'Select a country'}</Input.Placeholder>}
+                      </InputBase>
+                    </Combobox.Target>
+                    <Combobox.Dropdown>
+                      <Combobox.Search
+                        value={countrySearch}
+                        onChange={(event) => setCountrySearch(event.currentTarget.value)}
+                        placeholder={locale === 'ar' ? 'البحث في البلدان' : 'Search countries'}
+                        disabled={isDisabled}
+                      />
+                      <Combobox.Options className="max-h-60 overflow-y-auto">
+                        {filteredCountryOptions.length > 0 ? (
+                          filteredCountryOptions.map((option) => (
+                            <Combobox.Option value={option.value} key={option.value}>
+                              {option.label}
+                            </Combobox.Option>
+                          ))
+                        ) : (
+                          <Combobox.Empty>{locale === 'ar' ? 'لا توجد نتائج' : 'Nothing found'}</Combobox.Empty>
+                        )}
+                      </Combobox.Options>
+                    </Combobox.Dropdown>
+                  </Combobox>
+                </div>
+              </LoadingOverlay>
             </div>
           )}
         </div>
+
         {/* Role Section - Only for insighter */}
         {searchType === 'insighter' && (
           <div data-debug={`Role section visible for ${searchType}`}>
             <button
-              onClick={() => setRoleCollapsed(!roleCollapsed)}
-              className="w-full flex items-center justify-between px-4 py-3 text-left bg-gray-50 hover:bg-gray-100 focus:outline-none"
+              onClick={() => !isDisabled && setRoleCollapsed(!roleCollapsed)}
+              disabled={isDisabled}
+              className={`w-full flex items-center justify-between px-4 py-3 text-left bg-gray-50 hover:bg-gray-100 focus:outline-none transition-colors ${
+                isDisabled ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
             >
               <span className="flex items-center gap-2 text-blue-500 font-semibold">
-                <IconBuildingBank size={20} className="p-0.5  rounded-full" />
+                <IconBuildingBank size={20} className="p-0.5 rounded-full" />
                 {locale === 'ar' ? 'النوع' : 'Role'}
               </span>
               <svg className={`w-4 h-4 text-gray-400 transition-transform ${roleCollapsed ? '' : 'rotate-180'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1436,43 +1463,54 @@ const FilterBox: React.FC<FilterBoxProps> = ({
               </svg>
             </button>
             {!roleCollapsed && (
-              <div className="px-2 py-3 bg-white flex gap-2 flex-wrap">
-                <Chip
-                  checked={roleFilter === 'all'}
-                  onChange={() => handleRoleFilterChange('all')}
-                  variant="outline"
-                  size="sm"
-                >
-                  {locale === 'ar' ? 'الكل' : 'All'}
-                </Chip>
-                <Chip
-                  checked={roleFilter === 'company'}
-                  onChange={() => handleRoleFilterChange('company')}
-                  variant="outline"
-                  size="sm"
-                >
-                  {locale === 'ar' ? 'شركة' : 'Company'}
-                </Chip>
-                <Chip
-                  checked={roleFilter === 'individual'}
-                  onChange={() => handleRoleFilterChange('individual')}
-                  variant="outline"
-                  size="sm"
-                >
-                  {locale === 'ar' ? 'فرد' : 'Individual'}
-                </Chip>
+              <div className="px-2 py-3 bg-white">
+                <LoadingOverlay isLoading={isDisabled}>
+                  <div className="flex gap-2 flex-wrap">
+                    <Chip
+                      checked={roleFilter === 'all'}
+                      onChange={() => !isDisabled && handleRoleFilterChange('all')}
+                      variant="outline"
+                      size="sm"
+                      disabled={isDisabled}
+                    >
+                      {locale === 'ar' ? 'الكل' : 'All'}
+                    </Chip>
+                    <Chip
+                      checked={roleFilter === 'company'}
+                      onChange={() => !isDisabled && handleRoleFilterChange('company')}
+                      variant="outline"
+                      size="sm"
+                      disabled={isDisabled}
+                    >
+                      {locale === 'ar' ? 'شركة' : 'Company'}
+                    </Chip>
+                    <Chip
+                      checked={roleFilter === 'individual'}
+                      onChange={() => !isDisabled && handleRoleFilterChange('individual')}
+                      variant="outline"
+                      size="sm"
+                      disabled={isDisabled}
+                    >
+                      {locale === 'ar' ? 'فرد' : 'Individual'}
+                    </Chip>
+                  </div>
+                </LoadingOverlay>
               </div>
             )}
           </div>
         )}
+
         {/* Accuracy Section */}
         <div>
           <button
-            onClick={() => setAccuracyCollapsed(!accuracyCollapsed)}
-            className="w-full flex items-center justify-between px-4 py-3 text-left bg-gray-50 hover:bg-gray-100 focus:outline-none"
+            onClick={() => !isDisabled && setAccuracyCollapsed(!accuracyCollapsed)}
+            disabled={isDisabled}
+            className={`w-full flex items-center justify-between px-4 py-3 text-left bg-gray-50 hover:bg-gray-100 focus:outline-none transition-colors ${
+              isDisabled ? 'opacity-50 cursor-not-allowed' : ''
+            }`}
           >
             <span className="flex items-center gap-2 text-blue-500 font-semibold">
-              <IconWorldSearch size={20} className="p-0.5  rounded-full" />
+              <IconWorldSearch size={20} className="p-0.5 rounded-full" />
               {locale === 'ar' ? 'دقة البحث' : 'Accuracy'}
             </span>
             <svg className={`w-4 h-4 text-gray-400 transition-transform ${accuracyCollapsed ? '' : 'rotate-180'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1481,26 +1519,48 @@ const FilterBox: React.FC<FilterBoxProps> = ({
           </button>
           {!accuracyCollapsed && (
             <div className="px-4 py-3 bg-white space-y-2">
-              <p className="text-xs text-gray-500 mb-1">{locale === 'ar' ? 'اضبط دقة البحث الخاص بك.' : 'Adjust the accuracy of your search.'}</p>
-              <div className="flex flex-col gap-2">
-                <label className="flex items-center gap-2 text-xs text-gray-700 cursor-pointer">
-                  <input type="radio" name="accuracy" value="all" checked={accuracyFilter === 'all'} onChange={(e) => setAccuracyFilter(e.target.value as 'any' | 'all')} className="accent-blue-500" />
-                  {locale === 'ar' ? 'تضمين جميع الكلمات' : 'Include all words'}
-                </label>
-                <label className="flex items-center gap-2 text-xs text-gray-700 cursor-pointer">
-                  <input type="radio" name="accuracy" value="any" checked={accuracyFilter === 'any'} onChange={(e) => setAccuracyFilter(e.target.value as 'any' | 'all')} className="accent-blue-500" />
-                  {locale === 'ar' ? 'تضمين أي من كلمات' : 'Include any words'}
-                </label>
-              </div>
+              <LoadingOverlay isLoading={isDisabled}>
+                <p className="text-xs text-gray-500 mb-1">{locale === 'ar' ? 'اضبط دقة البحث الخاص بك.' : 'Adjust the accuracy of your search.'}</p>
+                <div className="flex flex-col gap-2">
+                  <label className={`flex items-center gap-2 text-xs text-gray-700 cursor-pointer ${
+                    isDisabled ? 'opacity-50 cursor-not-allowed' : ''
+                  }`}>
+                    <input
+                      type="radio"
+                      name="accuracy"
+                      value="all"
+                      checked={accuracyFilter === 'all'}
+                      onChange={(e) => !isDisabled && setAccuracyFilter(e.target.value as 'any' | 'all')}
+                      className="accent-blue-500"
+                      disabled={isDisabled}
+                    />
+                    {locale === 'ar' ? 'تضمين جميع الكلمات' : 'Include all words'}
+                  </label>
+                  <label className={`flex items-center gap-2 text-xs text-gray-700 cursor-pointer ${
+                    isDisabled ? 'opacity-50 cursor-not-allowed' : ''
+                  }`}>
+                    <input
+                      type="radio"
+                      name="accuracy"
+                      value="any"
+                      checked={accuracyFilter === 'any'}
+                      onChange={(e) => !isDisabled && setAccuracyFilter(e.target.value as 'any' | 'all')}
+                      className="accent-blue-500"
+                      disabled={isDisabled}
+                    />
+                    {locale === 'ar' ? 'تضمين أي من كلمات' : 'Include any words'}
+                  </label>
+                </div>
+              </LoadingOverlay>
             </div>
           )}
         </div>
       </div>
-      
-      {/* ISIC Code Modal */}
+
+      {/* Enhanced Modals */}
       <Modal
         opened={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={() => !isDisabled && setIsModalOpen(false)}
         title={locale === 'ar' ? 'اختر رمز ISIC' : 'Select ISIC Code'}
         size="lg"
         overlayProps={{ backgroundOpacity: 0.55, blur: 3 }}
@@ -1511,22 +1571,18 @@ const FilterBox: React.FC<FilterBoxProps> = ({
             placeholder={locale === 'ar' ? 'ابحث عن رمز ISIC...' : 'Search ISIC codes...'}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full px-3 py-2 mt-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className={`w-full px-3 py-2 mt-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+              isDisabled ? 'opacity-50 cursor-not-allowed' : ''
+            }`}
+            disabled={isDisabled}
           />
-          {loadingIsicCodes ? (
-            <div className="flex justify-center py-8">
-              <Loader size="md" />
-            </div>
-          ) : (
-            renderLeafNodes()
-          )}
+          {renderLeafNodes()}
         </div>
       </Modal>
 
-      {/* HS Code Modal */}
       <Modal
         opened={isHsCodeModalOpen}
-        onClose={() => setIsHsCodeModalOpen(false)}
+        onClose={() => !isDisabled && setIsHsCodeModalOpen(false)}
         title={locale === 'ar' ? 'اختر رمز HS' : 'Select HS Code'}
         size="lg"
         overlayProps={{ backgroundOpacity: 0.55, blur: 3 }}
@@ -1537,22 +1593,18 @@ const FilterBox: React.FC<FilterBoxProps> = ({
             placeholder={locale === 'ar' ? 'ابحث عن رمز HS...' : 'Search HS codes...'}
             value={hsCodeSearchTerm}
             onChange={(e) => setHsCodeSearchTerm(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent mt-2"
+            className={`w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent mt-2 ${
+              isDisabled ? 'opacity-50 cursor-not-allowed' : ''
+            }`}
+            disabled={isDisabled}
           />
-          {loadingHsCodes ? (
-            <div className="flex justify-center py-8">
-              <Loader size="md" />
-            </div>
-          ) : (
-            renderHsCodes()
-          )}
+          {renderHsCodes()}
         </div>
       </Modal>
 
-      {/* Industry Modal */}
       <Modal
         opened={isIndustryModalOpen}
-        onClose={() => setIsIndustryModalOpen(false)}
+        onClose={() => !isDisabled && setIsIndustryModalOpen(false)}
         title={locale === 'ar' ? 'اختر المجال' : 'Select Industry'}
         size="lg"
         overlayProps={{ backgroundOpacity: 0.55, blur: 3 }}
@@ -1563,15 +1615,12 @@ const FilterBox: React.FC<FilterBoxProps> = ({
             placeholder={locale === 'ar' ? 'ابحث عن المجال...' : 'Search industries...'}
             value={industrySearchTerm}
             onChange={(e) => setIndustrySearchTerm(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent mt-2"
+            className={`w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent mt-2 ${
+              isDisabled ? 'opacity-50 cursor-not-allowed' : ''
+            }`}
+            disabled={isDisabled}
           />
-          {loadingIndustries ? (
-            <div className="flex justify-center py-8">
-              <Loader size="md" />
-            </div>
-          ) : (
-            renderIndustryLeafNodes()
-          )}
+          {renderIndustryLeafNodes()}
         </div>
       </Modal>
     </div>
@@ -1596,8 +1645,27 @@ const FilterBox: React.FC<FilterBoxProps> = ({
     );
   }
 
-  // Default sidebar rendering for desktop
   return <FilterContent />;
-};
+}, (prevProps, nextProps) => {
+  // Custom comparison function to prevent unnecessary re-renders
+  // Only re-render if props that actually affect the component have changed
+  const propsToCompare: (keyof FilterBoxProps)[] = [
+    'locale', 'searchType', 'languageFilter', 'countryFilter', 'regionFilter',
+    'economicBlocFilter', 'isicCodeFilter', 'hsCodeFilter', 'industryFilter',
+    'priceFilter', 'rangeStartFilter', 'rangeEndFilter', 'accuracyFilter',
+    'roleFilter', 'isDrawerOpen', 'forceDrawerMode'
+  ];
+
+  // Compare only the important props, ignore function references unless they're actually different
+  for (const prop of propsToCompare) {
+    if (prevProps[prop] !== nextProps[prop]) {
+      return false; // Props changed, should re-render
+    }
+  }
+
+  return true; // Props are the same, don't re-render
+});
+
+FilterBox.displayName = 'FilterBox';
 
 export default FilterBox;

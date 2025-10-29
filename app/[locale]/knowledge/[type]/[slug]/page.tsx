@@ -155,12 +155,54 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     return generateKnowledgeMetadata(data, locale, type, slug);
   } catch (error) {
     const isRTL = locale === 'ar';
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://knoldg.com';
+    const defaultSocialImage = 'https://res.cloudinary.com/dsiku9ipv/image/upload/v1761651021/drilldown_l7cdf2.jpg';
+    const pageUrl = `${baseUrl}/${locale}/knowledge/${type}/${slug}`;
+
+    let metadataBase: URL | undefined;
+    try {
+      metadataBase = new URL(baseUrl);
+    } catch {
+      metadataBase = new URL('https://knoldg.com');
+    }
+
+    const title = isRTL ? "المعرفة غير موجودة | KNOLDG" : "Knowledge Not Found | KNOLDG";
+    const description = isRTL 
+      ? "لم يتم العثور على المورد المعرفي المطلوب. تحقق من الرابط أو ابحث عن محتوى آخر على منصة KNOLDG."
+      : "The requested knowledge resource could not be found. Please check the URL or search for other content on KNOLDG platform.";
+
     return {
-      title: isRTL ? "المعرفة غير موجودة | KNOLDG" : "Knowledge Not Found | KNOLDG",
-      description: isRTL 
-        ? "لم يتم العثور على المورد المعرفي المطلوب. تحقق من الرابط أو ابحث عن محتوى آخر على منصة KNOLDG."
-        : "The requested knowledge resource could not be found. Please check the URL or search for other content on KNOLDG platform.",
+      metadataBase,
+      title,
+      description,
       robots: { index: false, follow: false },
+      alternates: {
+        canonical: pageUrl,
+      },
+      openGraph: {
+        type: 'website',
+        url: pageUrl,
+        siteName: 'KNOLDG',
+        title,
+        description,
+        locale: isRTL ? 'ar_SA' : 'en_US',
+        images: [
+          {
+            url: defaultSocialImage,
+            width: 1200,
+            height: 630,
+            alt: title,
+            type: 'image/jpeg',
+          },
+        ],
+      },
+      twitter: {
+        card: 'summary_large_image',
+        site: '@KNOLDG',
+        title,
+        description,
+        images: [defaultSocialImage],
+      },
     };
   }
 }
@@ -209,7 +251,7 @@ export default function KnowledgePage({ params }: Props) {
         }}
       />
       
-    <div className="min-h-screen bg-gray-50 relative" dir={isRTL ? 'rtl' : 'ltr'} style={knowledge.language === 'arabic' ? { direction: 'rtl', textAlign: 'right' } : {}}>
+    <div className="min-h-screen bg-gray-50 relative" dir={isRTL ? 'rtl' : 'ltr' }>
       {/* Language mismatch notifier */}
       <LanguageMismatchNotifier 
         knowledgeLanguage={knowledge.language} 
@@ -247,7 +289,7 @@ export default function KnowledgePage({ params }: Props) {
           
           {/* Header */}
           <div className={`${isRTL ? 'text-right' : 'text-start'} mb-4 w-full`}    data-aos="fade-down">
-            <div className="flex-row gap-3 sm:gap-4 flex-wrap sm:flex-nowrap sm:flex max-w-80-per">
+            <div className="flex-row gap-3 sm:gap-4 flex-wrap sm:flex-nowrap sm:flex max-w-80-per px-4" >
               <div className="mb-4 mt-1 hidden sm:block">
                 
                 {knowledge.type === 'data' && <div className="bg-white p-2 sm:p-3 rounded flex items-center justify-center"><span className="hidden sm:block"><DataIcon width={40} height={40} /></span><span className="sm:hidden"><DataIcon width={30} height={30} /></span></div>}
@@ -266,7 +308,7 @@ export default function KnowledgePage({ params }: Props) {
               </div>
               <div className="flex flex-col items-start">
                 <div className="flex flex-col items-start mb-6 sm:mb-10">
-                  <h3 className="text-3xl  md:text-4xl bg-gradient-to-r from-blue-500 to-teal-400 font-extrabold text-transparent bg-clip-text ">
+                  <h3 className="text-3xl  md:text-4xl bg-gradient-to-r from-blue-500 to-teal-400 pt-4 font-extrabold text-transparent bg-clip-text " >
                     {knowledge.title}
                   </h3>
                   
@@ -414,30 +456,30 @@ export default function KnowledgePage({ params }: Props) {
       </div>
       
       {/* Main Content */}
-      <div className="container mx-auto px-3 sm:px-4 pb-12 sm:pb-16 md:pb-20">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
-          <div className="lg:col-span-2">
-            <TabsContent knowledge={knowledge} knowledgeSlug={slug} />
-          </div>
+        <div className="container mx-auto px-3 sm:px-4 pb-12 sm:pb-16 md:pb-20">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
+            <div className="lg:col-span-2">
+              <TabsContent knowledge={knowledge} knowledgeSlug={slug} />
+            </div>
           <div className="lg:col-span-1">
-            <KnowledgeSideBox
-              total_price={knowledge.total_price}
-              documents={knowledge.documents}
-              language={knowledge.language}
-              isic_code={knowledge.isic_code ? knowledge.isic_code : null}
-              hs_code={knowledge.hs_code ? knowledge.hs_code : null}
-              published_at={knowledge.published_at}
-              economic_blocs={knowledge.economic_blocs}
-              regions={knowledge.regions}
-              countries={knowledge.countries}
-              locale={locale}
-              knowledgeSlug={slug}
-              purchased_status={knowledge.purchased_status}
-              is_read_later={knowledge.is_read_later}
-              knowledgeUUID={knowledge.id}
-              insighterUUID={knowledge.insighter.uuid}
-            />
-          </div>
+              <KnowledgeSideBox
+                total_price={knowledge.total_price}
+                documents={knowledge.documents}
+                language={knowledge.language}
+                isic_code={knowledge.isic_code ? knowledge.isic_code : null}
+                hs_code={knowledge.hs_code ? knowledge.hs_code : null}
+                published_at={knowledge.published_at}
+                economic_blocs={knowledge.economic_blocs}
+                regions={knowledge.regions}
+                countries={knowledge.countries}
+                locale={locale}
+                knowledgeSlug={slug}
+                purchased_status={knowledge.purchased_status}
+                is_read_later={knowledge.is_read_later}
+                knowledgeUUID={knowledge.id}
+                insighterUUID={knowledge.insighter.uuid}
+              />
+            </div>
         </div>
       </div>
 

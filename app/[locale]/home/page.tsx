@@ -45,20 +45,8 @@ export default function HomePage() {
   const initialIsicCode = searchParams.get('isic_code') ? parseInt(searchParams.get('isic_code')!) : null;
   const initialHsCode = searchParams.get('hs_code') ? parseInt(searchParams.get('hs_code')!) : null;
   const initialPriceFilter = searchParams.get('paid') || null;
-  const initialPriceRangeStart = (() => {
-    const value = searchParams.get('range_start');
-    if (!value) return 0;
-    const parsed = parseInt(value, 10);
-    if (Number.isNaN(parsed)) return 0;
-    return Math.max(0, parsed);
-  })();
-  const initialPriceRangeEnd = (() => {
-    const value = searchParams.get('range_end');
-    if (!value) return 1000;
-    const parsed = parseInt(value, 10);
-    if (Number.isNaN(parsed)) return 1000;
-    return Math.max(0, parsed);
-  })();
+  const initialRangeStart = searchParams.get('range_start') || null;
+  const initialRangeEnd = searchParams.get('range_end') || null;
   const initialCategory = searchParams.get('type') || 'all';
   const initialAccuracy = (searchParams.get('accuracy') as 'any' | 'all') || 'all';
   // Get initial page from URL
@@ -102,8 +90,8 @@ export default function HomePage() {
   const [isicCodeFilter, setIsicCodeFilter] = useState<number | null>(initialIsicCode);
   const [hsCodeFilter, setHsCodeFilter] = useState<number | null>(initialHsCode);
   const [priceFilter, setPriceFilter] = useState<string | null>(initialPriceFilter);
-  const [priceRangeStart, setPriceRangeStart] = useState<number | null>(initialPriceRangeStart);
-  const [priceRangeEnd, setPriceRangeEnd] = useState<number | null>(initialPriceRangeEnd);
+  const [rangeStartFilter, setRangeStartFilter] = useState<string | null>(initialRangeStart);
+  const [rangeEndFilter, setRangeEndFilter] = useState<string | null>(initialRangeEnd);
   const [accuracyFilter, setAccuracyFilter] = useState<'any' | 'all'>(initialAccuracy);
   const [roleFilter, setRoleFilter] = useState<'all' | 'company' | 'individual'>(initialRole);
   
@@ -158,11 +146,11 @@ export default function HomePage() {
           isicCodeFilter,
           industryFilter,
           priceFilter,
-          priceRangeStart,
-          priceRangeEnd,
           hsCodeFilter,
           accuracyFilter,
           roleFilter,
+          rangeStartFilter,
+          rangeEndFilter,
           (errorMsg) => toast.error(errorMsg, 'Statistics Error')
         );
         setStatistics(statsResponse.data || []);
@@ -172,8 +160,8 @@ export default function HomePage() {
     } else {
       setStatistics([]);
     }
-  }, [locale, languageFilter, countryFilter, regionFilter, economicBlocFilter, 
-      isicCodeFilter, industryFilter, priceFilter, priceRangeStart, priceRangeEnd, hsCodeFilter, accuracyFilter, roleFilter, toast]);
+  }, [locale, languageFilter, countryFilter, regionFilter, economicBlocFilter,
+      isicCodeFilter, industryFilter, priceFilter, hsCodeFilter, accuracyFilter, roleFilter, rangeStartFilter, rangeEndFilter, toast]);
   
   // Helper function to get count for a specific category type from statistics
   const getCategoryCount = useCallback((categoryType: string) => {
@@ -209,8 +197,8 @@ export default function HomePage() {
     setIsicCodeFilter(null);
     setHsCodeFilter(null);
     setPriceFilter(null);
-    setPriceRangeStart(0);
-    setPriceRangeEnd(1000);
+    setRangeStartFilter(null);
+    setRangeEndFilter(null);
     setSelectedCategory('all');
     setAccuracyFilter('all');
     setRoleFilter('all');
@@ -220,7 +208,6 @@ export default function HomePage() {
     const urlParams = new URLSearchParams();
     if (searchQuery && searchQuery.trim() !== '') urlParams.set('keyword', searchQuery);
     urlParams.set('search_type', searchType);
-    urlParams.set('range_end', '1000');
     
     // Update URL with only search parameters
     router.push(`/${locale}/home?${urlParams.toString()}`, { scroll: false });
@@ -254,11 +241,11 @@ export default function HomePage() {
         handleError,
         null, // Reset industry filter
         null, // Reset price filter
-        0, // Reset price range start
-        1000, // Reset price range end
         null, // Reset HS code filter
         'all', // Reset accuracy filter
-        'all' // Reset role filter
+        'all', // Reset role filter
+        null, // Reset range start filter
+        null // Reset range end filter
       );
       
       setSearchResults(response.data || []);
@@ -300,8 +287,8 @@ export default function HomePage() {
     hs_code?: number | null,
     category?: string | null,
     paid?: string | null,
-    range_start?: number | null,
-    range_end?: number | null,
+    range_start?: string | null,
+    range_end?: string | null,
     accuracy?: 'any' | 'all',
     role?: 'all' | 'company' | 'individual',
     page?: number
@@ -325,8 +312,8 @@ export default function HomePage() {
     const isicCode = params.isic_code !== undefined ? params.isic_code : isicCodeFilter;
     const hsCode = params.hs_code !== undefined ? params.hs_code : hsCodeFilter;
     const paid = params.paid !== undefined ? params.paid : priceFilter;
-    const rangeStartValue = params.range_start !== undefined ? params.range_start : priceRangeStart;
-    const rangeEndValue = params.range_end !== undefined ? params.range_end : priceRangeEnd;
+    const rangeStart = params.range_start !== undefined ? params.range_start : rangeStartFilter;
+    const rangeEnd = params.range_end !== undefined ? params.range_end : rangeEndFilter;
     const category = params.category !== undefined ? params.category : selectedCategory;
     const accuracy = params.accuracy !== undefined ? params.accuracy : accuracyFilter;
     const role = params.role !== undefined ? params.role : roleFilter;
@@ -346,15 +333,8 @@ export default function HomePage() {
     if (isicCode !== null) urlParams.set('isic_code', isicCode.toString());
     if (hsCode !== null) urlParams.set('hs_code', hsCode.toString());
     if (paid !== null) urlParams.set('paid', paid);
-    const hasRangeStart = rangeStartValue !== null && rangeStartValue !== undefined && rangeStartValue !== 0;
-    const hasRangeEnd = rangeEndValue !== null && rangeEndValue !== undefined;
-    if (hasRangeStart || hasRangeEnd) {
-      const startValue = (rangeStartValue ?? 0);
-      urlParams.set('range_start', startValue.toString());
-      if (rangeEndValue !== null && rangeEndValue !== undefined) {
-        urlParams.set('range_end', rangeEndValue.toString());
-      }
-    }
+    if (rangeStart !== null) urlParams.set('range_start', rangeStart);
+    if (rangeEnd !== null) urlParams.set('range_end', rangeEnd);
     if (category && category !== 'all') urlParams.set('type', category);
     if (accuracy && accuracy !== 'all') urlParams.set('accuracy', accuracy);
     if (role && role !== 'all') urlParams.set('role', role);
@@ -366,7 +346,7 @@ export default function HomePage() {
     
     // Update URL without refreshing the page
     router.push(`/${locale}/home?${urlParams.toString()}`, { scroll: false });
-  }, [locale, router, searchType, searchQuery, currentPage, languageFilter, countryFilter, regionFilter, economicBlocFilter, industryFilter, isicCodeFilter, hsCodeFilter, priceFilter, priceRangeStart, priceRangeEnd, selectedCategory, accuracyFilter, roleFilter]);
+  }, [locale, router, searchType, searchQuery, currentPage, languageFilter, countryFilter, regionFilter, economicBlocFilter, industryFilter, isicCodeFilter, hsCodeFilter, priceFilter, selectedCategory, accuracyFilter, roleFilter, rangeStartFilter, rangeEndFilter]);
 
   // Handler for search type changes
   const handleSearchTypeChange = useCallback(async (type: 'knowledge' | 'insighter') => {
@@ -450,11 +430,11 @@ export default function HomePage() {
         handleError,
         null, // Always reset industry when switching types
         null, // Always reset price when switching types
-        0, // Always reset price range start when switching types
-        null, // Always reset price range end when switching types
         null, // Always reset HS code when switching types
         'all', // Always reset accuracy to 'all' when switching types
-        'all' // Always reset role to 'all' when switching types
+        'all', // Always reset role to 'all' when switching types
+        null, // Always reset range start when switching types
+        null // Always reset range end when switching types
       );
       
       console.log(`✅ API response for ${type}:`, response.data?.length, 'items');
@@ -544,26 +524,37 @@ export default function HomePage() {
     setPriceFilter(value);
     // Update URL with new filter
     updateUrlWithFilters({ paid: value });
-    
+
     // Reset to page 1 when filter changes
     setCurrentPage(1);
-    
+
     // The main search effect will be triggered by the state change
   }, [updateUrlWithFilters]);
-  
-  // Custom setter for price range start that triggers search
-  const handlePriceRangeStartChange = useCallback((value: number | null) => {
-    const sanitizedValue = value ?? 0;
-    setPriceRangeStart(sanitizedValue);
-    updateUrlWithFilters({ range_start: sanitizedValue });
+
+  // Custom setter for range start filter that triggers search
+  const handleRangeStartFilterChange = useCallback((value: string | null) => {
+    // Update the range start filter state
+    setRangeStartFilter(value);
+    // Update URL with new filter
+    updateUrlWithFilters({ range_start: value });
+
+    // Reset to page 1 when filter changes
     setCurrentPage(1);
+
+    // The main search effect will be triggered by the state change
   }, [updateUrlWithFilters]);
-  
-  // Custom setter for price range end that triggers search
-  const handlePriceRangeEndChange = useCallback((value: number | null) => {
-    setPriceRangeEnd(value);
+
+  // Custom setter for range end filter that triggers search
+  const handleRangeEndFilterChange = useCallback((value: string | null) => {
+    // Update the range end filter state
+    setRangeEndFilter(value);
+    // Update URL with new filter
     updateUrlWithFilters({ range_end: value });
+
+    // Reset to page 1 when filter changes
     setCurrentPage(1);
+
+    // The main search effect will be triggered by the state change
   }, [updateUrlWithFilters]);
   
   // Custom setter for industry filter that triggers search
@@ -661,41 +652,26 @@ export default function HomePage() {
     const urlCountry = searchParams.get('country') ? parseInt(searchParams.get('country')!) : null;
     const urlLanguage = (searchParams.get('language') as 'all' | 'arabic' | 'english') || 'all';
     const urlPriceFilter = searchParams.get('paid') || null;
-    const urlRangeStartParam = searchParams.get('range_start');
-    const urlRangeEndParam = searchParams.get('range_end');
-    const urlRangeStart = (() => {
-      if (!urlRangeStartParam) return 0;
-      const parsed = parseInt(urlRangeStartParam, 10);
-      if (Number.isNaN(parsed)) return 0;
-      return Math.max(0, parsed);
-    })();
-    const urlRangeEnd = (() => {
-      if (!urlRangeEndParam) return 1000;
-      const parsed = parseInt(urlRangeEndParam, 10);
-      if (Number.isNaN(parsed)) return 1000;
-      return Math.max(0, parsed);
-    })();
+    const urlRangeStart = searchParams.get('range_start') || null;
+    const urlRangeEnd = searchParams.get('range_end') || null;
     const urlAccuracy = (searchParams.get('accuracy') as 'any' | 'all') || 'all';
     const urlRole = (searchParams.get('role') as 'all' | 'company' | 'individual') || 'all';
     
     console.log('INITIAL URL PARAMETERS:', {
       query, type, accuracy, language, country, categoryType,
-      urlIndustry, urlRegion, urlEconomicBloc, urlIsicCode, urlHsCode, urlRole,
-      urlRangeStart: urlRangeStartParam, urlRangeEnd: urlRangeEndParam
+      urlIndustry, urlRegion, urlEconomicBloc, urlIsicCode, urlHsCode, urlRole
     });
     
     // Set loading to true immediately if we have any search parameters
     const hasSearchParams = query || type || language || country || categoryType || accuracy || 
-                           urlIndustry || urlRegion || urlEconomicBloc || urlIsicCode || urlHsCode || urlRole ||
-                           urlRangeStartParam || urlRangeEndParam;
+                           urlIndustry || urlRegion || urlEconomicBloc || urlIsicCode || urlHsCode || urlRole;
     if (hasSearchParams) {
       setLoading(true);
     }
     
     // Trigger search if we have query parameters OR other search parameters that should show results
     const shouldTriggerSearch = query || type || accuracy || language || country || categoryType ||
-                               urlIndustry || urlRegion || urlEconomicBloc || urlIsicCode || urlHsCode || urlRole ||
-                               urlRangeStartParam || urlRangeEndParam;
+                               urlIndustry || urlRegion || urlEconomicBloc || urlIsicCode || urlHsCode || urlRole;
     
     if (shouldTriggerSearch) {
       console.log('URL has search parameters, triggering search with direct URL values');
@@ -720,15 +696,15 @@ export default function HomePage() {
             urlIsicCode,
             categoryType || 'all',
             30, // perPage
-            handleError, // onError callback
-            urlIndustry, // Use URL value directly
-            urlPriceFilter,
-            urlRangeStart,
-            urlRangeEnd,
-            urlHsCode,
-            urlAccuracy,
-            urlRole
-          );
+          handleError, // onError callback
+          urlIndustry, // Use URL value directly
+          urlPriceFilter,
+          urlHsCode,
+          urlAccuracy,
+          urlRole,
+          urlRangeStart,
+          urlRangeEnd
+        );
           
           setSearchResults(response.data || []);
           setTotalPages(response.meta?.last_page || 1);
@@ -737,8 +713,6 @@ export default function HomePage() {
           // Update the search query and type state to match URL parameters
           setSearchQuery(query || '');
           if (type) setSearchType(type);
-          setPriceRangeStart(urlRangeStart);
-          setPriceRangeEnd(urlRangeEnd);
           setPriceFilter(urlPriceFilter);
           
           // Update the previous search query reference to avoid duplicate searches
@@ -757,11 +731,11 @@ export default function HomePage() {
                 urlIsicCode,
                 urlIndustry, // Use URL value directly
                 urlPriceFilter,
-                urlRangeStart,
-                urlRangeEnd,
                 urlHsCode,
                 urlAccuracy,
                 urlRole,
+                urlRangeStart,
+                urlRangeEnd,
                 (errorMsg) => toast.error(errorMsg, 'Statistics Error')
               );
               setStatistics(statsResponse.data || []);
@@ -836,13 +810,6 @@ export default function HomePage() {
     if (isicCodeFilter !== null) expectedUrlParams.set('isic_code', isicCodeFilter.toString());
     if (hsCodeFilter !== null) expectedUrlParams.set('hs_code', hsCodeFilter.toString());
     if (priceFilter !== null) expectedUrlParams.set('paid', priceFilter);
-    if ((priceRangeStart !== null && priceRangeStart !== 0) || priceRangeEnd !== null) {
-      const startValue = priceRangeStart ?? 0;
-      expectedUrlParams.set('range_start', startValue.toString());
-      if (priceRangeEnd !== null) {
-        expectedUrlParams.set('range_end', priceRangeEnd.toString());
-      }
-    }
     if (selectedCategory && selectedCategory !== 'all') expectedUrlParams.set('type', selectedCategory);
     if (accuracyFilter && accuracyFilter !== 'all') expectedUrlParams.set('accuracy', accuracyFilter);
     if (roleFilter && roleFilter !== 'all') expectedUrlParams.set('role', roleFilter);
@@ -873,20 +840,8 @@ export default function HomePage() {
     const urlCategory = searchParams.get('type');
     const urlAccuracy = searchParams.get('accuracy') as 'any' | 'all';
     const urlPriceFilter = searchParams.get('paid');
-    const urlRangeStartParam = searchParams.get('range_start');
-    const urlRangeEndParam = searchParams.get('range_end');
-    const urlRangeStart = (() => {
-      if (!urlRangeStartParam) return 0;
-      const parsed = parseInt(urlRangeStartParam, 10);
-      if (Number.isNaN(parsed)) return 0;
-      return Math.max(0, parsed);
-    })();
-    const urlRangeEnd = (() => {
-      if (!urlRangeEndParam) return 1000;
-      const parsed = parseInt(urlRangeEndParam, 10);
-      if (Number.isNaN(parsed)) return 1000;
-      return Math.max(0, parsed);
-    })();
+    const urlRangeStart = searchParams.get('range_start');
+    const urlRangeEnd = searchParams.get('range_end');
     const urlRole = searchParams.get('role') as 'all' | 'company' | 'individual' || 'all';
     const urlPage = searchParams.get('page') ? parseInt(searchParams.get('page')!) : 1;
     
@@ -938,15 +893,15 @@ export default function HomePage() {
       if (urlPriceFilter !== priceFilter) {
         setPriceFilter(urlPriceFilter);
       }
-      
-      if (urlRangeStart !== priceRangeStart) {
-        setPriceRangeStart(urlRangeStart);
+
+      if (urlRangeStart !== rangeStartFilter) {
+        setRangeStartFilter(urlRangeStart);
       }
-      
-      if (urlRangeEnd !== priceRangeEnd) {
-        setPriceRangeEnd(urlRangeEnd);
+
+      if (urlRangeEnd !== rangeEndFilter) {
+        setRangeEndFilter(urlRangeEnd);
       }
-      
+
       // Handle category parameter
       if (urlCategory && urlCategory !== selectedCategory) {
         setSelectedCategory(urlCategory);
@@ -1051,15 +1006,15 @@ export default function HomePage() {
         handleError,
         industryFilter,
         priceFilter,
-        priceRangeStart,
-        priceRangeEnd,
         hsCodeFilter,
         accuracyFilter,
-        roleFilter
+        roleFilter,
+        rangeStartFilter,
+        rangeEndFilter
       );
-      
 
-      
+
+
       // Handle search API response format
       setSearchResults(response.data || []);
       setTotalPages(response.meta?.last_page || 1);
@@ -1076,7 +1031,7 @@ export default function HomePage() {
     } finally {
       setLoading(false);
     }
-  }, [searchQuery, searchType, locale, activeTab, languageFilter, countryFilter, regionFilter, economicBlocFilter, isicCodeFilter, selectedCategory, industryFilter, priceFilter, priceRangeStart, priceRangeEnd, hsCodeFilter, updateUrlWithFilters, toast, accuracyFilter, roleFilter]);
+  }, [searchQuery, searchType, locale, activeTab, languageFilter, countryFilter, regionFilter, economicBlocFilter, isicCodeFilter, selectedCategory, industryFilter, priceFilter, hsCodeFilter, updateUrlWithFilters, toast, accuracyFilter, roleFilter, rangeStartFilter, rangeEndFilter]);
 
   // Handle search submission (Enter key or search button)
   const handleSubmit = (e: React.FormEvent) => {
@@ -1101,10 +1056,10 @@ export default function HomePage() {
     isicCodeFilter,
     hsCodeFilter,
     priceFilter,
-    priceRangeStart,
-    priceRangeEnd,
     accuracyFilter,
-    roleFilter
+    roleFilter,
+    rangeStartFilter,
+    rangeEndFilter
   });
   
   // Track previous search query to avoid redundant API calls
@@ -1152,13 +1107,6 @@ export default function HomePage() {
     if (isicCodeFilter) params.set('isic_code', isicCodeFilter.toString());
     if (hsCodeFilter) params.set('hs_code', hsCodeFilter.toString());
     if (priceFilter) params.set('paid', priceFilter);
-    if ((priceRangeStart !== null && priceRangeStart !== 0) || priceRangeEnd !== null) {
-      const startValue = priceRangeStart ?? 0;
-      params.set('range_start', startValue.toString());
-      if (priceRangeEnd !== null) {
-        params.set('range_end', priceRangeEnd.toString());
-      }
-    }
     if (selectedCategory && selectedCategory !== 'all') params.set('type', selectedCategory);
     if (accuracyFilter !== 'all') params.set('accuracy', accuracyFilter);
     if (roleFilter !== 'all') params.set('role', roleFilter);
@@ -1189,13 +1137,13 @@ export default function HomePage() {
         (error) => toast.error(error, 'Error'),
         industryFilter,
         priceFilter,
-        priceRangeStart,
-        priceRangeEnd,
         hsCodeFilter,
         accuracyFilter,
-        roleFilter
+        roleFilter,
+        rangeStartFilter,
+        rangeEndFilter
       );
-      
+
       console.log('📄 API Response for page', newPage, ':', response.meta);
       
       // Step 5: Update results
@@ -1218,7 +1166,7 @@ export default function HomePage() {
         console.log('📄 Pagination flags reset');
       }, 2000); // Increased to 2 seconds to ensure no interference
     }
-  }, [searchQuery, searchType, locale, activeTab, languageFilter, countryFilter, regionFilter, economicBlocFilter, isicCodeFilter, selectedCategory, industryFilter, priceFilter, priceRangeStart, priceRangeEnd, hsCodeFilter, accuracyFilter, roleFilter, toast]);
+  }, [searchQuery, searchType, locale, activeTab, languageFilter, countryFilter, regionFilter, economicBlocFilter, isicCodeFilter, selectedCategory, industryFilter, priceFilter, hsCodeFilter, accuracyFilter, roleFilter, rangeStartFilter, rangeEndFilter, toast]);
 
   // Track the last time an API call was made to prevent too many calls
   const lastApiCallTimeRef = useRef<number>(0);
@@ -1280,16 +1228,16 @@ export default function HomePage() {
       params.isicCodeFilter !== isicCodeFilter ||
       params.hsCodeFilter !== hsCodeFilter ||
       params.priceFilter !== priceFilter ||
-      params.priceRangeStart !== priceRangeStart ||
-      params.priceRangeEnd !== priceRangeEnd ||
       params.accuracyFilter !== accuracyFilter ||
-      params.roleFilter !== roleFilter;
+      params.roleFilter !== roleFilter ||
+      params.rangeStartFilter !== rangeStartFilter ||
+      params.rangeEndFilter !== rangeEndFilter;
     
     // Log parameter changes for debugging (but don't include searchQuery)
     if (paramsChanged) {
       console.log('Search params changed (excluding query):', { 
         locale, languageFilter, countryFilter, regionFilter, economicBlocFilter,
-        activeTab, searchType, selectedCategory, industryFilter, isicCodeFilter, hsCodeFilter, priceFilter, priceRangeStart, priceRangeEnd, accuracyFilter, roleFilter 
+        activeTab, searchType, selectedCategory, industryFilter, isicCodeFilter, hsCodeFilter, priceFilter, accuracyFilter, roleFilter, rangeStartFilter, rangeEndFilter 
       });
     }
     
@@ -1309,10 +1257,10 @@ export default function HomePage() {
       isicCodeFilter,
       hsCodeFilter,
       priceFilter,
-      priceRangeStart,
-      priceRangeEnd,
       accuracyFilter,
-      roleFilter
+      roleFilter,
+      rangeStartFilter,
+      rangeEndFilter
     };
     
     // If nothing changed, don't fetch
@@ -1390,13 +1338,13 @@ export default function HomePage() {
           handleError, // onError callback
           industryFilter,
           priceFilter,
-          priceRangeStart,
-          priceRangeEnd,
           hsCodeFilter,
           accuracyFilter,
-          roleFilter
+          roleFilter,
+          rangeStartFilter,
+          rangeEndFilter
         );
-        
+
         setSearchResults(response.data || []);
         setTotalPages(response.meta?.last_page || 1);
         setTotalItems(response.meta?.total || 0);
@@ -1430,7 +1378,7 @@ export default function HomePage() {
       }
     };
   // REMOVED searchQuery from dependencies - only trigger on filter changes, not query changes
-  }, [locale, languageFilter, countryFilter, regionFilter, economicBlocFilter, activeTab, searchType, initialized, toast, selectedCategory, industryFilter, isicCodeFilter, hsCodeFilter, priceFilter, priceRangeStart, priceRangeEnd, accuracyFilter, roleFilter, fetchStatisticsIfNeeded]);
+  }, [locale, languageFilter, countryFilter, regionFilter, economicBlocFilter, activeTab, searchType, initialized, toast, selectedCategory, industryFilter, isicCodeFilter, hsCodeFilter, priceFilter, accuracyFilter, roleFilter, rangeStartFilter, rangeEndFilter, fetchStatisticsIfNeeded]);
 
   return (
    <main className='min-h-screen flex flex-col bg-gray-50'>
@@ -1668,7 +1616,6 @@ export default function HomePage() {
                   filtersVisible ? 'transform translate-x-0' : 'transform -translate-x-full lg:translate-x-0'
                 }`}>
                     <FilterBox
-                      key={`filter-box-${searchType}`} // Force re-render when search type changes
                       locale={locale}
                       searchType={searchType}
                       languageFilter={languageFilter}
@@ -1687,10 +1634,10 @@ export default function HomePage() {
                       setHsCodeFilter={handleHsCodeFilterChange}
                       priceFilter={priceFilter}
                       setPriceFilter={handlePriceFilterChange}
-                      priceRangeStart={priceRangeStart}
-                      setPriceRangeStart={handlePriceRangeStartChange}
-                      priceRangeEnd={priceRangeEnd}
-                      setPriceRangeEnd={handlePriceRangeEndChange}
+                      rangeStartFilter={rangeStartFilter}
+                      setRangeStartFilter={handleRangeStartFilterChange}
+                      rangeEndFilter={rangeEndFilter}
+                      setRangeEndFilter={handleRangeEndFilterChange}
                       accuracyFilter={accuracyFilter}
                       setAccuracyFilter={handleAccuracyFilterChange}
                       roleFilter={roleFilter}
