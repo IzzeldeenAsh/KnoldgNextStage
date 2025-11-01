@@ -50,6 +50,8 @@ interface KnowledgeDetails {
   is_review: boolean;
   is_read_later?: boolean;
   purchased_status: 'non-purchased' | 'purchased' | 'partial-purchased';
+  cover_start?: number;
+  cover_end?: number;
   insighter: {
     name: string;
     profile_photo_url: string;
@@ -155,15 +157,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     return generateKnowledgeMetadata(data, locale, type, slug);
   } catch (error) {
     const isRTL = locale === 'ar';
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://knoldg.com';
-    const defaultSocialImage = 'https://res.cloudinary.com/dsiku9ipv/image/upload/v1761651021/drilldown_l7cdf2.jpg';
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://foresighta.co';
+    const defaultSocialImage = 'https://res.cloudinary.com/dsiku9ipv/image/upload/v1761746492/drilldown_1_cjpvli.jpg';
     const pageUrl = `${baseUrl}/${locale}/knowledge/${type}/${slug}`;
 
     let metadataBase: URL | undefined;
     try {
       metadataBase = new URL(baseUrl);
     } catch {
-      metadataBase = new URL('https://knoldg.com');
+      metadataBase = new URL('https://foresighta.co');
     }
 
     const title = isRTL ? "المعرفة غير موجودة | KNOLDG" : "Knowledge Not Found | KNOLDG";
@@ -197,7 +199,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         ],
       },
       twitter: {
-        card: 'summary_large_image',
+        card: 'summary',
         site: '@KNOLDG',
         title,
         description,
@@ -327,7 +329,7 @@ export default function KnowledgePage({ params }: Props) {
                           alt={knowledge.insighter.company.legal_name || 'Company'}
                           fill={true}
                           sizes="(max-width: 640px) 40px, 50px"
-                          className="rounded-full object-contain"
+                          className="rounded-full object-cover object-top"
                         />
                       ) : (
                         <div className="w-full h-full rounded-full bg-blue-500 flex items-center justify-center">
@@ -478,6 +480,8 @@ export default function KnowledgePage({ params }: Props) {
                 is_read_later={knowledge.is_read_later}
                 knowledgeUUID={knowledge.id}
                 insighterUUID={knowledge.insighter.uuid}
+                cover_start={knowledge.cover_start}
+                cover_end={knowledge.cover_end}
               />
             </div>
         </div>

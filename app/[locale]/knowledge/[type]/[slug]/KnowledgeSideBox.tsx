@@ -51,6 +51,8 @@ interface KnowledgeSideBoxProps {
   knowledgeSlug?: string;
   purchased_status?: 'non-purchased' | 'purchased' | 'partial-purchased';
   is_read_later?: boolean;
+  cover_start?: number;
+  cover_end?: number;
 }
 
 const KnowledgeSideBox = ({
@@ -68,7 +70,9 @@ const KnowledgeSideBox = ({
   purchased_status,
   is_read_later,
   knowledgeUUID,
-  insighterUUID
+  insighterUUID,
+  cover_start,
+  cover_end
 }: KnowledgeSideBoxProps) => {
   const params = useParams();
   const currentLocale = locale || params.locale as string || 'en';
@@ -204,6 +208,8 @@ const KnowledgeSideBox = ({
   
   // Maximum number of items to show initially
   const MAX_VISIBLE_ITEMS = 3;
+  // Maximum number of Target Market items to show initially
+  const MAX_VISIBLE_TARGET_MARKET_ITEMS = 2;
   
   // Share functionality
   const handleShare = () => {
@@ -266,6 +272,7 @@ const KnowledgeSideBox = ({
     targetMarket: isRTL ? 'السوق المستهدف': 'Target Market',
     publishedAt: isRTL ? 'تاريخ النشر' : 'Published On',
     lastUpdate: isRTL ? 'آخر تحديث' : 'Last Update',
+    yearsItCovers: isRTL ? 'السنوات التي يغطيها' : 'Years it covers',
     oneTimePurchase: isRTL ? 'شراء لمرة واحدة' : 'One time purchase',
     buyNow: isRTL ? 'اشتري الآن' : 'Buy Now',
     addToCart: isRTL ?  'إضافة إلى حقيبة المشتريات' : 'Add to Cart',
@@ -455,13 +462,14 @@ const KnowledgeSideBox = ({
                 </div>
                 {translations.isicCode}
               </span>
-              <div className="field-content-container">
+              <div className="field-content-container overflow-visible relative">
                 <div className="group relative inline-block">
-                  <span className="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10 mt-1">
+                  <span className="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10 mt-1 cursor-help">
                     {isic_code.key}
                   </span>
-                  <span className="absolute bottom-full left-1/2 mb-2 hidden -translate-x-1/2 transform rounded bg-white p-2 text-xs shadow-lg border border-gray-200 group-hover:block min-w-[200px] max-w-[300px] z-10 text-center">
+                  <span className="absolute bottom-full left-1/2 mb-2 hidden -translate-x-1/2 transform rounded bg-black text-white p-3 text-xs shadow-xl group-hover:block min-w-[200px] max-w-[300px] z-[9999] text-center whitespace-normal break-words">
                     {isic_code.name}
+                    <span className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-black"></span>
                   </span>
                 </div>
               </div>
@@ -529,14 +537,15 @@ const KnowledgeSideBox = ({
                 </div>
                 {translations.hsCode}
               </span>
-              <div className="field-content-container">
+              <div className="field-content-container overflow-visible relative">
                 <div className="group relative inline-block">
-                  <span className="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10 mt-1">
+                  <span className="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10 mt-1 cursor-help">
                     {typeof hs_code === 'object' ? (hs_code.key || JSON.stringify(hs_code)) : hs_code}
                   </span>
                   {typeof hs_code === 'object' && hs_code.name && (
-                    <span className="absolute bottom-full left-1/2 mb-2 hidden -translate-x-1/2 transform rounded bg-white p-2 text-xs shadow-lg border border-gray-200 group-hover:block min-w-[200px] max-w-[300px] z-10 text-center">
+                    <span className="absolute bottom-full left-1/2 mb-2 hidden -translate-x-1/2 transform rounded bg-black text-white p-3 text-xs shadow-xl group-hover:block min-w-[200px] max-w-[300px] z-[9999] text-center whitespace-normal break-words">
                       {hs_code.name}
+                      <span className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-black"></span>
                     </span>
                   )}
                 </div>
@@ -607,20 +616,18 @@ const KnowledgeSideBox = ({
                   {translations.targetMarket}
                 </span>
                 <div className={`field-content-container ${expandedSections.economicBlocs ? 'expanded' : ''}`}>
-                  <div className="flex flex-wrap gap-1 justify-end">
+                  <div className={`flex flex-wrap gap-1 justify-end`}>
                     {economic_blocs
-                      .slice(0, expandedSections.economicBlocs ? economic_blocs.length : MAX_VISIBLE_ITEMS)
+                      .slice(0, expandedSections.economicBlocs ? economic_blocs.length : MAX_VISIBLE_TARGET_MARKET_ITEMS)
                       .map((economicBloc) => (
-                        <span key={economicBloc.id} className="badge bg-[#f1f1f4] text-[#4b5675] text-xs font-medium px-2.5 py-0.5 rounded">
+                        <span key={economicBloc.id} className={`badge bg-[#f1f1f4] text-[#4b5675] text-xs font-medium px-2.5 py-0.5 rounded ${isRTL ? 'text-left' : 'text-right'}`}>
                           {economicBloc.name}
                         </span>
                       ))}
                   </div>
-                  {economic_blocs.length > MAX_VISIBLE_ITEMS && (
+                  {economic_blocs.length > MAX_VISIBLE_TARGET_MARKET_ITEMS && (
                     <button 
-                  style={{marginInlineStart:'auto'}}
-
-                      className="text-blue-500 text-xs flex items-center whitespace-nowrap ml-1 mt-1"
+                      className="text-blue-500 text-xs flex items-center whitespace-nowrap ms-auto mt-1"
                       onClick={() => toggleSection('economicBlocs')}
                     >
                       {expandedSections.economicBlocs ? (
@@ -629,7 +636,7 @@ const KnowledgeSideBox = ({
                         </>
                       ) : (
                         <>
-                          +{economic_blocs.length - MAX_VISIBLE_ITEMS} {translations.more} <ChevronDownIcon className="w-3 h-3 ml-1" />
+                          +{economic_blocs.length - MAX_VISIBLE_TARGET_MARKET_ITEMS} {translations.more} <ChevronDownIcon className="w-3 h-3 ml-1" />
                         </>
                       )}
                     </button>
@@ -648,26 +655,24 @@ const KnowledgeSideBox = ({
                   {translations.targetMarket}
                 </span>
                 <div className={`field-content-container ${expandedSections.regions ? 'expanded' : ''}`}>
-                  <div className="flex flex-wrap justify-end gap-1">
+                  <div className={`flex flex-wrap gap-1 justify-end`}>
                     {regions.length === 6 ? (
-                      <span className="badge bg-[#f1f1f4] text-[#4b5675] text-xs font-medium px-2.5 py-0.5 rounded">
+                      <span className={`badge bg-[#f1f1f4] text-[#4b5675] text-xs font-medium px-2.5 py-0.5 rounded ${isRTL ? 'text-left' : 'text-right'}`}>
                      {translations.worldWide}
                       </span>
                     ) : (
                       regions
-                        .slice(0, expandedSections.regions ? regions.length : MAX_VISIBLE_ITEMS)
+                        .slice(0, expandedSections.regions ? regions.length : MAX_VISIBLE_TARGET_MARKET_ITEMS)
                         .map((region:any) => (
-                          <span key={region.id} className="badge bg-[#f1f1f4] text-[#4b5675] text-xs font-medium px-2.5 py-0.5 rounded">
+                          <span key={region.id} className={`badge bg-[#f1f1f4] text-[#4b5675] text-xs font-medium px-2.5 py-0.5 rounded ${isRTL ? 'text-left' : 'text-right'}`}>
                             {region.name}
                           </span>
                         ))
                     )}
                   </div>
-                  {regions.length > MAX_VISIBLE_ITEMS && regions.length !== 6 && (
+                  {regions.length > MAX_VISIBLE_TARGET_MARKET_ITEMS && regions.length !== 6 && (
                     <button 
-                  style={{marginInlineStart:'auto'}}
-
-                      className="text-blue-500 text-xs flex items-center whitespace-nowrap ml-1 mt-1"
+                      className="text-blue-500 text-xs flex items-center whitespace-nowrap ms-auto mt-1"
                       onClick={() => toggleSection('regions')}
                     >
                       {expandedSections.regions ? (
@@ -676,7 +681,7 @@ const KnowledgeSideBox = ({
                         </>
                       ) : (
                         <>
-                          +{regions.length - MAX_VISIBLE_ITEMS} {translations.more} <ChevronDownIcon className="w-3 h-3 ml-1" />
+                          +{regions.length - MAX_VISIBLE_TARGET_MARKET_ITEMS} {translations.more} <ChevronDownIcon className="w-3 h-3 ml-1" />
                         </>
                       )}
                     </button>
@@ -695,20 +700,18 @@ const KnowledgeSideBox = ({
                   {translations.targetMarket}
                 </span>
                 <div className={`field-content-container ${expandedSections.countries ? 'expanded' : ''}`}>
-                  <div className="flex flex-wrap justify-end gap-1">
+                  <div className={`flex flex-wrap gap-1 justify-end`}>
                     {countries
-                      .slice(0, expandedSections.countries ? countries.length : MAX_VISIBLE_ITEMS)
+                      .slice(0, expandedSections.countries ? countries.length : MAX_VISIBLE_TARGET_MARKET_ITEMS)
                       .map((country:any) => (
-                        <span key={country.id} className="badge bg-[#f1f1f4] text-[#4b5675] text-xs font-medium px-2.5 py-0.5 rounded">
+                        <span key={country.id} className={`badge bg-[#f1f1f4] text-[#4b5675] text-xs font-medium px-2.5 py-0.5 rounded ${isRTL ? 'text-left' : 'text-right'}`}>
                           {country.name}
                         </span>
                       ))}
                   </div>
-                  {countries.length > MAX_VISIBLE_ITEMS && (
+                  {countries.length > MAX_VISIBLE_TARGET_MARKET_ITEMS && (
                     <button 
-                  style={{marginInlineStart:'auto'}}
-
-                      className="text-blue-500 text-xs flex items-center whitespace-nowrap ml-1 mt-1"
+                      className="text-blue-500 text-xs flex items-center whitespace-nowrap ms-auto mt-1"
                       onClick={() => toggleSection('countries')}
                     >
                       {expandedSections.countries ? (
@@ -717,7 +720,7 @@ const KnowledgeSideBox = ({
                         </>
                       ) : (
                         <>
-                          +{countries.length - MAX_VISIBLE_ITEMS} {translations.more} <ChevronDownIcon className="w-3 h-3 ml-1" />
+                          +{countries.length - MAX_VISIBLE_TARGET_MARKET_ITEMS} {translations.more} <ChevronDownIcon className="w-3 h-3 ml-1" />
                         </>
                       )}
                     </button>
@@ -727,18 +730,23 @@ const KnowledgeSideBox = ({
             )
           }
 
-          <div className="tp-course-details2-widget-list-item flex items-center justify-between">
-            <span className="flex items-center">
-              <div className="bg-blue-50 p-2 rounded-full me-2">
-                <CalendarIcon className="w-4 h-4 text-blue-500" />
-              </div>
-              {translations.publishedAt}
-            </span>
-            <span className="field-content-container flex items-center justify-end">
-              {published_at ? new Date(published_at).toLocaleDateString(isRTL ? 'en-US' : undefined) : translations.na}
-            </span>
-          </div>
+          {cover_start && cover_end && (
+            <div className="tp-course-details2-widget-list-item flex items-center justify-between">
+              <span className="flex items-center">
+                <div className="bg-blue-50 p-2 rounded-full me-2">
+                  <CalendarIcon className="w-4 h-4 text-blue-500" />
+                </div>
+                {translations.yearsItCovers}
+              </span>
+              <span className="field-content-container">
+                <span className="flex items-center justify-end">
+                  {cover_start === cover_end ? cover_start : `${cover_start} - ${cover_end}`}
+                </span>
+              </span>
+            </div>
+          )}
 
+       
           {/* Only show Last Update if it has a value */}
           {false && (
             <div className="tp-course-details2-widget-list-item flex items-center justify-between">
@@ -878,6 +886,10 @@ const KnowledgeSideBox = ({
             align-items: flex-end;
           }
 
+          .field-content-container.overflow-visible {
+            overflow: visible;
+          }
+
           .field-content-container.expanded {
             max-height: none;
           }
@@ -886,11 +898,17 @@ const KnowledgeSideBox = ({
             max-height: 80px;
           }
 
+          .field-content-container:not(.expanded).overflow-visible {
+            overflow: visible;
+          }
+
           .tp-course-details2-widget-list-item {
             min-height: 50px;
             padding: 12px 0;
             border-bottom: 1px solid #f3f4f6;
-            align-items: flex-start;
+            align-items: center;
+            position: relative;
+            overflow: visible;
           }
 
           .tp-course-details2-widget-list-item:last-child {
