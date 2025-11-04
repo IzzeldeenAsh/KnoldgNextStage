@@ -168,10 +168,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       metadataBase = new URL('https://foresighta.co');
     }
 
-    const title = isRTL ? "المعرفة غير موجودة | KNOLDG" : "Knowledge Not Found | KNOLDG";
+    const title = isRTL ? "المعرفة غير موجودة | Insighta" : "Knowledge Not Found |Insighta";
     const description = isRTL 
-      ? "لم يتم العثور على المورد المعرفي المطلوب. تحقق من الرابط أو ابحث عن محتوى آخر على منصة KNOLDG."
-      : "The requested knowledge resource could not be found. Please check the URL or search for other content on KNOLDG platform.";
+      ? "لم يتم العثور على المورد المعرفي المطلوب. تحقق من الرابط أو ابحث عن محتوى آخر على منصة Insighta."
+      : "The requested knowledge resource could not be found. Please check the URL or search for other content on Insighta platform.";
 
     return {
       metadataBase,

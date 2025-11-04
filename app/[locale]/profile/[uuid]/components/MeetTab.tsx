@@ -22,7 +22,7 @@ import { VisaIcon, MasterCardIcon, GooglePayIcon, ApplePayIcon } from "@/compone
 import { useUserProfile } from "@/app/lib/useUserProfile";
 
 // Initialize Stripe
-const stripePromise = loadStripe("pk_test_51RpQiFL3mrWP7a0P1OYWGeFJWtgMwcWJtiEDLvn29CpYn5x8Ou77YViA1yoimlixKU5aUAeOeN5VTfoC4sMpvFVF00qq9a6BNm");
+const stripePromise = loadStripe("pk_test_51RvbpiRSMujJZykzGpYlMXB5BXcWcTKrBLcWVtvj3oM2vS9S0z1Ur8YVWPDVSoRTwIoYEDMkvnblr7VbQMCiwwx700TNlixQE6");
 
 interface MeetingTime {
   start_time: string;
@@ -861,7 +861,7 @@ export default function MeetTab({
 
                   {/* Payment methods in one row */}
                   <div className="flex flex-col gap-3">
-                    {/* Knoldg Wallet Option */}
+                    {/* Insighta Wallet Option */}
                     <div
                       className={`border rounded-lg p-4 cursor-pointer transition-all min-h-[72px] ${
                         paymentMethod === "manual"
@@ -896,7 +896,7 @@ export default function MeetTab({
                           <div className="flex items-center justify-between">
 
                             <div className="font-medium text-sm text-gray-800 dark:text-gray-200">
-                              {locale.startsWith('ar') ? 'محفظة نولدج' : 'Knoldg Wallet'}
+                              {locale.startsWith('ar') ? 'محفظة إنسايتا' : 'Insighta Wallet'}
                             </div>
                             <div className="flex items-center gap-3">
                             <div className="w-8 h-8 flex items-center justify-center flex-shrink-0">
