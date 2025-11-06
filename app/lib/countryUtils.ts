@@ -35,7 +35,7 @@ export function storeReturnUrl(url: string) {
       `Path=/`,
       `Max-Age=${60 * 60}`, // 1 hour
       `SameSite=None`,
-      `Domain=.foresightaa.co`,
+      `Domain=.foresighta.co`,
       `Secure`
     ];
   }
@@ -87,7 +87,7 @@ export function clearReturnUrl() {
       'Path=/',
       'Max-Age=-1',
       'SameSite=None',
-      'Domain=.foresightaa.co',
+      'Domain=.foresighta.co',
       'Secure'
     ];
   }

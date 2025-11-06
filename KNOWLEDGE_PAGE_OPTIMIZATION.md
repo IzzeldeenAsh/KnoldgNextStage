@@ -68,11 +68,11 @@
 
 ```bash
 # Base URLs (Required)
-NEXT_PUBLIC_BASE_URL=https://foresightaa.co
-NEXT_PUBLIC_DASHBOARD_URL=https://app.foresightaa.co
+NEXT_PUBLIC_BASE_URL=https://foresighta.co
+NEXT_PUBLIC_DASHBOARD_URL=https://app.foresighta.co
 
 # API Configuration
-NEXT_PUBLIC_API_URL=https://api.foresightaa.co
+NEXT_PUBLIC_API_URL=https://api.foresighta.co
 
 # Social Media
 NEXT_PUBLIC_TWITTER_HANDLE=@KNOLDG
