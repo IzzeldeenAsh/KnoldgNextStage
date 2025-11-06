@@ -8,12 +8,12 @@ const isDevelopment = FORCE_DEVELOPMENT || process.env.NODE_ENV === 'development
 
 // API and App URLs based on environment
 export const apiBaseUrl = isDevelopment 
-  ? 'https://api.foresighta.co' 
-  : 'https://api.foresighta.co';
+  ? 'https://api.foresightaa.co' 
+  : 'https://api.foresightaa.co';
 
 export const appBaseUrl = isDevelopment 
-  ? 'https://app.foresighta.co' 
-  : 'https://app.foresighta.co';
+  ? 'https://app.foresightaa.co' 
+  : 'https://app.foresightaa.co';
 
 // Function to get full API URL with path
 export const getApiUrl = (path: string): string => {

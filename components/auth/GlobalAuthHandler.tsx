@@ -31,7 +31,7 @@ export default function GlobalAuthHandler() {
       try {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
-        localStorage.removeItem('foresighta-creds');
+        localStorage.removeItem('foresightaa-creds');
         console.log('[GlobalAuthHandler] LocalStorage cleaned');
       } catch (e) {
         console.error('[GlobalAuthHandler] Error cleaning localStorage:', e);
@@ -66,7 +66,7 @@ export default function GlobalAuthHandler() {
         const timestamp = new Date().getTime();
         
         // Redirect to Angular app's logout endpoint
-        window.location.href = `https://app.foresighta.co/auth/logout?redirect_uri=${encodeURIComponent(`https://foresighta.co/${locale}?t=${timestamp}`)}`;
+        window.location.href = `https://app.foresightaa.co/auth/logout?redirect_uri=${encodeURIComponent(`https://foresightaa.co/${locale}?t=${timestamp}`)}`;
       }
     };
 
