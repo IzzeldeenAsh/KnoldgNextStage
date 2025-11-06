@@ -198,7 +198,7 @@ export default function SearchResultsList({
 
       const method = currentState ? 'DELETE' : 'POST';
       const slug = item.url.split('/').pop();
-      const url = `https://api.foresighta.co/api/account/favorite/knowledge/${slug}`;
+      const url = `https://api.insightabusiness.com/api/account/favorite/knowledge/${slug}`;
 
       console.log(`[Read Later] ${method} request to:`, url);
       console.log(`[Read Later] Current state:`, currentState, 'Item ID:', itemId, 'Slug:', slug);
@@ -244,7 +244,7 @@ export default function SearchResultsList({
   const typeTranslations: Record<string, string> = {
     report: isRTL ? "تقرير" : "Reports",
     manual: isRTL ? "دليل" : "Manuals",
-    insight: isRTL ? "رؤى" : "Insights",
+    statistic: isRTL ? "إحصائيات" : "Statistics",
     data: isRTL ? "بيانات" : "Data",
     article: isRTL ? "مقالة" : "Articles",
     course: isRTL ? "دورة تدريبية" : "Course",
@@ -330,7 +330,7 @@ export default function SearchResultsList({
                       <>
                         {item.type === "report" && <ReportIcon width={24} height={24} />}
                         {item.type === "manual" && <ManualIcon width={24} height={24} />}
-                        {item.type === "insight" && <InsightIcon width={24} height={24} />}
+                        {item.type === "statistic" && <InsightIcon width={24} height={24} />}
                         {item.type === "data" && <DataIcon width={24} height={24} />}
                         {item.type === "course" && <CourseIcon width={24} height={24} />}
                         {!item.type && <InsightIcon width={24} height={24} />}
@@ -342,7 +342,7 @@ export default function SearchResultsList({
                   
                   <Badge w="fit-content" className="capitalize z-10" variant="light">
                     {item.searchable_type === "knowledge" && item.type 
-                      ? (typeof item.type === 'string' ? typeTranslations[item.type.toLowerCase()] || item.type : typeTranslations['insight'])
+                      ? (typeof item.type === 'string' ? typeTranslations[item.type.toLowerCase()] || item.type : typeTranslations['statistic'])
                       : item.searchable_type === "topic" ? translations.topic : translations.knowledge}
                   </Badge>
                  

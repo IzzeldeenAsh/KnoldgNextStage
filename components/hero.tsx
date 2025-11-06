@@ -30,7 +30,7 @@ async function fetchAutocomplete(keyword: string, locale: string): Promise<strin
   if (!keyword.trim()) return [];
   
   try {
-    const response = await fetch(`https://api.foresighta.co/api/platform/search/autocomplete?keyword=${encodeURIComponent(keyword)}`, {
+    const response = await fetch(`https://api.insightabusiness.com/api/platform/search/autocomplete?keyword=${encodeURIComponent(keyword)}`, {
       headers: {
         'Accept-Language': locale, // Set the locale in the header
         'Accept': 'application/json'
@@ -239,7 +239,7 @@ export default function Hero() {
                           </div>
                           <span className="text-gray-900 font-medium md:text-md text-sm">
                             {searchType === 'knowledge' 
-                              ? (currentLocale === 'ar' ? 'معرفة' : 'Knowledge') 
+                              ? (currentLocale === 'ar' ? 'رؤى' : 'Insights') 
                               : (currentLocale === 'ar' ? 'إنسايتر' : 'Insighter')}
                           </span>
                         </div>

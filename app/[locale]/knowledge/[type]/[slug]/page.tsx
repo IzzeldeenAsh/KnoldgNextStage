@@ -113,7 +113,7 @@ async function fetchKnowledgeData(type: string, slug: string, locale: string = '
     // Note: localStorage cleanup is handled by AuthHandler component
     
     const response = await fetch(
-      `https://api.foresighta.co/api/platform/industries/knowledge/${slug}`,
+      `https://api.insightabusiness.com/api/platform/industries/knowledge/${slug}`,
       {
         method: "GET",
         headers,
@@ -157,7 +157,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     return generateKnowledgeMetadata(data, locale, type, slug);
   } catch (error) {
     const isRTL = locale === 'ar';
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://foresighta.co';
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://insightabusiness.com';
     const defaultSocialImage = 'https://res.cloudinary.com/dsiku9ipv/image/upload/v1761746492/drilldown_1_cjpvli.jpg';
     const pageUrl = `${baseUrl}/${locale}/knowledge/${type}/${slug}`;
 
@@ -165,7 +165,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     try {
       metadataBase = new URL(baseUrl);
     } catch {
-      metadataBase = new URL('https://foresighta.co');
+      metadataBase = new URL('https://insightabusiness.com');
     }
 
     const title = isRTL ? "المعرفة غير موجودة | Insighta" : "Knowledge Not Found |Insighta";
@@ -295,13 +295,13 @@ export default function KnowledgePage({ params }: Props) {
               <div className="mb-4 mt-1 hidden sm:block">
                 
                 {knowledge.type === 'data' && <div className="bg-white p-2 sm:p-3 rounded flex items-center justify-center"><span className="hidden sm:block"><DataIcon width={40} height={40} /></span><span className="sm:hidden"><DataIcon width={30} height={30} /></span></div>}
-                {knowledge.type === 'insight' && <div className="bg-white p-2 rounded flex items-center justify-center"><span className="hidden sm:block"><InsightIcon width={50} height={50} /></span><span className="sm:hidden"><InsightIcon width={30} height={30} /></span></div>}
+                {knowledge.type === 'statistic' && <div className="bg-white p-2 rounded flex items-center justify-center"><span className="hidden sm:block"><InsightIcon width={50} height={50} /></span><span className="sm:hidden"><InsightIcon width={30} height={30} /></span></div>}
                 {knowledge.type === 'manual' && <div className="bg-white p-2 rounded flex items-center justify-center"><span className="hidden sm:block"><ManualIcon width={50} height={50} /></span><span className="sm:hidden"><ManualIcon width={30} height={30} /></span></div>}
                 {knowledge.type === 'report' && <div className="bg-white p-2 rounded flex items-center justify-center"><span className="hidden sm:block"><ReportIcon width={50} height={50} /></span><span className="sm:hidden"><ReportIcon width={30} height={30} /></span></div>}
                 {knowledge.type === 'course' && <div className="bg-white p-2 rounded flex items-center justify-center"><span className="hidden sm:block"><CourseIcon width={50} height={50} /></span><span className="sm:hidden"><CourseIcon width={30} height={30} /></span></div>}
-                <div className="text-xs font-bold text-center bg-blue-100 uppercase mt-2 text-blue-500 rounded-md">
+                <div className="text-[10px] font-bold text-center bg-blue-100 uppercase mt-2 text-blue-500 rounded-md">
                     {messages && knowledge.type === 'data' ? messages?.Header?.navigation?.data || knowledge.type : 
-                     knowledge.type === 'insight' ? messages?.Header?.navigation?.insight || knowledge.type : 
+                     knowledge.type === 'statistic' ? messages?.Header?.navigation?.statistic || knowledge.type : 
                      knowledge.type === 'manual' ? messages?.Header?.navigation?.manual || knowledge.type : 
                      knowledge.type === 'report' ? messages?.Header?.navigation?.report || knowledge.type : 
                      knowledge.type === 'course' ? messages?.Header?.navigation?.course || knowledge.type : 
