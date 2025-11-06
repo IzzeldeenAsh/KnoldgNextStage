@@ -116,9 +116,9 @@ const SearchSection = memo<SearchSectionProps>(({
                     onClick={() => onCategorySelect('report')} 
                     count={categoryCounts['report']}
                   />
-                  <CategoryIconBox 
-                    name="insight" 
-                    label="Insights" 
+                   <CategoryIconBox 
+                        name="statistic" 
+                        label="Statistics" 
                     locale={locale} 
                     arLabel="الرؤى" 
                     isSelected={filterCategory === 'insight'} 
