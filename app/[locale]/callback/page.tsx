@@ -171,7 +171,7 @@ export default function QueryParamAuthCallback() {
         `Path=/`,
         `Max-Age=${60 * 60 * 24 * 7}`, // 7 days
         `SameSite=None`,
-        `Domain=.foresighta.co`,
+        `Domain=.insightabusiness.com`,
         `Secure`
       ];
     }
@@ -206,7 +206,7 @@ export default function QueryParamAuthCallback() {
     console.log('[callback] Clearing auth data');
     localStorage.removeItem('token');
     localStorage.removeItem('user');
-    localStorage.removeItem('foresightaa-creds');
+    localStorage.removeItem('foresighta-creds');
     
     // Clear token cookie
     const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
@@ -224,7 +224,7 @@ export default function QueryParamAuthCallback() {
         'Path=/',
         'Max-Age=-1',
         'SameSite=None',
-        'Domain=.foresighta.co',
+        'Domain=.insightabusiness.com',
         'Secure'
       ];
     }
@@ -392,7 +392,7 @@ export default function QueryParamAuthCallback() {
         'Path=/',
         'Max-Age=-1',
         'SameSite=None',
-        'Domain=.foresighta.co',
+        'Domain=.insightabusiness.com',
         'Secure'
       ];
     }
@@ -421,7 +421,7 @@ export default function QueryParamAuthCallback() {
         `Path=/`,
         `Max-Age=${60 * 60}`, // 1 hour
         `SameSite=None`,
-        `Domain=.foresighta.co`,
+        `Domain=.insightabusiness.com`,
         `Secure`
       ];
     }

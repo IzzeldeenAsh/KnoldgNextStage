@@ -20,7 +20,7 @@ export default function IntegrationsCarousel() {
   const [swiperInitialized, setSwiperInitialized] = useState<boolean>(false)
 
   useEffect(() => {
-    const carousel = new Swiper('.foresightaa-carousel', {
+    const carousel = new Swiper('.foresighta-carousel', {
       breakpoints: {
         320: {
           slidesPerView: 1

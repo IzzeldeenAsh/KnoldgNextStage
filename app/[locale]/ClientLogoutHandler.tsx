@@ -11,7 +11,7 @@ const cleanupAuthData = () => {
   try {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
-    localStorage.removeItem('foresightaa-creds');
+    localStorage.removeItem('foresighta-creds');
     console.log('[ClientLogoutHandler] LocalStorage cleaned');
   } catch (e) {
     console.error('[ClientLogoutHandler] Error cleaning localStorage:', e);

@@ -29,7 +29,7 @@ export function useUserProfile() {
     // Clear all auth data from current app
     localStorage.removeItem('token');
     localStorage.removeItem('user');
-    localStorage.removeItem('foresightaa-creds');
+    localStorage.removeItem('foresighta-creds');
     
     // Clear auth cookies
     const clearAuthCookies = () => {
@@ -39,7 +39,7 @@ export function useUserProfile() {
         if (isLocalhost) {
           document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
         } else {
-          document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; Domain=.foresighta.co; Secure; SameSite=None;`;
+          document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; Domain=.insightabusiness.com; Secure; SameSite=None;`;
         }
       };
       

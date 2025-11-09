@@ -393,7 +393,7 @@ export default function HomePageOptimized() {
                       onClick={() => handleCategorySelect('report')} 
                       count={categoryCounts['report']}
                     />
-                     <CategoryIconBox 
+                   <CategoryIconBox 
                         name="statistic" 
                         label="Statistics" 
                       locale={locale} 

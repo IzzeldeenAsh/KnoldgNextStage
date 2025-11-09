@@ -36,7 +36,7 @@ export default function MobileMenu({ isHomePage = true }: MobileMenuProps) {
     setIsLoading(true);
     
     // Set the language preference in a cookie - expires in 1 year
-    document.cookie = `preferred_language=${locale}; max-age=${60 * 60 * 24 * 365}; path=/; Domain=.foresighta.co;`;
+    document.cookie = `preferred_language=${locale}; max-age=${60 * 60 * 24 * 365}; path=/; Domain=.insightabusiness.com;`;
     
     // Get the current path without locale prefix
     const currentPath = pathname.split('/').slice(2).join('/');
@@ -125,7 +125,7 @@ export default function MobileMenu({ isHomePage = true }: MobileMenuProps) {
             <Link className={`flex font-medium text-sm ${menuTextColorClass} py-1.5`} href={`/${currentLocale}/industries/data`}>{t('navigation.data')}</Link>
           </li>
           <li>
-            <Link className={`flex font-medium text-sm ${menuTextColorClass} py-1.5`} href={`/${currentLocale}/industries/insight`}>{t('navigation.insights')}</Link>
+            <Link className={`flex font-medium text-sm ${menuTextColorClass} py-1.5`} href={`/${currentLocale}/industries/statistic`}>{t('navigation.statistics')}</Link>
           </li>
           <li>
             <Link className={`flex font-medium text-sm ${menuTextColorClass} py-1.5`} href={`/${currentLocale}/industries/manual`}>{t('navigation.manuals')}</Link>

@@ -12,11 +12,11 @@
     @apply opacity-50 cursor-default pointer-events-none;
 }
 
-.foresightaa-carousel .swiper-slide {
+.foresighta-carousel .swiper-slide {
     @apply opacity-80;
 }
 
-.foresightaa-carousel .swiper-slide.swiper-slide-active {
+.foresighta-carousel .swiper-slide.swiper-slide-active {
     @apply opacity-100;
 }
 

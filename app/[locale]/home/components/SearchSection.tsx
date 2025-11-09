@@ -116,7 +116,7 @@ const SearchSection = memo<SearchSectionProps>(({
                     onClick={() => onCategorySelect('report')} 
                     count={categoryCounts['report']}
                   />
-                   <CategoryIconBox 
+                  <CategoryIconBox 
                         name="statistic" 
                         label="Statistics" 
                     locale={locale} 

@@ -163,7 +163,7 @@ const { isLoading: isAppLoading, setIsLoading: setAppLoading } = useLoading();
     
     // Check for exact match in segment or specific path cases
     if (currentPath === path || 
-        (path === 'insight' && currentPath === 'insight') || 
+        (path === 'statistic' && currentPath === 'statistic') || 
         (path === 'data' && currentPath === 'data') ||
         (path === 'report' && currentPath === 'report') ||
         (path === 'manual' && currentPath === 'manual') ||
@@ -221,7 +221,7 @@ const { isLoading: isAppLoading, setIsLoading: setAppLoading } = useLoading();
     ];
     
     if (isProduction) {
-      cookieParts.push(`Domain=.foresighta.co`); // leading dot = include subdomains
+      cookieParts.push(`Domain=.insightabusiness.com`); // leading dot = include subdomains
       cookieParts.push(`Secure`);                // HTTPS only in production
     }
     
@@ -373,7 +373,7 @@ const { isLoading: isAppLoading, setIsLoading: setAppLoading } = useLoading();
                 <Link className={`font-medium text-sm ${menuTextColorClass} mx-1 lg:mx-2 ${isActiveLink('report')}`} href={`/${pathname.split('/')[1]}/industries/report`}>{t('navigation.reports')}</Link>
               </li>
               <li>
-                <Link className={`font-medium text-sm ${menuTextColorClass} mx-1 lg:mx-2 ${isActiveLink('insight')}`} href={`/${pathname.split('/')[1]}/industries/insight`}>{t('navigation.insights')}</Link>
+                <Link className={`font-medium text-sm ${menuTextColorClass} mx-1 lg:mx-2 ${isActiveLink('statistic')}`} href={`/${pathname.split('/')[1]}/industries/statistic`}>{t('navigation.statistics')}</Link>
               </li>
               <li className='lg:block hidden'>
                 <Link className={`font-medium text-sm ${menuTextColorClass} mx-1 lg:mx-2 ${isActiveLink('manual')}`} href={`/${pathname.split('/')[1]}/industries/manual`}>{t('navigation.manuals')}</Link>

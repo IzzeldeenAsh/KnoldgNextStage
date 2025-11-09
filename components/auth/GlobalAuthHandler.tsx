@@ -31,7 +31,7 @@ export default function GlobalAuthHandler() {
       try {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
-        localStorage.removeItem('foresightaa-creds');
+        localStorage.removeItem('foresighta-creds');
         console.log('[GlobalAuthHandler] LocalStorage cleaned');
       } catch (e) {
         console.error('[GlobalAuthHandler] Error cleaning localStorage:', e);
