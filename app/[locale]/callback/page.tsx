@@ -171,7 +171,7 @@ export default function QueryParamAuthCallback() {
         `Path=/`,
         `Max-Age=${60 * 60 * 24 * 7}`, // 7 days
         `SameSite=None`,
-        `Domain=.insightabusiness.com`,
+        `Domain=.foresighta.co`,
         `Secure`
       ];
     }
@@ -224,7 +224,7 @@ export default function QueryParamAuthCallback() {
         'Path=/',
         'Max-Age=-1',
         'SameSite=None',
-        'Domain=.insightabusiness.com',
+        'Domain=.foresighta.co',
         'Secure'
       ];
     }
@@ -392,7 +392,7 @@ export default function QueryParamAuthCallback() {
         'Path=/',
         'Max-Age=-1',
         'SameSite=None',
-        'Domain=.insightabusiness.com',
+        'Domain=.foresighta.co',
         'Secure'
       ];
     }
@@ -421,7 +421,7 @@ export default function QueryParamAuthCallback() {
         `Path=/`,
         `Max-Age=${60 * 60}`, // 1 hour
         `SameSite=None`,
-        `Domain=.insightabusiness.com`,
+        `Domain=.foresighta.co`,
         `Secure`
       ];
     }

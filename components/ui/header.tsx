@@ -208,7 +208,7 @@ const { isLoading: isAppLoading, setIsLoading: setAppLoading } = useLoading();
     setAppLoading(true);
     
     // Enhanced cookie setting for better browser compatibility (especially Safari/Firefox)
-    const isProduction = typeof window !== 'undefined' && window.location.hostname.includes('insightabusiness.com');
+    const isProduction = typeof window !== 'undefined' && window.location.hostname.includes('foresighta.co');
     const expirationDate = new Date();
     expirationDate.setFullYear(expirationDate.getFullYear() + 1); // 1 year from now
     
@@ -221,7 +221,7 @@ const { isLoading: isAppLoading, setIsLoading: setAppLoading } = useLoading();
     ];
     
     if (isProduction) {
-      cookieParts.push(`Domain=.insightabusiness.com`); // leading dot = include subdomains
+      cookieParts.push(`Domain=.foresighta.co`); // leading dot = include subdomains
       cookieParts.push(`Secure`);                // HTTPS only in production
     }
     
