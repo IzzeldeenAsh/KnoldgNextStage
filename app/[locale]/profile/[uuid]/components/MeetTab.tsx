@@ -732,9 +732,9 @@ export default function MeetTab({
                       size={48}
                       className="text-gray-300 mx-auto mb-4"
                     />
-                    <p className="text-gray-500">
-                      Please select a date to view available times
-                    </p>
+                      <p className="text-gray-500">
+                        {locale.startsWith('ar') ? "اختر تاريخ الجلسة ليتم عرض الأوقات المتاحة" : 'Please select a date to view available times'}
+                      </p>
                   </div>
                 )}
               </div>
@@ -1099,7 +1099,7 @@ export default function MeetTab({
               className="bg-gradient-to-r from-blue-500 to-teal-400 hover:from-blue-600 hover:to-teal-500 transition-all"
               onClick={() => {
                 // Redirect to meetings dashboard
-                window.location.href = "https://app.foresighta.co/app/insighter-dashboard/my-meetings/sent";
+                window.location.href = "https://app.foresighta.co/app/insighter-dashboard/my-meetings";
               }}
             >
               {locale.startsWith('ar') ? 'اذهب إلى الاجتماعات' : 'Go to Meetings'}

@@ -266,7 +266,7 @@ const KnowledgeSideBox = ({
     economicBloc: isRTL ? 'الكتلة الاقتصادية' : 'Economic Block',
     region: isRTL ? 'المنطقة' : 'Region',
     country: isRTL ? 'الدولة' : 'Country',
-    targetMarket: isRTL ? 'السوق المستهدف': 'Target Market',
+    targetMarket: isRTL ? 'السوق المستهدفة': 'Target Market',
     publishedAt: isRTL ? 'تاريخ النشر' : 'Published On',
     lastUpdate: isRTL ? 'آخر تحديث' : 'Last Update',
     yearsItCovers: isRTL ? 'السنوات التي يغطيها' : 'Years it covers',
@@ -285,7 +285,7 @@ const KnowledgeSideBox = ({
     download: isRTL ? 'تحميل' : 'Download',
     alreadyPurchased: isRTL ? 'تم الشراء ' : 'Purchased',
     partiallyPurchased: isRTL ? 'تم الشراء جزئياً' : 'Partially Purchased',
-    shareKnowledge: isRTL ? 'شارك المعرفة' : 'Share Knowledge',
+    shareKnowledge: isRTL ? 'شارك المستند' : 'Share Insight',
     customShareMessage: isRTL ? 'أضف رسالة شخصية' : 'Add a Personal Message',
     shareMessageHint: isRTL ? 'أضف ملاحظة أو رسالة لتخصيص المشاركة...' : 'Add a note or message to personalize your share...',
     characterCount: isRTL ? 'عدد الأحرف' : 'Character Count',
@@ -905,7 +905,6 @@ const KnowledgeSideBox = ({
           .tp-course-details2-widget-list-item > span:first-child {
           
             white-space: nowrap;
-            overflow: hidden;
             text-overflow: ellipsis;
             display: inline-flex;
             align-items: center;
@@ -915,7 +914,6 @@ const KnowledgeSideBox = ({
           .field-content-container:not(.expanded) .no-wrap {
             white-space: nowrap;
             text-overflow: ellipsis;
-            overflow: hidden;
             flex-wrap: nowrap !important;
           }
 

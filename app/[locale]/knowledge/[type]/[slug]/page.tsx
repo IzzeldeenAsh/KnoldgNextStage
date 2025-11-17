@@ -299,13 +299,26 @@ export default function KnowledgePage({ params }: Props) {
                 {knowledge.type === 'manual' && <div className="bg-white p-2 rounded flex items-center justify-center"><span className="hidden sm:block"><ManualIcon width={50} height={50} /></span><span className="sm:hidden"><ManualIcon width={30} height={30} /></span></div>}
                 {knowledge.type === 'report' && <div className="bg-white p-2 rounded flex items-center justify-center"><span className="hidden sm:block"><ReportIcon width={50} height={50} /></span><span className="sm:hidden"><ReportIcon width={30} height={30} /></span></div>}
                 {knowledge.type === 'course' && <div className="bg-white p-2 rounded flex items-center justify-center"><span className="hidden sm:block"><CourseIcon width={50} height={50} /></span><span className="sm:hidden"><CourseIcon width={30} height={30} /></span></div>}
-                <div className="text-[10px] font-bold text-center bg-blue-100 uppercase mt-2 text-blue-500 rounded-md">
-                    {messages && knowledge.type === 'data' ? messages?.Header?.navigation?.data || knowledge.type : 
-                     knowledge.type === 'statistic' ? messages?.Header?.navigation?.statistic || knowledge.type : 
-                     knowledge.type === 'manual' ? messages?.Header?.navigation?.manual || knowledge.type : 
-                     knowledge.type === 'report' ? messages?.Header?.navigation?.report || knowledge.type : 
-                     knowledge.type === 'course' ? messages?.Header?.navigation?.course || knowledge.type : 
-                     knowledge.type}
+                  <div className="text-[10px] font-bold text-center bg-blue-100 uppercase mt-2 text-blue-500 rounded-md">
+                    {(() => {
+                      const navLabels = messages?.Header?.navigation;
+                      switch (knowledge.type) {
+                        case 'data':
+                          return navLabels?.data || knowledge.type;
+                        case 'statistic':
+                          return locale === 'ar' ? 'إحصائيات' : navLabels?.statistics || knowledge.type;
+                        case 'manual':
+                          return navLabels?.manuals || knowledge.type;
+                        case 'report':
+                          return navLabels?.reports || knowledge.type;
+                        case 'course':
+                          return navLabels?.courses || knowledge.type;
+                        case 'insight':
+                          return navLabels?.insights || knowledge.type;
+                        default:
+                          return knowledge.type;
+                      }
+                    })()}
                   </div>
               </div>
               <div className="flex flex-col items-start">
@@ -318,11 +331,12 @@ export default function KnowledgePage({ params }: Props) {
               </div>
             </div>
             <div className="flex flex-wrap gap-4 sm:gap-6 text-sm mt-4">
-              {(knowledge.insighter.roles?.includes('company') || knowledge.insighter.roles?.includes('company-insighter')) ? (
+              {
+              (knowledge.insighter.roles?.includes('company') || knowledge.insighter.roles?.includes('company-insighter')) ? (
                 // Company display
                 <>
                   <div className="relative w-[40px] h-[40px] sm:w-[50px] sm:h-[50px]">
-                    <Link href={`/${locale}/profile/${knowledge.insighter.company?.uuid || knowledge.insighter.uuid}`} className="block h-full">
+                    <Link href={`/${locale}/profile/${knowledge.insighter.company?.uuid || knowledge.insighter.uuid}?entity=company`} className="block h-full">
                       {knowledge.insighter.company?.logo ? (
                         <Image
                           src={knowledge.insighter.company.logo}
@@ -386,7 +400,7 @@ export default function KnowledgePage({ params }: Props) {
                 // Original insighter display
                 <>
                   <div className="relative w-[40px] h-[40px] sm:w-[50px] sm:h-[50px]">
-                    <Link href={`/${locale}/profile/${knowledge.insighter.uuid}`} className="block h-full">
+                    <Link href={`/${locale}/profile/${knowledge.insighter.uuid}?entity=insighter`} className="block h-full">
                       {knowledge.insighter.profile_photo_url ? (
                         <Image
                           src={knowledge.insighter.profile_photo_url}
