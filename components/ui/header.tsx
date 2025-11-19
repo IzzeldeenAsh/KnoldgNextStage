@@ -208,7 +208,7 @@ const { isLoading: isAppLoading, setIsLoading: setAppLoading } = useLoading();
     setAppLoading(true);
     
     // Enhanced cookie setting for better browser compatibility (especially Safari/Firefox)
-    const isProduction = typeof window !== 'undefined' && window.location.hostname.includes('foresighta.co');
+    const isProduction = typeof window !== 'undefined' && window.location.hostname.includes('insightabusiness.com');
     const expirationDate = new Date();
     expirationDate.setFullYear(expirationDate.getFullYear() + 1); // 1 year from now
     
@@ -258,6 +258,11 @@ const { isLoading: isAppLoading, setIsLoading: setAppLoading } = useLoading();
     // This ensures all components are properly re-rendered with the new locale
     window.location.href = fullUrl;
   };
+
+  // Hide header on callback routes to avoid visual flicker/loaders during auth
+  if (pathname.includes('/callback')) {
+    return null;
+  }
 
   return (
     <>
