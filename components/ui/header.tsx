@@ -221,7 +221,7 @@ const { isLoading: isAppLoading, setIsLoading: setAppLoading } = useLoading();
     ];
     
     if (isProduction) {
-      cookieParts.push(`Domain=.foresighta.co`); // leading dot = include subdomains
+      cookieParts.push(`Domain=.insightabusiness.com`); // leading dot = include subdomains
       cookieParts.push(`Secure`);                // HTTPS only in production
     }
     
