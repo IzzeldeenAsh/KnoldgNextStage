@@ -971,7 +971,7 @@ const FilterBox: React.FC<FilterBoxProps> = React.memo(({
 
   // Filter content component
   const FilterContent = () => (
-    <div className={`${shouldUseDrawer ? '' : 'bg-gray-50  border border-gray-200 h-full w-full max-w-xs'}`} dir={locale === 'ar' ? 'rtl' : 'ltr'}>
+    <div className={`${shouldUseDrawer ? '' : 'bg-gray-50  border border-gray-200 h-full w-full max-w-xs min-w-[350px]'}`} dir={locale === 'ar' ? 'rtl' : 'ltr'}>
       {/* Top Bar */}
       <div className="flex items-center justify-between px-4 pt-4 pb-2 border-b border-gray-200">
         <h2 className="text-base font-semibold text-gray-800">{locale === 'ar' ? 'الفلاتر' : 'Filters'}</h2>
@@ -1075,7 +1075,6 @@ const FilterBox: React.FC<FilterBoxProps> = React.memo(({
                           min="0"
                           step="0.01"
                         />
-                     <div className="flex flex-col">
                      <button
                           onClick={handleRangePriceSearch}
                           disabled={isDisabled}
@@ -1096,7 +1095,6 @@ const FilterBox: React.FC<FilterBoxProps> = React.memo(({
                         >
                           <IconX size={16} />
                         </button>
-                     </div>
                       </div>
                       {rangeError && (
                         <p className="text-xs text-red-500 mt-1">{rangeError}</p>
