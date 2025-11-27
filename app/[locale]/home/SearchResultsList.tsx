@@ -156,85 +156,119 @@ function formatPublishedDate(dateString: string, locale: string = 'en') {
 function sanitizeLimitedHtml(html: string | null): string {
   if (!html) return "";
   if (typeof window === "undefined") return "";
-  const container = document.createElement("div");
-  container.innerHTML = html;
-
-  const allowedTags = new Set([
-    "H1",
-    "H2",
-    "H3",
-    "P",
-    "UL",
-    "OL",
-    "LI",
-    "STRONG",
-    "EM",
-    "A",
-    "BR",
-    "SPAN",
-  ]);
-
-  function sanitizeNode(node: Node): Node | null {
-    if (node.nodeType === Node.TEXT_NODE) return node;
-
-    if (node.nodeType === Node.ELEMENT_NODE) {
-      const element = node as HTMLElement;
-      const tag = element.tagName.toUpperCase();
-
-      if (!allowedTags.has(tag)) {
-        const fragment = document.createDocumentFragment();
-        while (element.firstChild) {
-          const child = element.firstChild;
-          const sanitizedChild = sanitizeNode(child);
-          if (sanitizedChild) {
-            fragment.appendChild(sanitizedChild);
-          } else {
-            element.removeChild(child);
-          }
-        }
-        return fragment;
-      }
-
-      // Strip all attributes except safe href on anchors
-      Array.from(element.attributes).forEach((attr) => {
-        const attrName = attr.name.toLowerCase();
-        if (!(tag === "A" && attrName === "href")) {
-          element.removeAttribute(attr.name);
-        }
-      });
-
-      if (tag === "A") {
-        const href = element.getAttribute("href") || "";
-        const isSafe = /^(https?:|mailto:|tel:)/i.test(href);
-        if (!isSafe) {
-          element.removeAttribute("href");
-        }
-      }
-
-      // Recurse children
-      Array.from(element.childNodes).forEach((child) => {
-        const sanitizedChild = sanitizeNode(child);
-        if (sanitizedChild !== child) {
-          if (sanitizedChild) {
-            element.replaceChild(sanitizedChild, child);
-          } else {
-            element.removeChild(child);
-          }
-        }
-      });
-
-      return element;
+  try {
+    // Avoid heavy DOM work for very large strings
+    if (html.length > 20000) {
+      return truncateDescription(html, 60);
     }
 
-    return null;
-  }
+    const container = document.createElement("div");
+    container.innerHTML = html;
 
-  const sanitizedChildren = Array.from(container.childNodes)
-    .map((n) => sanitizeNode(n))
-    .filter(Boolean) as Node[];
-  const output = document.createElement("div");
-  sanitizedChildren.forEach((n) => output.appendChild(n));
-  return output.innerHTML;
+    const allowedTags = new Set([
+      "H1",
+      "H2",
+      "H3",
+      "P",
+      "UL",
+      "OL",
+      "LI",
+      "STRONG",
+      "EM",
+      "A",
+      "BR",
+      "SPAN",
+    ]);
+
+    // Guard against runaway recursion
+    const NODE_LIMIT = 4000;
+    let visited = 0;
+
+    const sanitizeNode = (node: Node): Node | null => {
+      visited += 1;
+      if (visited > NODE_LIMIT) {
+        return document.createTextNode("");
+      }
+
+      if (node.nodeType === Node.TEXT_NODE) return node;
+
+      if (node.nodeType === Node.ELEMENT_NODE) {
+        const element = node as HTMLElement;
+        const tag = element.tagName.toUpperCase();
+
+        if (!allowedTags.has(tag)) {
+          const fragment = document.createDocumentFragment();
+          while (element.firstChild) {
+            const child = element.firstChild;
+            const sanitizedChild = sanitizeNode(child);
+            if (sanitizedChild) {
+              fragment.appendChild(sanitizedChild);
+            } else {
+              element.removeChild(child);
+            }
+          }
+          return fragment;
+        }
+
+        // Strip all attributes except safe href on anchors
+        Array.from(element.attributes).forEach((attr) => {
+          const attrName = attr.name.toLowerCase();
+          if (!(tag === "A" && attrName === "href")) {
+            element.removeAttribute(attr.name);
+          }
+        });
+
+        if (tag === "A") {
+          const href = element.getAttribute("href") || "";
+          const isSafe = /^(https?:|mailto:|tel:)/i.test(href);
+          if (!isSafe) {
+            element.removeAttribute("href");
+          }
+        }
+
+        // Recurse children
+        Array.from(element.childNodes).forEach((child) => {
+          const sanitizedChild = sanitizeNode(child);
+          if (sanitizedChild !== child) {
+            if (sanitizedChild) {
+              element.replaceChild(sanitizedChild, child);
+            } else {
+              element.removeChild(child);
+            }
+          }
+        });
+
+        return element;
+      }
+
+      return null;
+    }
+
+    const sanitizedChildren = Array.from(container.childNodes)
+      .map((n) => sanitizeNode(n))
+      .filter(Boolean) as Node[];
+    const output = document.createElement("div");
+    sanitizedChildren.forEach((n) => output.appendChild(n));
+    return output.innerHTML;
+  } catch {
+    // As a final fallback, return truncated plain text
+    try {
+      return truncateDescription(html, 60);
+    } catch {
+      return "";
+    }
+  }
+}
+
+// Convert HTML to plain text and preserve basic line breaks
+function htmlToPlainTextWithBreaks(html: string | null): string {
+  if (!html) return "";
+  let text = html
+    .replace(/<\s*br\s*\/?>/gi, '\n')
+    .replace(/<\/\s*(p|div|h[1-6]|li|ul|ol)\s*>/gi, '\n');
+  text = text.replace(/<[^>]+>/g, '');
+  text = text.replace(/\n{3,}/g, '\n\n').trim();
+  return text;
 }
 
 export default function SearchResultsList({
@@ -293,7 +327,7 @@ export default function SearchResultsList({
     setLoadingStates(prev => ({ ...prev, [itemId]: true }));
 
     try {
-      const token = localStorage.getItem('token');
+      const token = getAuthToken();
       if (!token) {
         console.error('No auth token found');
         return;
@@ -401,6 +435,10 @@ export default function SearchResultsList({
                 ? `$${numericPrice.toLocaleString('en-US', { maximumFractionDigits: 2 })}`
                 : normalizedPrice;
               const coverageText = formatCoverageRange(item.cover_start, item.cover_end);
+              const roles = Array.isArray(item.insighter?.roles) ? item.insighter.roles : [];
+              const isCompany = roles.includes("company");
+              const isCompanyInsighter = roles.includes("company-insighter");
+              const isInsighter = roles.includes("insighter");
 
               return (
                 <Card
@@ -487,12 +525,12 @@ export default function SearchResultsList({
                     <div className="relative">
                    <div className="object-cover object-top">
                    <Link 
-                     href={item.insighter.roles.includes("company") || item.insighter.roles.includes("company-insighter") ? 
-                       `/${currentLocale}/profile/${item.insighter.company?.uuid}` : 
-                       `/${currentLocale}/profile/${item.insighter.uuid}?entity=insighter`}
+                    href={isCompany || isCompanyInsighter ? 
+                      `/${currentLocale}/profile/${item.insighter.company?.uuid}` : 
+                      `/${currentLocale}/profile/${item.insighter.uuid}?entity=insighter`}
                    >
                      <Avatar
-                       src={(item.insighter.roles.includes("company") || item.insighter.roles.includes("company-insighter")) && item.insighter.company?.logo ? 
+                       src={(isCompany || isCompanyInsighter) && item.insighter.company?.logo ? 
                          item.insighter.company.logo : 
                          item.insighter.profile_photo_url}
                        radius="xl"
@@ -500,14 +538,14 @@ export default function SearchResultsList({
                        size="md"
                        className={`${cardStyles.avatar} avatar-top-position`}
                      >
-                       {!((item.insighter.roles.includes("company") || item.insighter.roles.includes("company-insighter")) && item.insighter.company?.logo) && 
+                       {!((isCompany || isCompanyInsighter) && item.insighter.company?.logo) && 
                        !item.insighter.profile_photo_url &&
                          getInitials(item.insighter.name)}
                      </Avatar>
                    </Link>
                    </div>
                         
-                        {item.insighter.roles.includes("company-insighter") && item.insighter.profile_photo_url && (
+                        {isCompanyInsighter && item.insighter.profile_photo_url && (
                           <Link href={`/${currentLocale}/profile/${item.insighter.uuid}?entity=insighter`}>
                           <Avatar
                             src={item.insighter.profile_photo_url}
@@ -523,7 +561,7 @@ export default function SearchResultsList({
                           />
                           </Link>
                         )}
-                         {item.insighter.roles.includes("company") && item.insighter.profile_photo_url && (
+                         {isCompany && item.insighter.profile_photo_url && (
                           <Link href={`/${currentLocale}/profile/${item.insighter.uuid}?entity=insighter`}>
                           <Avatar
                             src={item.insighter.profile_photo_url}
@@ -543,11 +581,11 @@ export default function SearchResultsList({
                     <div>
                     <Text fw={600} size="sm" className="capitalize" c="white" ps={4}>
                           <Link href={`/${currentLocale}/profile/${item.insighter.uuid}?entity=insighter`}>
-                          {item.insighter.roles.includes("insighter") && item.insighter.name.toLowerCase()}
+                          {isInsighter && item.insighter.name.toLowerCase()}
                           </Link>
 
                         <Link href={`/${currentLocale}/profile/${item.insighter.company?.uuid}`}>
-                          {item.insighter.roles.includes("company") && (
+                          {isCompany && (
                             item.insighter.company
                               ? isRTL
                                 ? ` ${item.insighter.company.legal_name}`
@@ -557,7 +595,7 @@ export default function SearchResultsList({
                           </Link>
 
                           <Link href={`/${currentLocale}/profile/${item.insighter.company?.uuid}`}>
-                          {item.insighter.roles.includes("company-insighter") && (
+                          {isCompanyInsighter && (
                             item.insighter.company
                               ? isRTL
                                 ? ` ${item.insighter.company.legal_name}`
@@ -569,11 +607,11 @@ export default function SearchResultsList({
 
                         <Text c="dimmed" size="xs" className="capitalize" ps={4}>
                           <Link href={`/${currentLocale}/profile/${item.insighter.uuid}?entity=insighter`}>
-                          {item.insighter.roles.includes("insighter") && translations.insighter}
+                          {isInsighter && translations.insighter}
                           </Link>
 
                          
-                          {item.insighter.roles.includes("company") && (
+                          {isCompany && (
                             item.insighter.company
                               ? (<Link href={`/${currentLocale}/profile/${item.insighter?.uuid}?entity=insighter`}>
                                 {translations.by} {item.insighter.name.toLowerCase()}
@@ -584,7 +622,7 @@ export default function SearchResultsList({
                           )}
 
                           <Link href={`/${currentLocale}/profile/${item.insighter.company?.uuid}`}>
-                          {item.insighter.roles.includes("company-insighter") && (
+                          {isCompanyInsighter && (
                             item.insighter.company
                               ? (<Link href={`/${currentLocale}/profile/${item.insighter?.uuid}?entity=insighter`}>
                                 {translations.by} {item.insighter.name.toLowerCase()}
@@ -608,8 +646,10 @@ export default function SearchResultsList({
                           className={`${listStyles.richDescription} ${listStyles.richDescriptionCollapsed}`}
                           ref={(el) => { descRefs.current[item.searchable_id] = el; }}
                           dir={(item.language === 'arabic') ? "rtl" : "ltr"}
-                          dangerouslySetInnerHTML={{ __html: sanitizeLimitedHtml(item.description) }}
-                        />
+                          style={{ whiteSpace: 'pre-line' }}
+                        >
+                          {htmlToPlainTextWithBreaks(item.description)}
+                        </div>
                       </Link>
                       {needsToggleMap[item.searchable_id] && (
                         <Link
