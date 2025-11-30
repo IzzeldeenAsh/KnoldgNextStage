@@ -27,7 +27,7 @@ async function getProfileData(uuid: string, locale: string): Promise<ProfileData
   try {
     // Try insighter API first
     let response = await fetch(
-      `https://api.foresighta.co/api/platform/insighter/profile/${uuid}`,
+      `https://api.insightabusiness.com/api/platform/insighter/profile/${uuid}`,
       {
         headers: {
           'Content-Type': 'application/json',
@@ -83,8 +83,10 @@ async function getProfileData(uuid: string, locale: string): Promise<ProfileData
   }
 }
 
-export async function generateMetadata({ params }: ProfileLayoutProps): Promise<Metadata> {
-  const { uuid, locale } = params;
+export async function generateMetadata(
+  { params }: { params: Promise<{ uuid: string; locale: string }> }
+): Promise<Metadata> {
+  const { uuid, locale } = await params;
   const profileData = await getProfileData(uuid, locale);
 
   if (!profileData) {
@@ -124,7 +126,7 @@ export async function generateMetadata({ params }: ProfileLayoutProps): Promise<
     : `${profileName} - Profile | ${platformText}`;
 
   // Construct the profile URL
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://foresighta.co';
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://insightabusiness.com';
   const profileUrl = `${baseUrl}/${locale}/profile/${uuid}`;
 
   return {
