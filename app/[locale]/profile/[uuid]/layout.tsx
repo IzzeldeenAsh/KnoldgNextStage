@@ -91,7 +91,7 @@ export async function generateMetadata(
 
   if (!profileData) {
     return {
-      title: 'Profile Not Found - Foresighta',
+      title: 'Profile Not Found - Insighta',
       description: 'The requested profile could not be found.',
     };
   }
@@ -113,7 +113,7 @@ export async function generateMetadata(
     ? (isCompany ? 'شركة' : 'خبير')
     : (isCompany ? 'Company' : 'Insighter');
 
-  const platformText = locale === 'ar' ? 'فورسايتا' : 'Foresighta';
+  const platformText = locale === 'ar' ? 'انسايتا' : 'Insighta';
 
   const description = profileData.bio
     ? `${profileData.bio.slice(0, 155)}...`
@@ -126,8 +126,13 @@ export async function generateMetadata(
     : `${profileName} - Profile | ${platformText}`;
 
   // Construct the profile URL
-  const baseUrl =  'https://foresighta.co';
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://foresighta.co';
   const profileUrl = `${baseUrl}/${locale}/profile/${uuid}`;
+  const absoluteProfileImage = profileImage
+    ? (profileImage.startsWith('http')
+      ? profileImage
+      : `${baseUrl}${profileImage.startsWith('/') ? '' : '/'}${profileImage}`)
+    : null;
 
   return {
     title,
@@ -139,31 +144,27 @@ export async function generateMetadata(
       siteName: platformText,
       locale: locale === 'ar' ? 'ar_AE' : 'en_US',
       type: 'profile',
-      images: profileImage ? [
+      images: absoluteProfileImage ? [
         {
-          url: profileImage,
-          width: 400,
-          height: 400,
+          url: absoluteProfileImage,
           alt: `${profileName}'s profile picture`,
-          type: 'image/jpeg',
         },
       ] : [
         {
           url: `${baseUrl}/api/og-image?name=${encodeURIComponent(profileName)}&type=${roleText}`,
-          width: 1200,
-          height: 630,
           alt: `${profileName}'s profile`,
-          type: 'image/png',
         },
       ],
     },
     twitter: {
-      card: 'summary_large_image',
+      card: 'summary',
       title,
       description,
-      images: profileImage ? [profileImage] : [`${baseUrl}/api/og-image?name=${encodeURIComponent(profileName)}&type=${roleText}`],
-      creator: '@foresighta_co',
-      site: '@foresighta_co',
+      images: absoluteProfileImage
+        ? [absoluteProfileImage]
+        : [`${baseUrl}/api/og-image?name=${encodeURIComponent(profileName)}&type=${roleText}`],
+      creator: '@insightabusiness_com',
+      site: '@insightabusiness_com',
     },
     robots: {
       index: true,
