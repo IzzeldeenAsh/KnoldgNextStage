@@ -2,10 +2,10 @@ import { Metadata } from 'next'
 
 interface ProfileLayoutProps {
   children: React.ReactNode
-  params: {
+  params: Promise<{
     uuid: string
     locale: string
-  }
+  }>
 }
 
 interface ProfileData {
@@ -27,7 +27,7 @@ async function getProfileData(uuid: string, locale: string): Promise<ProfileData
   try {
     // Try insighter API first
     let response = await fetch(
-      `https://api.insightabusiness.com/api/platform/insighter/profile/${uuid}`,
+      `https://api.foresighta.co/api/platform/insighter/profile/${uuid}`,
       {
         headers: {
           'Content-Type': 'application/json',
@@ -126,7 +126,7 @@ export async function generateMetadata(
     : `${profileName} - Profile | ${platformText}`;
 
   // Construct the profile URL
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://insightabusiness.com';
+  const baseUrl =  'https://foresighta.co';
   const profileUrl = `${baseUrl}/${locale}/profile/${uuid}`;
 
   return {
