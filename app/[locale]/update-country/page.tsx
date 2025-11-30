@@ -123,7 +123,7 @@ export default function UpdateCountryPage() {
       // Check if it's an Angular route
       if (isAngularRoute(redirectUrl)) {
         const angularPath = redirectUrl.startsWith('/app/') ? redirectUrl : `/app${redirectUrl}`;
-        window.location.href = `http://localhost:4200${angularPath}`;
+        window.location.href = `https://app.foresighta.co${angularPath}`;
       } else {
         // Handle relative URLs by ensuring they start with the locale
         let finalUrl = redirectUrl;
@@ -162,7 +162,7 @@ export default function UpdateCountryPage() {
     if (isLocalhost) {
       document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
     } else {
-      document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; Domain=.insightabusiness.com; Secure; SameSite=None;`;
+      document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; Domain=.foresighta.co; Secure; SameSite=None;`;
     }
   };
 

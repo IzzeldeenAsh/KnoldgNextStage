@@ -118,7 +118,7 @@ export function UserProfile({ isHome }: { isHome: boolean }) {
     return (
       <>
         <Link
-          href="http://localhost:4200/auth/login"
+          href="https://app.foresighta.co/auth/login"
           className="btn-sm bg-gray-800 text-gray-200 shadow hover:bg-gray-900"
         >
           {t("login")}
@@ -293,7 +293,7 @@ export function UserProfile({ isHome }: { isHome: boolean }) {
               roles.includes("company-insighter")) && (
             <>
               <Link
-                href="http://localhost:4200/app/add-knowledge/stepper"
+                href="https://app.foresighta.co/app/add-knowledge/stepper"
                 className="block px-4 py-2.5 text-sm font-medium text-sky-600 hover:bg-indigo-50 hover:text-sky-700"
                 onClick={() => setMenuOpen(false)}
                 style={{fontSize: '13px'}}
@@ -301,7 +301,7 @@ export function UserProfile({ isHome }: { isHome: boolean }) {
                 {t("addInsight")}
               </Link>
                <Link
-               href="http://localhost:4200/app/insighter-dashboard/my-knowledge/general"
+               href="https://app.foresighta.co/app/insighter-dashboard/my-knowledge/general"
                className="block px-4 py-2.5  font-semibold text-slate-900 hover:bg-indigo-50 hover:text-sky-700"
                onClick={() => setMenuOpen(false)}
                style={{fontSize: '13px'}}
@@ -313,7 +313,7 @@ export function UserProfile({ isHome }: { isHome: boolean }) {
 
             {(roles.includes('company') && (
               <Link
-                href="http://localhost:4200/app/insighter-dashboard/my-company-settings"
+                href="https://app.foresighta.co/app/insighter-dashboard/my-company-settings"
                 className="block px-4 py-2.5  font-semibold text-slate-900 hover:bg-indigo-50 hover:text-sky-700"
                 onClick={() => setMenuOpen(false)}
                 style={{fontSize: '13px'}}
@@ -323,16 +323,24 @@ export function UserProfile({ isHome }: { isHome: boolean }) {
             ))}
               </div>
             <Link
-              href="http://localhost:4200/app/profile/overview"
+              href="https://app.foresighta.co/app/profile/overview"
               className="block px-4 py-3  font-semibold text-slate-900 hover:bg-indigo-50 hover:text-sky-700"
               style={{fontSize: '13px'}}
               onClick={() => setMenuOpen(false)}
             >
               {t("myProfile")}
             </Link>
+            <Link
+              href={`https://foresighta.co/en/profile/${user.uuid}?entity=insighter`}
+              className="block px-4 py-2.5  font-semibold text-slate-900 hover:bg-indigo-50 hover:text-sky-700"
+              style={{fontSize: '13px'}}
+              onClick={() => setMenuOpen(false)}
+            >
+              {t("myInsighterPage")}
+            </Link>
             {/* Show dashboard for all users */}
             <Link
-              href="http://localhost:4200/app/insighter-dashboard/my-dashboard"
+              href="https://app.foresighta.co/app/insighter-dashboard/my-dashboard"
               className="block px-4 py-2.5 font-semibold text-slate-900 hover:bg-indigo-50 hover:text-sky-700"
               onClick={() => setMenuOpen(false)}
               style={{fontSize: '13px'}}
@@ -340,7 +348,7 @@ export function UserProfile({ isHome }: { isHome: boolean }) {
               {t("dashboard")}
             </Link>
             {/* <Link
-            href="http://localhost:4200/app/insighter-dashboard/my-consulting-schedule"
+            href="https://app.foresighta.co/app/insighter-dashboard/my-consulting-schedule"
             className="block px-4 py-2.5 font-semibold text-slate-900 hover:bg-indigo-50 hover:text-sky-700"
             onClick={() => setMenuOpen(false)}
             style={{fontSize: '13px'}}
@@ -351,7 +359,7 @@ export function UserProfile({ isHome }: { isHome: boolean }) {
             {!isClient$() && (
               <>
                 {/* <Link
-                  href="http://localhost:4200/app/insighter-dashboard/my-requests"
+                  href="https://app.foresighta.co/app/insighter-dashboard/my-requests"
                   className="block px-4 py-2.5 font-semibold text-slate-900 hover:bg-indigo-50 hover:text-sky-700"
                   onClick={() => setMenuOpen(false)}
                   style={{fontSize: '13px'}}
@@ -359,7 +367,7 @@ export function UserProfile({ isHome }: { isHome: boolean }) {
                   {t("myRequests")}
                 </Link> */}
                 {/* <Link
-                  href="http://localhost:4200/app/insighter-dashboard/my-meetings/received"
+                  href="https://app.foresighta.co/app/insighter-dashboard/my-meetings/received"
                   className="block px-4 py-2.5 font-semibold text-slate-900 hover:bg-indigo-50 hover:text-sky-700"
                   onClick={() => setMenuOpen(false)}
                   style={{fontSize: '13px'}}
@@ -367,7 +375,7 @@ export function UserProfile({ isHome }: { isHome: boolean }) {
                   {t("ReceivedMeetings")}
                 </Link> */}
                 <Link
-                  href="http://localhost:4200/app/insighter-dashboard/account-settings/general-settings"
+                  href="https://app.foresighta.co/app/insighter-dashboard/account-settings/general-settings"
                   className="block px-4 py-2.5 font-semibold text-slate-900 hover:bg-indigo-50 hover:text-sky-700"
                   onClick={() => setMenuOpen(false)}
                   style={{fontSize: '13px'}}
@@ -381,7 +389,7 @@ export function UserProfile({ isHome }: { isHome: boolean }) {
             {/* Show company settings only for company role */}
             {/* {roles.includes('company') && 
               <Link
-                href="http://localhost:4200/app/insighter-dashboard/my-company-settings"
+                href="https://app.foresighta.co/app/insighter-dashboard/my-company-settings"
                 className="block px-4 py-2.5 font-semibold text-slate-900 hover:bg-indigo-50 hover:text-sky-700"
                 onClick={() => setMenuOpen(false)}
                 style={{fontSize: '13px'}}
@@ -395,7 +403,7 @@ export function UserProfile({ isHome }: { isHome: boolean }) {
               !roles.includes("company-insighter") && (
                 <>
                 <Link
-                  href="http://localhost:4200/app/insighter-register/vertical"
+                  href="https://app.foresighta.co/app/insighter-register/vertical"
                   className="block px-4 py-2.5  font-semibold bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-teal-400"
                   onClick={() => setMenuOpen(false)}
                   style={{fontSize: '13px'}}

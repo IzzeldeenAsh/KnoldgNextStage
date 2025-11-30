@@ -22,7 +22,7 @@ import { VisaIcon, MasterCardIcon, GooglePayIcon, ApplePayIcon } from "@/compone
 import { useUserProfile } from "@/app/lib/useUserProfile";
 
 // Initialize Stripe
-const stripePromise = loadStripe("pk_live_51RvbpYRIE7WtDi9SLKPBxKTPyTkULT1e36AZMOcmtUomKgW99akiph2PVg5mmUcPtyAjvlXwP1wy70OFvooJLpQc00CNQYKb96");
+const stripePromise = loadStripe("pk_test_51RpQiFL3mrWP7a0P1OYWGeFJWtgMwcWJtiEDLvn29CpYn5x8Ou77YViA1yoimlixKU5aUAeOeN5VTfoC4sMpvFVF00qq9a6BNm");
 
 interface MeetingTime {
   start_time: string;
@@ -639,8 +639,8 @@ export default function MeetTab({
             </h3>
             <p className="text-gray-500 mb-4">{t("loginToView")}</p>
             <a
-              href={`http://localhost:4200/auth/login?returnUrl=${encodeURIComponent(
-                `http://localhost:3000/${locale}/profile/${uuid}${
+              href={`https://app.foresighta.co/auth/login?returnUrl=${encodeURIComponent(
+                `https://foresighta.co/${locale}/profile/${uuid}${
                   typeof window !== "undefined"
                     ? window.location.search
                     : ""
@@ -1306,7 +1306,7 @@ export default function MeetTab({
               className="bg-gradient-to-r from-blue-500 to-teal-400 hover:from-blue-600 hover:to-teal-500 transition-all"
               onClick={() => {
                 // Redirect to meetings dashboard
-                window.location.href = "http://localhost:4200/app/insighter-dashboard/my-meetings";
+                window.location.href = "https://app.foresighta.co/app/insighter-dashboard/my-meetings";
               }}
             >
               {locale.startsWith('ar') ? 'اذهب إلى الاجتماعات' : 'Go to Meetings'}

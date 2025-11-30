@@ -211,7 +211,7 @@ const { isLoading: isAppLoading, setIsLoading: setAppLoading } = useLoading();
       // Local variation
       `${cookieName}=; Path=/; Max-Age=-1`,
       // Production domain variation
-      `${cookieName}=; Domain=.insightabusiness.com; Path=/; Max-Age=-1; Secure; SameSite=None`,
+      `${cookieName}=; Domain=.foresighta.co; Path=/; Max-Age=-1; Secure; SameSite=None`,
       // Fallback without domain
       `${cookieName}=; Path=/; Max-Age=-1; ${isProduction ? 'Secure; SameSite=None' : 'SameSite=Lax'}`
     ];
@@ -245,7 +245,7 @@ const { isLoading: isAppLoading, setIsLoading: setAppLoading } = useLoading();
       ];
 
       if (isProduction) {
-        cookieParts.push(`Domain=.insightabusiness.com`); // leading dot = include subdomains
+        cookieParts.push(`Domain=.foresighta.co`); // leading dot = include subdomains
         cookieParts.push(`Secure`);                // HTTPS only in production
       }
 
@@ -516,7 +516,7 @@ const { isLoading: isAppLoading, setIsLoading: setAppLoading } = useLoading();
             ) : (
               <li>
                 <Link className="btn-sm text-slate-300 hover:text-white [background:linear-gradient(theme(colors.slate.900),_theme(colors.slate.900))_padding-box,_conic-gradient(theme(colors.slate.400),_theme(colors.slate.700)_25%,_theme(colors.slate.700)_75%,_theme(colors.slate.400)_100%)_border-box] before:bg-slate-800/30 hover:scale-105 active:scale-95 transition-all duration-150 ease-in-out group relative before:absolute before:inset-0 before:rounded-full before:pointer-events-none" 
-                href={`http://localhost:4200/auth/login?returnUrl=${encodeURIComponent(typeof window !== 'undefined' ? window.location.href : '')}`}>
+                href={`https://app.foresighta.co/auth/login?returnUrl=${encodeURIComponent(typeof window !== 'undefined' ? window.location.href : '')}`}>
                   <span className="relative inline-flex items-center">
                     {t('auth.login')} <span className="tracking-normal text-blue-500 group-hover:translate-x-1 transition-transform duration-150 ease-in-out ml-1">-&gt;</span>
                   </span>
