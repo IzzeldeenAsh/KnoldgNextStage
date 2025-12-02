@@ -1,9 +1,9 @@
 'use client';
 
 import React, { useState, useEffect } from "react";
-import { Rating, Textarea, Button, Card, Text, Loader } from "@mantine/core";
+import { Textarea, Button, Card, Text, Loader } from "@mantine/core";
 import Image from "next/image";
-import { IconX, IconCheck, IconTrash } from "@tabler/icons-react";
+import { IconX, IconCheck, IconTrash, IconStar, IconStarFilled } from "@tabler/icons-react";
 import { useReview } from "@/hooks/knowledgs/useReview";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
@@ -40,6 +40,73 @@ function getInitials(name: string) {
     .toUpperCase();
 }
 
+// Custom RTL-aware Star Rating Component
+interface CustomRatingProps {
+  value: number;
+  onChange: (value: number) => void;
+  isRTL: boolean;
+  max?: number;
+  readOnly?: boolean;
+}
+
+function CustomRating({ value, onChange, isRTL, max = 5, readOnly = false }: CustomRatingProps) {
+  const [hoverValue, setHoverValue] = useState<number | null>(null);
+
+  const handleStarClick = (starIndex: number) => {
+    if (!readOnly) {
+      onChange(starIndex + 1);
+    }
+  };
+
+  const handleStarHover = (starIndex: number) => {
+    if (!readOnly) {
+      setHoverValue(starIndex + 1);
+    }
+  };
+
+  const handleMouseLeave = () => {
+    if (!readOnly) {
+      setHoverValue(null);
+    }
+  };
+
+  const currentValue = hoverValue ?? value;
+
+  const stars = Array.from({ length: max }, (_, index) => {
+    const filled = (index + 1) <= currentValue;
+
+    return (
+      <button
+        key={index}
+        type="button"
+        className={`focus:outline-none transition-colors duration-150 ${readOnly ? 'cursor-default' : 'cursor-pointer'}`}
+        onClick={() => handleStarClick(index)}
+        onMouseEnter={() => handleStarHover(index)}
+        onMouseLeave={handleMouseLeave}
+        disabled={readOnly}
+      >
+        {filled ? (
+          <IconStarFilled
+            size={20}
+            className="text-yellow-400 hover:text-yellow-500"
+          />
+        ) : (
+          <IconStar
+            size={20}
+            className="text-gray-300 hover:text-yellow-400"
+          />
+        )}
+      </button>
+    );
+  });
+
+  return (
+    <div className="flex gap-1 justify-start" dir={isRTL ? 'rtl' : 'ltr'}>
+      {stars}
+    </div>
+  );
+}
+
 export default function Reviews({ knowledgeSlug, reviews, is_review, is_owner, hasPurchasedAny }: ReviewsProps) {
   // Get locale and determine RTL
   const params = useParams();
@@ -53,7 +120,7 @@ export default function Reviews({ knowledgeSlug, reviews, is_review, is_owner, h
   const translations = {
     allReviews: isRTL ? 'جميع المراجعات' : 'All Reviews',
     noReviewsYet: isRTL ? 'لا توجد مراجعات حتى الآن.' : 'No reviews yet.',
-    rateKnowledge: isRTL ? 'قيّم هذا المستند' : 'Rate This Knowledge',
+    rateKnowledge: isRTL ? 'قيّم هذا المستند' : 'Rate This Insight',
     comment: isRTL ? 'التعليق' : 'Comment',
     writeReview: isRTL ? 'اكتب ملاحظاتك هنا' : 'Write your review...',
     submitReview: isRTL ? 'تقييم' : 'Submit Review',
@@ -316,11 +383,10 @@ export default function Reviews({ knowledgeSlug, reviews, is_review, is_owner, h
                   <Text fw={500} fs="xs" mb={5} className={isRTL ? 'text-right' : 'text-start'}>
                     {translations.rateKnowledge}
                   </Text>
-                  {/* @ts-ignore: The current Rating type doesn't include the `max` prop */}
-                  <Rating
-                    fractions={1}
+                  <CustomRating
                     value={rate}
                     onChange={(value) => setRate(value)}
+                    isRTL={isRTL}
                   />
                 </div>
                 <div>
@@ -398,11 +464,11 @@ export default function Reviews({ knowledgeSlug, reviews, is_review, is_owner, h
                   </div>
                   <div className="mt-2">
                     <div className="flex items-center">
-                      {/* @ts-ignore: The current Rating type doesn't include the `max` prop */}
-                      <Rating
-                        fractions={1}
+                      <CustomRating
                         value={review.rate}
-                        readOnly
+                        onChange={() => {}} // Read-only, so empty function
+                        isRTL={isRTL}
+                        readOnly={true}
                       />
                       <span className={`${isRTL ? 'mr-2' : 'ml-2'} text-sm`}>
                         {review.rate}/5

@@ -165,6 +165,12 @@ export default function ProfilePage() {
     show: boolean;
     message: string;
   }>({ show: false, message: "" });
+  // Insighter statistics (e.g., total meetings)
+  interface InsighterStatistics {
+    total_meeting: number;
+  }
+  const [insighterStatistics, setInsighterStatistics] =
+    useState<InsighterStatistics | null>(null);
 
   const params = useParams();
   const searchParams = useSearchParams();
@@ -390,6 +396,37 @@ export default function ProfilePage() {
 
     fetchKnowledgeData();
   }, [uuid, locale, knowledgePage, selectedType, profileData]);
+
+  // Fetch insighter statistics when viewing an insighter profile
+  useEffect(() => {
+    const fetchInsighterStatistics = async () => {
+      if (!uuid || (enterpriseType ?? searchParams.get("entity")) !== "insighter") {
+        setInsighterStatistics(null);
+        return;
+      }
+      try {
+        const response = await fetch(
+          `https://api.foresighta.co/api/platform/insighter/profile/statistics/${uuid}`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/json",
+              "Accept-Language": locale,
+            },
+            cache: "no-store",
+          }
+        );
+        if (!response.ok) return;
+        const data = await response.json();
+        setInsighterStatistics(data?.data ?? null);
+      } catch {
+        // Silently ignore; UI will fallback to 0
+        setInsighterStatistics(null);
+      }
+    };
+    fetchInsighterStatistics();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [uuid, locale, enterpriseType]);
 
   // State to track if user is authenticated
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
@@ -1008,6 +1045,7 @@ export default function ProfilePage() {
                     <div>
                       {/* Name and Badges */}
                       <div className="flex flex-wrap items-center gap-2 mb-1 capitalize">
+                      {isRTL && <IconRosetteDiscountCheckFilled className="w-5 h-5 text-blue-500" />}
                         {enterpriseType === "insighter" && (
                           <div>
                             <h1 className="text-2xl font-bold">
@@ -1021,8 +1059,7 @@ export default function ProfilePage() {
                             {profileData.company?.legal_name || ""}
                           </h1>
                         )}
-
-                        <IconRosetteDiscountCheckFilled className="w-5 h-5 text-blue-500" />
+                     {!isRTL && <IconRosetteDiscountCheckFilled className="w-5 h-5 text-blue-500" />}
                         {isCompany && enterpriseType !== "insighter" && (
                           <span
                             className={`bg-[#EFF8FF] text-[#299AF8] font-bold text-xs px-2 py-0.5 rounded-full inline-flex items-center ${
@@ -1068,8 +1105,9 @@ export default function ProfilePage() {
                             </span>
                           </Link>
                         )}
+                        
                       </div>
-                      {(isCompany && entityParam) && <div className="text-blue-500 text-sm font-semibold">{t("manager")}</div>}
+                      {(isCompany && entityParam) && <div className="text-blue-500 text-sm font-semibold text-center md:text-start">{t("manager")}</div>}
 
                       {/* Title/Role & Location */}
                       <div className="mb-3">
@@ -1122,7 +1160,7 @@ export default function ProfilePage() {
                           {knowledgeData?.meta.total || 0}
                         </p>
                       </div>
-                      {/* {enterpriseType === "insighter" && (
+                      {enterpriseType === "insighter" && (
                         <div className="text-start bg-gradient-to-br from-white to-blue-50 dark:from-slate-700 dark:to-slate-600 p-3 rounded-lg hover:shadow-md transition-all duration-300 transform hover:-translate-y-1 border border-gray-100 dark:border-slate-600 group">
                           <div className="flex items-center mb-2">
                             <div className="p-1.5 bg-blue-100 dark:bg-blue-900/30 rounded-full me-2 group-hover:scale-110 transition-transform">
@@ -1140,10 +1178,10 @@ export default function ProfilePage() {
                             />
                           </div>
                           <p className="bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-teal-500 font-bold text-4xl">
-                            0
+                            {insighterStatistics?.total_meeting ?? 0}
                           </p>
                         </div>
-                      )} */}
+                      )}
                     </div>
                   </div>
                 </div>
@@ -1204,7 +1242,7 @@ export default function ProfilePage() {
                   enterpriseType === "insighter" && (
                     <Tabs.Tab
                       value="meet"
-                      className="text-base font-medium px-8 py-4 transition"
+                      className={`text-base font-medium px-8 py-4 transition ${styles.shinyGradientText}`}
                     >
                       {t("meet")} {profileData?.first_name || ""}
                     </Tabs.Tab>
