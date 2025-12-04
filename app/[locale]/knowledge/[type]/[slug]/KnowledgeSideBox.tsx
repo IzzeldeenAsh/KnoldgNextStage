@@ -285,7 +285,7 @@ const KnowledgeSideBox = ({
     removeReadLater: isRTL ? 'إزالة من قراءة لاحقا' : 'Remove Read Later',
     na: isRTL ? 'غير متوفر' : 'N/A',
     free: isRTL ? 'مجاني' : 'Free',
-    share: isRTL ? 'مشاركة' : 'Share',
+    share: isRTL ? 'مشاركة الرؤية' : 'Share Insight',
     worldWide: isRTL ? 'كافة أنحاء العالم': 'Worldwide',
     showMore: isRTL ? 'عرض المزيد' : 'Show more',
     showLess: isRTL ? 'عرض أقل' : 'Show less',
@@ -1103,6 +1103,14 @@ const KnowledgeSideBox = ({
           .tp-course-details2-widget-list-item:last-child {
             border-bottom: none;
           }
+.tp-course-details2-widget {
+    top: 100px !important;
+    margin-top: -320px !important;
+    position: sticky;
+    max-width: 400px;
+    z-index: 25 !important;
+}
+
 
           /* RTL support */
           [dir="rtl"] .chips-wrapper {
