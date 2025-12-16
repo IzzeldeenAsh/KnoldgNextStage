@@ -606,9 +606,9 @@ export function generateOrganizationSchema(locale: string) {
       : "Platform for buying and selling insight resources, insights and expertise",
     "sameAs": [
       // Add social media links when available
-      // "https://www.facebook.com/foresighta",
-      // "https://twitter.com/foresighta",
-      // "https://www.linkedin.com/company/foresighta"
+      // "https://www.facebook.com/insightabusiness",
+      // "https://twitter.com/insightabusiness",
+      // "https://www.linkedin.com/company/insightabusiness"
     ],
     "contactPoint": {
       "@type": "ContactPoint",

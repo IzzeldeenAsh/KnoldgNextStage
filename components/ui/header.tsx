@@ -204,14 +204,14 @@ const { isLoading: isAppLoading, setIsLoading: setAppLoading } = useLoading();
 
   // Helper function to clear duplicate cookies
   const clearDuplicateCookies = (cookieName: string) => {
-    const isProduction = typeof window !== 'undefined' && window.location.hostname.includes('foresighta.co');
+    const isProduction = typeof window !== 'undefined' && window.location.hostname.includes('insightabusiness.com');
 
     // Clear all possible variations of the cookie to prevent duplicates
     const clearVariations = [
       // Local variation
       `${cookieName}=; Path=/; Max-Age=-1`,
       // Production domain variation
-      `${cookieName}=; Domain=.foresighta.co.com; Path=/; Max-Age=-1; Secure; SameSite=None`,
+      `${cookieName}=; Domain=.foresighta.co; Path=/; Max-Age=-1; Secure; SameSite=None`,
       // Fallback without domain
       `${cookieName}=; Path=/; Max-Age=-1; ${isProduction ? 'Secure; SameSite=None' : 'SameSite=Lax'}`
     ];
@@ -232,7 +232,7 @@ const { isLoading: isAppLoading, setIsLoading: setAppLoading } = useLoading();
     // Wait a moment for cookie clearing to take effect
     setTimeout(() => {
       // Enhanced cookie setting for better browser compatibility (especially Safari/Firefox)
-      const isProduction = typeof window !== 'undefined' && window.location.hostname.includes('foresighta.co');
+      const isProduction = typeof window !== 'undefined' && window.location.hostname.includes('insightabusiness.com');
       const expirationDate = new Date();
       expirationDate.setFullYear(expirationDate.getFullYear() + 1); // 1 year from now
 
@@ -245,7 +245,7 @@ const { isLoading: isAppLoading, setIsLoading: setAppLoading } = useLoading();
       ];
 
       if (isProduction) {
-        cookieParts.push(`Domain=.foresighta.co.com`); // leading dot = include subdomains
+        cookieParts.push(`Domain=.foresighta.co`); // leading dot = include subdomains
         cookieParts.push(`Secure`);                // HTTPS only in production
       }
 

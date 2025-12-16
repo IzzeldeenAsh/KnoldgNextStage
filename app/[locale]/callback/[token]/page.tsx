@@ -160,7 +160,7 @@ export default function AuthCallback() {
         `Path=/`,
         `Max-Age=${60 * 60 * 24 * 7}`, // 7 days
         `SameSite=None`,
-        `Domain=.foresighta.co.com`,
+        `Domain=.foresighta.co`,
         `Secure`
       ];
     }
@@ -226,7 +226,7 @@ export default function AuthCallback() {
         'Path=/',
         'Max-Age=-1',
         'SameSite=None',
-        'Domain=.foresighta.co.com',
+        'Domain=.foresighta.co',
         'Secure'
       ];
     }
@@ -462,7 +462,7 @@ export default function AuthCallback() {
         'Path=/',
         'Max-Age=-1',
         'SameSite=None',
-        'Domain=.foresighta.co.com',
+        'Domain=.foresighta.co',
         'Secure'
       ];
     }
@@ -491,7 +491,7 @@ export default function AuthCallback() {
         `Path=/`,
         `Max-Age=${60 * 60}`, // 1 hour
         `SameSite=None`,
-        `Domain=.foresighta.co.com`,
+        `Domain=.foresighta.co`,
         `Secure`
       ];
     }
