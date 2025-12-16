@@ -12,13 +12,26 @@ interface SubIndustryCardProps {
 export default function SubIndustryCard({ child, locale, isRTL }: SubIndustryCardProps) {
   const t = useTranslations()
   const isDisabled = child.weight === 0
+  const isArabicFirstWord = (text: string): boolean => {
+    if (!text) return false
+    const firstWord = text.trim().split(/\s+/)[0] || ''
+    // Check if the first meaningful character of the first word is Arabic
+    for (let i = 0; i < firstWord.length; i++) {
+      const ch = firstWord[i]
+      if (/[\u0600-\u06FF]/.test(ch)) return true
+      // If we hit an ASCII letter/number, we can stop early
+      if (/[A-Za-z0-9]/.test(ch)) return false
+      // Otherwise skip punctuation/symbols and continue
+    }
+    return false
+  }
 
   return (
     <div 
       className={`relative group bg-gradient-to-br from-white to-slate-50 rounded-sm p-6 shadow-md border border-slate-100 h-full flex flex-col ${!isDisabled ? 'hover:shadow-lg hover:border-blue-100 hover:from-white hover:to-blue-50 transition-all duration-300 cursor-pointer' : 'opacity-50 cursor-not-allowed'}`}
     >
       <div className="space-y-2 flex-grow">
-        <h3 className={`text-base font-bold ${!isDisabled ? `text-transparent ${isRTL ? 'bg-gradient-to-l from-blue-400 to-teal-500' : 'bg-gradient-to-r from-blue-500 to-teal-400'} bg-clip-text` : 'text-gray-900'}`}>
+        <h3 className={`text-base font-bold ${isRTL ? 'text-right' : 'text-left'} ${!isDisabled ? `text-transparent ${isRTL ? 'bg-gradient-to-l from-blue-400 to-teal-500' : 'bg-gradient-to-r from-blue-500 to-teal-400'} bg-clip-text` : 'text-gray-900'}`}>
           {child.name}
           {isDisabled && <span className="ml-2 text-xs text-gray-500"></span>}
         </h3>
@@ -27,14 +40,17 @@ export default function SubIndustryCard({ child, locale, isRTL }: SubIndustryCar
           <ul className="space-y-1">
             {child.topic.map((topic) => {
               const isTopicDisabled = topic.weight === 0
+              const isTopicRTL = isArabicFirstWord(topic.name)
+              const effectiveRTL = isTopicRTL
               
               return (
                 <li 
                   key={topic.id} 
-                  className="text-sm text-gray-700 flex items-center"
+                  dir={effectiveRTL ? 'rtl' : 'ltr'}
+                  className={`text-sm text-gray-700 flex items-center ${effectiveRTL ? 'text-right' : 'text-left'}`}
                 >
-                  <span className={isRTL ? "ml-2" : "mr-2"}>•</span>
-                  <span className={isTopicDisabled ? "opacity-50" : ""}>{topic.name}</span>
+                  <span className={effectiveRTL ? 'ml-2' : 'mr-2'}>•</span>
+                  <span dir="auto" className={`${isTopicDisabled ? 'opacity-50' : ''} break-words`}>{topic.name}</span>
                 </li>
               )
             })}

@@ -312,7 +312,7 @@
         "topTag2":"Ready to deliver measurable business impact?"
     },
     "Footer": {
-        "copyright": " 2025 insightabusiness.com. All Rights Reserved.",
+        "copyright": " 2025 foresighta.co. All Rights Reserved.",
         "insight": {
             "title": "Insight",
             "insights": "Statistics",
@@ -554,6 +554,7 @@
         "all": "All",
         "data": "Data",
         "insight": "Insight",
+        "statistics": "Statistics",
         "report": "Report",
         "manual": "Manual",
         "course": "Course"
@@ -589,7 +590,7 @@
         "AccountRegistration":"Account Registration and Obligations",
         "Usersaccurate":"Users must provide accurate registration information.",
         "Usersresponsible":"Users are responsible for safeguarding login credentials.",
-        "Knoldgnotified":"Any unauthorized activity must be reported immediately to privacy@insightabusiness.com.",
+        "Knoldgnotified":"Any unauthorized activity must be reported immediately to privacy@foresighta.co.",
         "PaymentsRefunds":"Payments, Refunds, and Renewals",
         "Acceptedpayment":"Payments accepted via credit card, PayPal, bank transfer, or regional options.",
         "RefundsNotAllowed":"Refunds are only allowed in cases of duplicate charges or technical errors.",
@@ -628,7 +629,7 @@
         "KnoldgCookies":"We may modify this policy.",
         "UsersCookie":"Continued use of the platform after changes constitutes acceptance.",
         "UserRights":"User Rights",
-        "UsersHave":"You may request access, correction, deletion, portability, or withdrawal of consent at any time via privacy@insightabusiness.com.",
+        "UsersHave":"You may request access, correction, deletion, portability, or withdrawal of consent at any time via privacy@foresighta.co.",
         "AccessCorrect":"",
         "OptCommunications":"",
         "RequestPortability":"",
@@ -638,7 +639,7 @@
         "StrictSecurity":"",
         "RetentionPeriod":"Data Retention",
         "PersonalData2":"Personal data is retained only as long as necessary for service delivery or legal compliance.",
-        "privacyLastUpdate":"Last Updated: November 2025 | Contact: privacy@insightabusiness.com",
+        "privacyLastUpdate":"Last Updated: November 2025 | Contact: privacy@foresighta.co",
         "privacyContact":""
     },
     "dataLicenseAgreement": {

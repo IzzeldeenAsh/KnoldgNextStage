@@ -533,6 +533,7 @@
         "all": "الكل",
         "data": "بيانات",
         "insight": "إحصائيات",
+        "statistics": "إحصائيات",
         "report": "تقارير",
         "manual": "أدلة",
         "course": "دورات"
@@ -568,7 +569,7 @@
         "AccountRegistration":"التسجيل والالتزامات",
         "Usersaccurate":"يجب تقديم بيانات صحيحة ودقيقة.",
         "Usersresponsible":"يتحمل المستخدم مسؤولية سرية بيانات دخوله.",
-        "Knoldgnotified":"يجب إبلاغنا فورًا عبر البريد الإلكتروني privacy@insightabusiness.com عند أي استخدام غير مصرح به.",
+        "Knoldgnotified":"يجب إبلاغنا فورًا عبر البريد الإلكتروني privacy@foresighta.co عند أي استخدام غير مصرح به.",
         "PaymentsRefunds":"الدفع والاسترداد والتجديد",
         "Acceptedpayment":"طرق الدفع تشمل البطاقات البنكية و PayPal والتحويلات المصرفية.",
         "RefundsNotAllowed":"لا يُسمح بالاسترداد إلا في حالات الخطأ التقني.",
@@ -604,7 +605,7 @@
         "DataShared": "قد نشارك البيانات مع مزودي الخدمات (مثل بوابات الدفع ومزودي خدمات منع الاحتيال).",
         "InformationDisclosed": "عند نقل البيانات خارج الاتحاد الأوروبي، نستخدم البنود التعاقدية القياسية أو ضمانات مكافئة.",
         "UserRights": "حقوق المستخدم",
-        "UsersHave": "يحق للمستخدم الوصول إلى بياناته أو تصحيحها أو حذفها أو طلب نقلها أو سحب الموافقة عبر privacy@insightabusiness.com.",
+        "UsersHave": "يحق للمستخدم الوصول إلى بياناته أو تصحيحها أو حذفها أو طلب نقلها أو سحب الموافقة عبر privacy@foresighta.co.",
         "DataSecurity": "أمن البيانات",
         "Knoldgemploys": "نستخدم التشفير وضوابط الوصول الآمنة والمراقبة المنتظمة لحماية البيانات الشخصية.",
         "StrictSecurity": "",
@@ -613,7 +614,7 @@
         "CookiesTracking": "تحديث السياسة",
         "KnoldgCookies": "قد يتم تحديث هذه السياسة، ",
         "UsersCookie": "ويُعد استمرار الاستخدام موافقة على التعديلات.",
-        "privacyLastUpdate":"آخر تحديث : نوفمبر 2025 | للتواصل : privacy@insightabusiness.com",
+        "privacyLastUpdate":"آخر تحديث : نوفمبر 2025 | للتواصل : privacy@foresighta.co",
         "privacyContact":""
     },
     "dataLicenseAgreement": {
