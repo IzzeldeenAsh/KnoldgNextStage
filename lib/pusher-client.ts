@@ -11,9 +11,9 @@ type PusherOpts = {
 }
 
 function getConfig(): PusherOpts {
-  const key = process.env.NEXT_PUBLIC_PUSHER_KEY
-  const cluster = process.env.NEXT_PUBLIC_PUSHER_CLUSTER || 'eu'
-  const authEndpoint = process.env.NEXT_PUBLIC_PUSHER_AUTH_ENDPOINT
+  const key = '81566bb993a074e07d41';
+  const cluster =  'eu';
+  const authEndpoint = 'https://api.foresighta.co/broadcasting/auth';
   if (!key || !authEndpoint) {
     console.error('[Pusher] Missing env: NEXT_PUBLIC_PUSHER_KEY or NEXT_PUBLIC_PUSHER_AUTH_ENDPOINT')
   }
@@ -43,11 +43,13 @@ export function getPusher(token: string, currentLocale: string): Pusher {
   })
 
   pusher.connection.bind('state_change', (states: any) => {
+    console.log('[Pusher] State change', states);
   })
   pusher.connection.bind('connected', () => {
+    console.log('[Pusher] Connected');
   })
   pusher.connection.bind('failed', () => {
-    console.error('[Pusher] Connection failed')
+    console.log('[Pusher] Connection failed');
   })
   pusher.connection.bind('error', (err: any) => {
     if (err?.error?.data?.code === 4100) {
@@ -62,7 +64,33 @@ export function subscribePrivateUser(userId: number, token: string, currentLocal
   const client = getPusher(token, currentLocale)
   const channelName = `private-user.${userId}`
   lastChannelName = channelName
-  return client.subscribe(channelName)
+  const channel = client.subscribe(channelName)
+  const events = [
+    'account.activated',
+    'account.deactivated',
+    'knowledge.accepted',
+    'knowledge.declined',
+    'order.insight',
+    'knowledge.answer_question',
+    'knowledge.ask_question',
+    'meeting.client_meeting_insighter_approved',
+    'meeting.client_meeting_insighter_postponed',
+    'meeting.client_meeting_reminder',
+    'meeting.client_meeting_new',
+    'meeting.client_meeting_reschedule',
+    'meeting.insighter_meeting_approved',
+    'meeting.insighter_meeting_reminder',
+    'meeting.insighter_meeting_client_new',
+    'requests.action',
+    'requests'
+  ]
+  events.forEach((evt) => {
+    channel.bind(evt, (data: any) => {
+      // eslint-disable-next-line no-console
+      console.log('[Pusher] Event:', evt, data)
+    })
+  })
+  return channel
 }
 
 export function unsubscribePrivateUser(userId: number) {

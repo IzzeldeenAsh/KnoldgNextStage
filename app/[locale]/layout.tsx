@@ -116,8 +116,28 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
       // yahoo: 'your-yahoo-verification-code',
     },
     icons: {
-      icon: '/favicon.ico',
-      apple: '/apple-touch-icon.png',
+      icon: [
+        { url: '/favicon.ico', sizes: 'any' },
+        { url: '/icon.png', type: 'image/png', sizes: '32x32' },
+      ],
+      shortcut: '/favicon.ico',
+      apple: [
+        { url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
+      ],
+      other: [
+        {
+          rel: 'icon',
+          type: 'image/png',
+          sizes: '192x192',
+          url: '/icons-192.png',
+        },
+        {
+          rel: 'icon',
+          type: 'image/png',
+          sizes: '512x512',
+          url: '/icons-512.png',
+        },
+      ],
     },
   };
 }
@@ -152,6 +172,22 @@ export default async function RootLayout({
   return (
     <html lang={locale} dir={direction} className="scroll-smooth">
       <head>
+        {/* Favicon and Icons - Explicit definitions for better Google indexing */}
+        <link rel="icon" type="image/x-icon" href="/favicon.ico" sizes="any" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/icon.png" />
+        <link rel="icon" type="image/png" sizes="192x192" href="/icons-192.png" />
+        <link rel="icon" type="image/png" sizes="512x512" href="/icons-512.png" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+        <link rel="shortcut icon" href="/favicon.ico" />
+        
+        {/* Web App Manifest */}
+        <link rel="manifest" href="/manifest.webmanifest" />
+        <meta name="theme-color" content="#6366f1" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-title" content="Insighta" />
+        
         {/* Google tag (gtag.js) */}
         <script async src="https://www.googletagmanager.com/gtag/js?id=G-R1XT5PMHG0"></script>
         <script
