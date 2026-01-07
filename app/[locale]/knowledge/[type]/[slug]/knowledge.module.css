@@ -340,6 +340,20 @@
 .priceTag {
   position: relative;
   z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.purchasedMini {
+  font-size: 0.52rem;
+  line-height: 1;
+  color: #277dce; /* green */
+  font-weight: 400;
+  opacity: 0.95;
+  white-space: nowrap;
+  padding-top: 2px;
 }
 
 .badge {
@@ -624,8 +638,13 @@
 .tocTable th,
 .tocTable td {
   padding: 8px 12px;
-  text-align: left;
+  text-align: start;
   border-bottom: 1px solid #edf2f7;
+  unicode-bidi: plaintext;
+}
+
+.tocTitleHeader {
+  text-align: start !important;
 }
 
 .tocTable th {
@@ -639,7 +658,7 @@
   background-color: #f8fafc;
 }
 
-.tocTable td:first-child {
+.tocChapterCol {
   color: #718096;
   font-weight: 400;
   font-size: 0.8125rem;

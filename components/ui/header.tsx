@@ -106,6 +106,7 @@ export default function Header() {
   const [industries, setIndustries] = useState<Industry[]>(industriesCache.data);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [isScrolled, setIsScrolled] = useState(false);
 const { isLoading: isAppLoading, setIsLoading: setAppLoading } = useLoading();
   const pathname = usePathname();
   const router = useRouter();
@@ -115,8 +116,29 @@ const { isLoading: isAppLoading, setIsLoading: setAppLoading } = useLoading();
   const { user, roles, isLoading, handleSignOut } = useUserProfile();
   
   // Always use dark style with white text, as requested
-  const textColorClass = 'text-slate-300 hover:text-white transition-all duration-300 ease-in-out px-3 py-2 rounded-md hover:bg-slate-700/50';
-  const menuTextColorClass = 'text-gray-200 hover:text-gray-100 transition-all duration-300 ease-in-out px-3 py-2 rounded-md hover:bg-[#3B8AEF]/20';
+  const textColorClass = ' hover:text-white transition-all duration-300 ease-in-out px-3 py-2 rounded-md hover:bg-slate-700/50';
+  const menuTextColorClass =  'text-white hover:text-gray-100 transition-all duration-300 ease-in-out px-3 py-2 rounded-md hover:bg-[#3B8AEF]/20';
+  const searchInputStyles = {
+    input: {
+      backgroundColor: isScrolled ? 'rgb(255, 255, 255)' : 'rgba(255, 255, 255, 0.1)',
+      border: isScrolled ? '1px solid rgba(255, 255, 255, 0.18)' : '1px solid rgba(255, 255, 255, 0.2)',
+      color: 'white',
+      direction: pathname.split('/')[1] === 'ar' ? 'rtl' : 'ltr',
+      '&::placeholder': {
+        color: isScrolled ? 'rgba(255, 255, 255, 0.75)' : 'rgba(255, 255, 255, 0.6)',
+      },
+      '&:focus': {
+        borderColor: '#3B8AEF',
+        backgroundColor: isScrolled ? 'rgba(0, 0, 0, 0.45)' : 'rgba(255, 255, 255, 0.15)',
+      },
+      '&:hover': {
+        backgroundColor: isScrolled ? 'rgba(0, 0, 0, 0.4)' : 'rgba(255, 255, 255, 0.12)',
+      },
+    },
+    section: {
+      color: isScrolled ? 'rgba(255, 255, 255, 0.75)' : 'rgba(255, 255, 255, 0.6)',
+    },
+  } as const;
 
   // Handle search submission
   const handleSearch = (query: string, searchType: 'knowledge' | 'insighter' = 'knowledge') => {
@@ -184,6 +206,13 @@ const { isLoading: isAppLoading, setIsLoading: setAppLoading } = useLoading();
 
     loadIndustries();
   }, [pathname]);
+
+  useEffect(() => {
+    const onScroll = () => setIsScrolled(window.scrollY > 0);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
 
   // Helper function to clear duplicate cookies
@@ -262,26 +291,31 @@ const { isLoading: isAppLoading, setIsLoading: setAppLoading } = useLoading();
 
   return (
     <>
-      {/* Beta Warning Bar */}
-      <div className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 text-white py-2 px-4 text-center text-xs md:text-lg font-medium relative z-40">
-        <span>{t('beta.notice')}</span>
-      </div>
-      
-      <header className="relative w-full z-30 bg-[#0F1629]">
-        {/* Particles animation - reduced effects */}
-        <div style={{opacity: 0.2}}>
-        <Particles 
-          className="absolute inset-0 -z-1" 
-        
-        />
+      <div className="sticky top-0 z-50">
+        {/* Beta Warning Bar */}
+        <div className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 text-white py-2 px-4 text-center text-xs md:text-lg font-medium relative z-40">
+          <span>{t('beta.notice')}</span>
         </div>
+        
+        <header
+          className={[
+            'relative w-full z-30 transition-all duration-300',
+            isScrolled
+              ? 'bg-[#0F1629]/20 backdrop-blur-sm border-b border-white/10 shadow-[0_12px_40px_rgba(0,0,0,0.15)]'
+              : 'bg-[#0F1629]'
+          ].join(' ')}
+        >
+          {/* Particles animation - reduced effects */}
+          <div style={{ opacity: 0.2 }}>
+            <Particles className="absolute inset-0 -z-1" />
+          </div>
      
 
       {/* Illustration */}
    
       
-      <div className="mx-auto px-4 sm:px-12 max-w-full relative z-10">
-        <div className="flex items-center justify-between h-16 md:h-20">
+      <div className="mx-auto px-2 sm:px-4 md:px-8 lg:px-12 max-w-full relative z-10">
+        <div className="flex items-center justify-between h-16 md:h-20 gap-1 md:gap-2">
 
           {/* Site branding */}
           <div className="flex-shrink-0 w-[40px] sm:w-[120px] md:w-[140px]">
@@ -289,15 +323,15 @@ const { isLoading: isAppLoading, setIsLoading: setAppLoading } = useLoading();
           </div>
 
           {/* Desktop navigation */}
-          <nav className="hidden md:flex flex-1 overflow-visible">
-            <ul className="flex justify-start items-center w-full">
+          <nav className="hidden md:flex flex-1 overflow-visible min-w-0">
+            <ul className="flex justify-start items-center w-full gap-0.5 md:gap-1">
               <li>
                 <HoverCard  
                   position='bottom'
                   radius="sm" shadow="md" withinPortal>
                   <HoverCard.Target>
                     <Link href={`/${pathname.split('/')[1]}/all-industries`}>
-                      <button className={`font-medium text-sm ${textColorClass}  xl:mx-1 flex items-center group ${isActiveLink('all-industries')}`}>
+                      <button className={` text-white ${textColorClass} font-medium text-xs md:text-sm xl:mx-1 flex items-center group ${isActiveLink('all-industries')}`}>
                         <span className="mr-1">{t('navigation.industries')}</span>
                         <IconChevronDown size={16} className="group-hover:translate-y-0.5 transition-transform duration-200" />
                       </button>
@@ -368,19 +402,19 @@ const { isLoading: isAppLoading, setIsLoading: setAppLoading } = useLoading();
                 </HoverCard>
               </li>
               <li>
-                <Link className={`font-medium text-sm ${menuTextColorClass}  xl:mx-1 ${isActiveLink('data')}`} href={`/${pathname.split('/')[1]}/industries/data`}>{t('navigation.data')}</Link>
+                <Link className={`font-medium text-xs md:text-sm ${menuTextColorClass} text-white xl:mx-1 ${isActiveLink('data')}`} href={`/${pathname.split('/')[1]}/industries/data`}>{t('navigation.data')}</Link>
               </li>
               <li>
-                <Link className={`font-medium text-sm ${menuTextColorClass}  xl:mx-1 ${isActiveLink('report')}`} href={`/${pathname.split('/')[1]}/industries/report`}>{t('navigation.reports')}</Link>
+                <Link className={`font-medium text-xs md:text-sm ${menuTextColorClass} text-white xl:mx-1 ${isActiveLink('report')}`} href={`/${pathname.split('/')[1]}/industries/report`}>{t('navigation.reports')}</Link>
               </li>
               <li>
-                <Link className={`font-medium text-sm ${menuTextColorClass}  xl:mx-1 ${isActiveLink('statistic')}`} href={`/${pathname.split('/')[1]}/industries/statistic`}>{t('navigation.statistics')}</Link>
+                <Link className={`font-medium text-xs md:text-sm ${menuTextColorClass} text-white xl:mx-1 ${isActiveLink('statistic')}`} href={`/${pathname.split('/')[1]}/industries/statistic`}>{t('navigation.statistics')}</Link>
               </li>
-              <li className='lg:block hidden'>
-                <Link className={`font-medium text-sm ${menuTextColorClass}  xl:mx-1 ${isActiveLink('manual')}`} href={`/${pathname.split('/')[1]}/industries/manual`}>{t('navigation.manuals')}</Link>
+              <li className='xl:block hidden'>
+                <Link className={`font-medium text-xs md:text-sm ${menuTextColorClass} text-white xl:mx-1 ${isActiveLink('manual')}`} href={`/${pathname.split('/')[1]}/industries/manual`}>{t('navigation.manuals')}</Link>
               </li>
-              <li className='lg:block hidden'>
-                <Link className={`font-medium text-sm ${menuTextColorClass}  xl:mx-1 ${isActiveLink('course')}`} href={`/${pathname.split('/')[1]}/industries/course`}>{t('navigation.courses')}</Link>
+              <li className='xl:block hidden'>
+                <Link className={`font-medium text-xs md:text-sm ${menuTextColorClass} text-white xl:mx-1 ${isActiveLink('course')}`} href={`/${pathname.split('/')[1]}/industries/course`}>{t('navigation.courses')}</Link>
               </li>
             </ul>
           </nav>
@@ -433,22 +467,7 @@ const { isLoading: isAppLoading, setIsLoading: setAppLoading } = useLoading();
                       }
                   )}
                   styles={{
-                    input: {
-                      backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                      border: '1px solid rgba(255, 255, 255, 0.2)',
-                      color: 'white',
-                      direction: pathname.split('/')[1] === 'ar' ? 'rtl' : 'ltr',
-                      '&::placeholder': {
-                        color: 'rgba(255, 255, 255, 0.6)',
-                      },
-                      '&:focus': {
-                        borderColor: '#3B8AEF',
-                        backgroundColor: 'rgba(255, 255, 255, 0.15)',
-                      }
-                    },
-                    section: {
-                      color: 'rgba(255, 255, 255, 0.6)',
-                    }
+                    ...searchInputStyles
                   }}
                 />
               </form>
@@ -458,23 +477,35 @@ const { isLoading: isAppLoading, setIsLoading: setAppLoading } = useLoading();
           {/* Desktop sign in links */}
           <ul className="flex justify-end items-center flex-shrink-0">
             {/* Language Switch Button */}
-            <li className="mx-2 ">
+            <li className="mx-1 md:mx-2">
               <div className="flex items-center">
                 <button
                   onClick={() => switchLocale(pathname.split('/')[1] === 'en' ? 'ar' : 'en')}
-                  className={`mx-2 flex items-center px-3 py-2 rounded-md text-slate-300 hover:text-white hover:bg-[#3B8AEF]/20 transition-all duration-300 ease-in-out group`}
+                  className={`flex items-center px-2 md:px-3 py-2 rounded-md text-slate-300 hover:text-white hover:bg-[#3B8AEF]/20 transition-all duration-300 ease-in-out group`}
                 >
-                  <IconLanguage size={18} className="mx-1 group-hover:rotate-12 transition-transform duration-300" />
-                  <span className="text-sm md:text-sm font-medium whitespace-nowrap">
+                  <IconLanguage size={18} className={`${isScrolled ? 'text-white' : 'text-gray-200'}`} />
+                  <span className={`hidden lg:inline text-sm font-medium whitespace-nowrap ml-1 ${isScrolled ? 'text-white' : 'text-gray-200'}`}>
                     {pathname.split('/')[1] === 'en' ? t('language.switchToArabic') : t('language.switchToEnglish')}
                   </span>
                 </button>
               </div>
             </li>
             
+            {/* Become an Insighter button - only for client role */}
+            {user && roles.includes('client') && !roles.includes('insighter') && !roles.includes('company') && !roles.includes('company-insighter') && (
+              <li className="mx-1 md:mx-2 hidden lg:block">
+                <Link 
+                  href="https://app.foresighta.co/app/insighter-register/vertical"
+                  className="font-medium text-sm text-white px-2 md:px-3 py-2 rounded-md bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 transition-all duration-300 ease-in-out whitespace-nowrap"
+                >
+                  {t('becomeInsighter')}
+                </Link>
+              </li>
+            )}
+            
             {/* Mobile search button - only show on smaller screens */}
             {!shouldHideSearchBar() && (
-              <li className="xl:hidden mr-2">
+              <li className="xl:hidden mr-1 md:mr-2">
                 <button
                   onClick={() => {
                     router.push(`/${pathname.split('/')[1]}/home`);
@@ -487,7 +518,7 @@ const { isLoading: isAppLoading, setIsLoading: setAppLoading } = useLoading();
             )}
             
             {/* Always reserve space for notification bell */}
-            <li className="me-4 flex items-center relative z-20">
+            <li className="me-2 md:me-4 flex items-center relative z-20">
               {user ? <NotificationBell /> : ''}
             </li>
             
@@ -513,7 +544,8 @@ const { isLoading: isAppLoading, setIsLoading: setAppLoading } = useLoading();
 
         </div>
       </div>
-    </header>
+        </header>
+      </div>
     </>
   )
 }

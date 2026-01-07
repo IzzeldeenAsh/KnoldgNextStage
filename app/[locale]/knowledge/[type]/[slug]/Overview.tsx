@@ -71,6 +71,7 @@ export default function Overview({ knowledge, knowledgeSlug }: OverviewProps) {
   const locale = params.locale;
   const isRTL = locale === 'ar';
   const isArabicContent = knowledge.language === 'arabic';
+  const isContentRTL = isRTL || isArabicContent;
   const { user } = useGlobalProfile();
   const router = useRouter();
 
@@ -97,7 +98,8 @@ export default function Overview({ knowledge, knowledgeSlug }: OverviewProps) {
     chapter: isRTL ? 'الفصل' : 'Chapter',
     title: isRTL ? 'العنوان' : 'Title',
     noDocumentsAvailable: isRTL ? 'لا توجد مستندات متاحة.' : 'No documents available.',
-    alreadyPurchased: isRTL ? 'تم الشراء ' : 'Purchased'
+    alreadyPurchased: isRTL ? 'تم الشراء ' : 'Purchased',
+    purchasedMini: isRTL ? 'تم الشراء' : 'Purchased',
   };
 
   // Check if user is logged in
@@ -251,6 +253,11 @@ export default function Overview({ knowledge, knowledgeSlug }: OverviewProps) {
   ) : (
     <span id={`doc-price-${doc.id}`} className={styles.badge} role="text" aria-label={`Price: $${parseFloat(doc.price).toFixed(2)}`}>${parseFloat(doc.price).toFixed(2)}</span>
   )}
+  {doc.is_purchased && (
+    <span className={styles.purchasedMini} aria-label={`${translations.purchasedMini} - ${doc.file_name}`}>
+    {translations.purchasedMini}
+    </span>
+  )}
 </div>
                   <div className={styles.expandIcon}>
                     <svg 
@@ -277,19 +284,21 @@ export default function Overview({ knowledge, knowledgeSlug }: OverviewProps) {
                     </div>
                   )}
                   {doc.table_of_content && Array.isArray(doc.table_of_content) && doc.table_of_content.length > 0 && (
-                    <div className={styles.tableOfContents}>
+                    <div className={styles.tableOfContents} dir={isContentRTL ? 'rtl' : 'ltr'}>
                       <h6>{translations.tableOfContents}</h6>
                       <table className={styles.tocTable}>
-                        <thead>
+                        {/* <thead>
                           <tr>
                             <th>{translations.chapter}</th>
-                            <th>{translations.title}</th>
+                            <th className={styles.tocTitleHeader}></th>
                           </tr>
-                        </thead>
+                        </thead> */}
                         <tbody>
                           {doc.table_of_content.map((toc, index) => (
                             <tr key={index}>
-                              <td>{translations.chapter} {index + 1}</td>
+                              <td className={styles.tocChapterCol}>
+                                {translations.chapter} {index + 1}
+                              </td>
                               <td>{toc.chapter?.title || toc.title}</td>
                             </tr>
                           ))}
