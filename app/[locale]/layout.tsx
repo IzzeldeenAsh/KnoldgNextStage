@@ -41,7 +41,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   const locale = resolvedParams.locale;
   const isArabic = locale === 'ar';
   
-  const baseUrl = 'https://insightabusiness.com';
+  const baseUrl = 'https://foresighta.co';
   
   return {
     metadataBase: new URL(baseUrl),
