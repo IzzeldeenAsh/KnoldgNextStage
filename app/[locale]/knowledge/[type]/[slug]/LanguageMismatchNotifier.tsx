@@ -24,7 +24,7 @@ export default function LanguageMismatchNotifier({
 
   // Helper to clear duplicate cookies similar to header.tsx
   const clearDuplicateCookies = (cookieName: string) => {
-    const isProduction = typeof window !== 'undefined' && window.location.hostname.includes('insightabusiness.com');
+    const isProduction = typeof window !== 'undefined' && window.location.hostname.includes('foresighta.co');
     const clearVariations = [
       `${cookieName}=; Path=/; Max-Age=-1`,
       `${cookieName}=; Domain=.foresighta.co; Path=/; Max-Age=-1; Secure; SameSite=None`,
@@ -40,7 +40,7 @@ export default function LanguageMismatchNotifier({
     clearDuplicateCookies('preferred_language');
 
     setTimeout(() => {
-      const isProduction = typeof window !== 'undefined' && window.location.hostname.includes('insightabusiness.com');
+      const isProduction = typeof window !== 'undefined' && window.location.hostname.includes('foresighta.co');
       const expirationDate = new Date();
       expirationDate.setFullYear(expirationDate.getFullYear() + 1);
 
