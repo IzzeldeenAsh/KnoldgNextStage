@@ -20,7 +20,7 @@ const getAngularAppUrl = (): string => {
   if (hostname.includes('foresighta.co')) {
     return `${protocol}//app.foresighta.co`;
   }
-  if (hostname.includes('foresighta.co')) {
+  if (hostname.includes('insightabusiness.com')) {
     return `${protocol}//app.foresighta.co`;
   }
   
