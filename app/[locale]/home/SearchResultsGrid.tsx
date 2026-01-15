@@ -321,6 +321,7 @@ export default function SearchResultsGrid({
     coverage: isRTL ? "التغطية" : "Coverage",
     free: isRTL ? "مجاني" : "Free",
     partial: isRTL ? "مدفوع جزئي" : "Partial Paid",
+    freeDocs: isRTL ? "مستندات مجانية" : "Free docs",
     insighter: isRTL ? "إنسايتر" : "Insighter",
     by: isRTL ? "من قبل" : "By",
     company: isRTL ? "الشركة" : "Company",
@@ -641,14 +642,25 @@ export default function SearchResultsGrid({
                   )}
                   {shouldShowPricing && (
                     <div className="flex items-center gap-2">
-                      {shouldShowPartial && (
-                        <Badge color="yellow" variant="light" className={cardStyles.priceBadge}>
-                          {translations.partial}
-                        </Badge>
+                         {shouldShowPartial && (
+                        <Text size="xs" c="dimmed" className="whitespace-nowrap">
+                           {translations.freeDocs} +
+                        </Text>
                       )}
                       {(shouldShowPaid || (!paidStatus && hasPrice) || (shouldShowPartial && hasPrice)) && (
                         <Badge color="yellow" variant="light" className={cardStyles.priceBadge}>
-                          <span dir="ltr" lang="en">{formattedPrice}</span>
+                          {shouldShowPartial && hasPrice ? (
+                            <span dir="ltr" lang="en" >{formattedPrice} 
+                            {/* <span style={{fontWeight: '600' , textTransform: 'capitalize' ,paddingLeft: '4px',paddingRight: '4px'}}>{translations.partial}</span> */}
+                            </span>
+                          ) : (
+                            <span dir="ltr" lang="en">{formattedPrice}</span>
+                          )}
+                        </Badge>
+                      )}
+                      {shouldShowPartial && !hasPrice && (
+                        <Badge color="yellow" variant="light" className={cardStyles.priceBadge} style={{fontWeight: '500'}}>
+                          {translations.partial}
                         </Badge>
                       )}
                       {shouldShowFree && !shouldShowPartial && !(shouldShowPaid && hasPrice) && (
@@ -656,6 +668,7 @@ export default function SearchResultsGrid({
                           {translations.free}
                         </Badge>
                       )}
+                   
                     </div>
                   )}
                 </div>
