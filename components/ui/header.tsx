@@ -51,7 +51,7 @@ const getAngularAppUrl = (): string => {
   if (hostname.includes('foresighta.co')) {
     return `${protocol}//app.foresighta.co`;
   }
-  if (hostname.includes('foresighta.co')) {
+  if (hostname.includes('insightabusiness.com')) {
     return `${protocol}//app.foresighta.co`;
   }
   
@@ -240,7 +240,7 @@ const { isLoading: isAppLoading, setIsLoading: setAppLoading } = useLoading();
     const hostname = window.location.hostname;
     
     // Check for production domains
-    if (hostname.includes('foresighta.co')) {
+    if (hostname.includes('insightabusiness.com')) {
       return '.foresighta.co';
     }
     if (hostname.includes('foresighta.co')) {
@@ -255,7 +255,7 @@ const { isLoading: isAppLoading, setIsLoading: setAppLoading } = useLoading();
   const isProduction = (): boolean => {
     if (typeof window === 'undefined') return false;
     const hostname = window.location.hostname;
-    return hostname.includes('foresighta.co') || hostname.includes('foresighta.co');
+    return hostname.includes('insightabusiness.com') || hostname.includes('foresighta.co');
   };
 
   // Helper function to clear duplicate cookies
