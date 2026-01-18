@@ -42,21 +42,21 @@ const INDUSTRIES_CACHE_DURATION = 300000; // 5 minutes cache for industries
 
 // Helper function to get the Angular app URL based on current domain
 const getAngularAppUrl = (): string => {
-  if (typeof window === 'undefined') return 'https://app.insightabusiness.com';
+  if (typeof window === 'undefined') return 'https://app.foresighta.co';
   
   const hostname = window.location.hostname;
   const protocol = window.location.protocol;
   
   // Production domains
   if (hostname.includes('foresighta.co')) {
-    return `${protocol}//app.insightabusiness.com`;
+    return `${protocol}//app.foresighta.co`;
   }
   if (hostname.includes('insightabusiness.com')) {
-    return `${protocol}//app.insightabusiness.com`;
+    return `${protocol}//app.foresighta.co`;
   }
   
   // Local development
-  return 'https://app.insightabusiness.com';
+  return 'https://app.foresighta.co';
 };
 
 async function getIndustries(locale: string = 'en', forceRefresh: boolean = false): Promise<Industry[]> {
@@ -86,7 +86,7 @@ async function getIndustries(locale: string = 'en', forceRefresh: boolean = fals
 
 async function fetchIndustriesFromAPI(locale: string): Promise<Industry[]> {
   try {
-    const res = await fetch("https://api.insightabusiness.com/api/platform/industries/menu", {
+    const res = await fetch("https://api.foresighta.co/api/platform/industries/menu", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -241,10 +241,10 @@ const { isLoading: isAppLoading, setIsLoading: setAppLoading } = useLoading();
     
     // Check for production domains
     if (hostname.includes('insightabusiness.com')) {
-      return '.insightabusiness.com';
+      return '.foresighta.co';
     }
     if (hostname.includes('foresighta.co')) {
-      return '.insightabusiness.com';
+      return '.foresighta.co';
     }
     
     // Local development - no domain needed
