@@ -6,6 +6,7 @@ import { useGlobalProfile } from '@/components/auth/GlobalProfileProvider';
 import FullScreenLoader from '@/components/ui/FullScreenLoader';
 import { useLocale } from 'next-intl';
 import AgreementModal from '@/components/agreements/AgreementModal';
+import { getAuthToken, getTokenFromCookie } from '@/lib/authToken';
 interface ProfileResponse {
   data: {
     id: number;
@@ -46,23 +47,9 @@ export default function QueryParamAuthCallback() {
   const returnUrl = searchParams.get('returnUrl');
   const locale = params.locale as string || 'en';
 
-  // Helper function to get token from cookie
-  const getTokenFromCookie = (): string | null => {
-    if (typeof document === 'undefined') return null;
-    
-    const cookies = document.cookie.split(';');
-    for (let cookie of cookies) {
-      const [name, value] = cookie.trim().split('=');
-      if (name === 'token') {
-        return value;
-      }
-    }
-    return null;
-  };
-
   // If still no token, try to get it from cookie
   if (!token) {
-    token = getTokenFromCookie();
+    token = getTokenFromCookie('token');
     if (token) {
       console.log('[callback] Found token in cookie:', token.substring(0, 20) + '...');
     }
@@ -117,7 +104,7 @@ export default function QueryParamAuthCallback() {
         localStorage.setItem('user', JSON.stringify(userData));
         
         // Verify authentication was successful
-        const storedToken = getTokenFromCookie() || localStorage.getItem('token');
+        const storedToken = getAuthToken();
         const storedUser = localStorage.getItem('user');
         
         if (!storedToken || !storedUser) {
@@ -149,7 +136,7 @@ export default function QueryParamAuthCallback() {
         // Show error for a moment before redirecting to login
         setTimeout(() => {
           console.log('[callback] Redirecting to login due to error');
-          window.location.href = 'https://app.foresighta.co/auth/login';
+          window.location.href = 'https://app.insightabusiness.com/auth/login';
         }, 2000);
       }
     };
@@ -159,7 +146,7 @@ export default function QueryParamAuthCallback() {
     } else {
       console.error('[callback] No token found in URL parameters or cookies');
       // Redirect to login if no token
-      window.location.href = 'https://app.foresighta.co/auth/login';
+      window.location.href = 'https://app.insightabusiness.com/auth/login';
     }
   }, [token, locale, returnUrl]);
 
@@ -180,13 +167,13 @@ export default function QueryParamAuthCallback() {
         `SameSite=Lax` // More permissive for localhost
       ];
     } else {
-      // Use .foresighta.co domain for cross-domain cookie sharing between app.foresighta.co and www.foresighta.co
+      // Use .insightabusiness.com domain for cross-domain cookie sharing between app.insightabusiness.com and www.insightabusiness.com
       cookieSettings = [
         `token=${token}`,
         `Path=/`,
         `Max-Age=${60 * 60 * 24 * 7}`, // 7 days
         `SameSite=None`,
-        `Domain=.foresighta.co`,
+        `Domain=.insightabusiness.com`,
         `Secure`
       ];
     }
@@ -197,7 +184,7 @@ export default function QueryParamAuthCallback() {
     
     // Verify the cookie was set
     setTimeout(() => {
-      const verification = getTokenFromCookie();
+      const verification = getTokenFromCookie('token');
       console.log('[callback] Cookie set verification:', verification ? 'Success' : 'Failed');
     }, 100);
   };
@@ -237,13 +224,13 @@ export default function QueryParamAuthCallback() {
         'Max-Age=-1'
       ];
     } else {
-      // Use .foresighta.co domain to match the cookie set by Angular app
+      // Use .insightabusiness.com domain to match the cookie set by Angular app
       cookieSettings = [
         'token=',
         'Path=/',
         'Max-Age=-1',
         'SameSite=None',
-        'Domain=.foresighta.co',
+        'Domain=.insightabusiness.com',
         'Secure'
       ];
     }
@@ -257,7 +244,7 @@ export default function QueryParamAuthCallback() {
       const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
       console.log('[TIMEZONE] Setting timezone:', userTimezone);
       
-      const timezoneResponse = await fetch('https://api.foresighta.co/api/account/timezone/set', {
+      const timezoneResponse = await fetch('https://api.insightabusiness.com/api/account/timezone/set', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${authToken}`,
@@ -311,7 +298,7 @@ export default function QueryParamAuthCallback() {
     // Check if user has admin role
     if (userData.roles && userData.roles.includes('admin')) {
       console.log('[callback] Admin user detected, redirecting to admin dashboard');
-      window.location.href = 'https://app.foresighta.co/admin-dashboard/admin/dashboard/main-dashboard/requests';
+      window.location.href = 'https://app.insightabusiness.com/admin-dashboard/admin/dashboard/main-dashboard/requests';
       return;
     }
 
@@ -371,7 +358,7 @@ export default function QueryParamAuthCallback() {
       if (isAngularRoute(finalReturnUrl)) {
         console.log('[callback] Detected Angular route, redirecting to Angular app');
         const angularPath = finalReturnUrl.startsWith('/app/') ? finalReturnUrl : `/app${finalReturnUrl}`;
-        const redirectUrl = `https://app.foresighta.co${angularPath}`;
+        const redirectUrl = `https://app.insightabusiness.com${angularPath}`;
         console.log('[callback] Final Angular redirect URL:', redirectUrl);
         window.location.href = redirectUrl;
       } else {
@@ -392,7 +379,7 @@ export default function QueryParamAuthCallback() {
          userData.roles.includes('company-insighter'))) {
       // Redirect to insighter dashboard
       console.log('[callback] Redirecting to Angular insighter dashboard');
-      window.location.href = `https://app.foresighta.co/app/insighter-dashboard/my-dashboard`;
+      window.location.href = `https://app.insightabusiness.com/app/insighter-dashboard/my-dashboard`;
     } else {
       // Redirect to home page using current locale
       console.log('[callback] Redirecting to home page:', `/${preferredLanguage}/home`);
@@ -431,13 +418,13 @@ export default function QueryParamAuthCallback() {
         'Max-Age=-1'
       ];
     } else {
-      // Use .foresighta.co domain to match the cookie set by Angular app
+      // Use .insightabusiness.com domain to match the cookie set by Angular app
       cookieSettings = [
         'auth_return_url=',
         'Path=/',
         'Max-Age=-1',
         'SameSite=None',
-        'Domain=.foresighta.co',
+        'Domain=.insightabusiness.com',
         'Secure'
       ];
     }
@@ -464,13 +451,13 @@ export default function QueryParamAuthCallback() {
         `SameSite=Lax`
       ];
     } else {
-      // Use .foresighta.co domain to match the cookie set by Angular app
+      // Use .insightabusiness.com domain to match the cookie set by Angular app
       cookieSettings = [
         `countryUpdateReturnUrl=${encodeURIComponent(url)}`,
         `Path=/`,
         `Max-Age=${60 * 60}`, // 1 hour
         `SameSite=None`,
-        `Domain=.foresighta.co`,
+        `Domain=.insightabusiness.com`,
         `Secure`
       ];
     }
@@ -484,7 +471,7 @@ export default function QueryParamAuthCallback() {
       try {
         console.log(`[callback] Profile fetch attempt ${attempt}/${maxRetries}`);
         
-        const response = await fetch('https://api.foresighta.co/api/account/profile', {
+        const response = await fetch('https://api.insightabusiness.com/api/account/profile', {
           headers: {
             'Authorization': `Bearer ${authToken}`,
             "Content-Type": "application/json",
@@ -537,7 +524,7 @@ export default function QueryParamAuthCallback() {
 
   const checkLatestAgreement = async (authToken: string, lang: string): Promise<boolean> => {
     try {
-      const res = await fetch('https://api.foresighta.co/api/account/agreement/check', {
+      const res = await fetch('https://api.insightabusiness.com/api/account/agreement/check', {
         headers: {
           'Authorization': `Bearer ${authToken}`,
           'Accept': 'application/json',

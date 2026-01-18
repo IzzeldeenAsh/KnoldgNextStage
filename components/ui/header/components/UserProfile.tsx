@@ -4,6 +4,7 @@ import { useUserProfile } from "../hooks/useUserProfile";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
+import { getAuthToken } from "@/lib/authToken";
 
 const getInitials = (firstName: string, lastName: string) => {
   return `${firstName[0]}${lastName[0]}`.toUpperCase();
@@ -11,21 +12,21 @@ const getInitials = (firstName: string, lastName: string) => {
 
 // Helper function to get the Angular app URL based on current domain
 const getAngularAppUrl = (): string => {
-  if (typeof window === 'undefined') return 'https://app.foresighta.co';
+  if (typeof window === 'undefined') return 'https://app.insightabusiness.com';
   
   const hostname = window.location.hostname;
   const protocol = window.location.protocol;
   
   // Production domains
   if (hostname.includes('foresighta.co')) {
-    return `${protocol}//app.foresighta.co`;
+    return `${protocol}//app.insightabusiness.com`;
   }
   if (hostname.includes('insightabusiness.com')) {
-    return `${protocol}//app.foresighta.co`;
+    return `${protocol}//app.insightabusiness.com`;
   }
   
   // Local development
-  return 'https://app.foresighta.co';
+  return 'https://app.insightabusiness.com';
 };
 
 interface MenuPosition {
@@ -127,7 +128,7 @@ export function UserProfile({ isHome }: { isHome: boolean }) {
   }, [menuOpen]);
 
   // Only show loading state if we have a token (potential user)  
-  const hasToken = typeof localStorage !== 'undefined' && localStorage.getItem('token');
+  const hasToken = !!getAuthToken();
   const isClient$ = () => {
     return roles.includes("client") && 
       !roles.includes("insighter") && 
@@ -348,7 +349,7 @@ export function UserProfile({ isHome }: { isHome: boolean }) {
             ))}
               </div>
            {!isClient$() && (  <Link 
-              href={`https://foresighta.co/en/profile/${user.uuid}?entity=insighter`}
+              href={`https://insightabusiness.com/en/profile/${user.uuid}?entity=insighter`}
               className="block px-4 py-2.5  font-semibold text-slate-900 hover:bg-indigo-50 hover:text-sky-700"
               style={{fontSize: '13px'}}
               onClick={() => setMenuOpen(false)}
@@ -366,7 +367,7 @@ export function UserProfile({ isHome }: { isHome: boolean }) {
               {t("dashboard")}
             </Link>
             {/* <Link
-            href="https://app.foresighta.co/app/insighter-dashboard/my-consulting-schedule"
+            href="https://app.insightabusiness.com/app/insighter-dashboard/my-consulting-schedule"
             className="block px-4 py-2.5 font-semibold text-slate-900 hover:bg-indigo-50 hover:text-sky-700"
             onClick={() => setMenuOpen(false)}
             style={{fontSize: '13px'}}
@@ -385,7 +386,7 @@ export function UserProfile({ isHome }: { isHome: boolean }) {
             {!isClient$() && (
               <>
                 {/* <Link
-                  href="https://app.foresighta.co/app/insighter-dashboard/my-requests"
+                  href="https://app.insightabusiness.com/app/insighter-dashboard/my-requests"
                   className="block px-4 py-2.5 font-semibold text-slate-900 hover:bg-indigo-50 hover:text-sky-700"
                   onClick={() => setMenuOpen(false)}
                   style={{fontSize: '13px'}}
@@ -393,7 +394,7 @@ export function UserProfile({ isHome }: { isHome: boolean }) {
                   {t("myRequests")}
                 </Link> */}
                 {/* <Link
-                  href="https://app.foresighta.co/app/insighter-dashboard/my-meetings/received"
+                  href="https://app.insightabusiness.com/app/insighter-dashboard/my-meetings/received"
                   className="block px-4 py-2.5 font-semibold text-slate-900 hover:bg-indigo-50 hover:text-sky-700"
                   onClick={() => setMenuOpen(false)}
                   style={{fontSize: '13px'}}
@@ -415,7 +416,7 @@ export function UserProfile({ isHome }: { isHome: boolean }) {
             {/* Show company settings only for company role */}
             {/* {roles.includes('company') && 
               <Link
-                href="https://app.foresighta.co/app/insighter-dashboard/my-company-settings"
+                href="https://app.insightabusiness.com/app/insighter-dashboard/my-company-settings"
                 className="block px-4 py-2.5 font-semibold text-slate-900 hover:bg-indigo-50 hover:text-sky-700"
                 onClick={() => setMenuOpen(false)}
                 style={{fontSize: '13px'}}

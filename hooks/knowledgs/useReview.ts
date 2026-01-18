@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useLocale } from "next-intl";
+import { getAuthToken } from "@/lib/authToken";
 
 interface UseReviewReturn {
   postReview: (rate: number, comment: string) => Promise<void>;
@@ -19,12 +20,12 @@ export function useReview(knowledgeSlug: string): UseReviewReturn {
     setError(null);
     setSuccess(false);
     try {
-      const token = localStorage.getItem("token");
+      const token = getAuthToken();
       if (!token) {
         throw new Error("You must be signed in to submit a review.");
       }
       const response = await fetch(
-        `https://api.foresighta.co/api/account/review/knowledge/${knowledgeSlug}`,
+        `https://api.insightabusiness.com/api/account/review/knowledge/${knowledgeSlug}`,
         {
           method: "POST",
           headers: {

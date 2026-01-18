@@ -4,6 +4,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { User } from '@/components/ui/header/hooks/useUserProfile';
 import { useLocale } from 'next-intl';
+import { getAuthToken } from '@/lib/authToken';
 
 interface ProfileContextType {
   user: User | null;
@@ -45,37 +46,12 @@ export function GlobalProfileProvider({ children }: { children: React.ReactNode 
   const pathname = usePathname();
   const locale = useLocale();
 
-  // Helper function to get token from cookie
-  const getTokenFromCookie = (): string | null => {
-    if (typeof document === 'undefined') return null;
-    
-    const cookies = document.cookie.split(';');
-    for (let cookie of cookies) {
-      const [name, value] = cookie.trim().split('=');
-      if (name === 'token') {
-        return value;
-      }
-    }
-    return null;
-  };
-
-  // Helper function to get token from any available source
-  const getAuthToken = (): string | null => {
-    const cookieToken = getTokenFromCookie();
-    if (cookieToken) return cookieToken;
-    
-    const localStorageToken = localStorage.getItem("token");
-    if (localStorageToken) return localStorageToken;
-    
-    return null;
-  };
-
   // Fetch profile with retry logic
   const fetchProfileWithRetry = async (token: string, maxRetries = 3): Promise<{ user: User | null; roles: string[] }> => {
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
         
-        const response = await fetch("https://api.foresighta.co/api/account/profile", {
+        const response = await fetch("https://api.insightabusiness.com/api/account/profile", {
           headers: {
             'Authorization': `Bearer ${token}`,
             "Content-Type": "application/json",

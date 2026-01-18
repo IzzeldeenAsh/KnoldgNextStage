@@ -5,6 +5,7 @@ import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useCountries, Country } from '@/app/lib/useCountries';
 import { useGlobalProfile } from '@/components/auth/GlobalProfileProvider';
+import { getAuthToken } from '@/lib/authToken';
 
 export default function UpdateCountryPage() {
   const [selectedCountry, setSelectedCountry] = useState<Country | null>(null);
@@ -28,23 +29,6 @@ export default function UpdateCountryPage() {
     }
   }, [user]);
 
-  // Helper function to get auth token
-  const getAuthToken = (): string | null => {
-    if (typeof document === 'undefined') return null;
-
-    // First try cookie
-    const cookies = document.cookie.split(';');
-    for (let cookie of cookies) {
-      const [name, value] = cookie.trim().split('=');
-      if (name === 'token') {
-        return value;
-      }
-    }
-
-    // Fallback to localStorage
-    return localStorage.getItem('token');
-  };
-
   // Update user's country
   const updateCountry = async (countryId: number) => {
     const token = getAuthToken();
@@ -52,7 +36,7 @@ export default function UpdateCountryPage() {
       throw new Error('No authentication token found');
     }
 
-    const response = await fetch('https://api.foresighta.co/api/account/profile/country', {
+    const response = await fetch('https://api.insightabusiness.com/api/account/profile/country', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -123,7 +107,7 @@ export default function UpdateCountryPage() {
       // Check if it's an Angular route
       if (isAngularRoute(redirectUrl)) {
         const angularPath = redirectUrl.startsWith('/app/') ? redirectUrl : `/app${redirectUrl}`;
-        window.location.href = `https://app.foresighta.co${angularPath}`;
+        window.location.href = `https://app.insightabusiness.com${angularPath}`;
       } else {
         // Handle relative URLs by ensuring they start with the locale
         let finalUrl = redirectUrl;
@@ -162,7 +146,7 @@ export default function UpdateCountryPage() {
     if (isLocalhost) {
       document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
     } else {
-      document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; Domain=.foresighta.co; Secure; SameSite=None;`;
+      document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; Domain=.insightabusiness.com; Secure; SameSite=None;`;
     }
   };
 

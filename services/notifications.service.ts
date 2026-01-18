@@ -1,5 +1,7 @@
 'use client'
 
+import { getAuthToken } from '@/lib/authToken'
+
 export interface Notification {
   id: string
   message: string
@@ -67,7 +69,7 @@ class NotificationService {
     this.isFetching = true;
     
     try {
-      const token = localStorage.getItem('token');
+      const token = getAuthToken();
       
       if (!token) {
         this.currentNotifications = [];
@@ -75,7 +77,7 @@ class NotificationService {
         return [];
       }
       
-      const response = await fetch('https://api.foresighta.co/api/account/notification', {
+      const response = await fetch('https://api.insightabusiness.com/api/account/notification', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -114,13 +116,13 @@ class NotificationService {
   // Mark a notification as read
   public async markNotificationAsRead(id: string, locale: string = 'en'): Promise<boolean> {
     try {
-      const token = localStorage.getItem('token');
+      const token = getAuthToken();
       
       if (!token) {
         return false;
       }
       
-      const response = await fetch(`https://api.foresighta.co/api/account/notification/read/${id}`, {
+      const response = await fetch(`https://api.insightabusiness.com/api/account/notification/read/${id}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -156,13 +158,13 @@ class NotificationService {
   // Mark all notifications as read
   public async markAllNotificationsAsRead(locale: string = 'en'): Promise<boolean> {
     try {
-      const token = localStorage.getItem('token');
+      const token = getAuthToken();
       
       if (!token) {
         return false;
       }
       
-      const response = await fetch('https://api.foresighta.co/api/account/notification/read', {
+      const response = await fetch('https://api.insightabusiness.com/api/account/notification/read', {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
