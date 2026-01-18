@@ -503,40 +503,48 @@ function ProfilePageContent() {
   // Check if user is authenticated and fetch user profile if authenticated
   useEffect(() => {
     const checkAuth = async () => {
-      // Check if token exists in localStorage
-      const token = localStorage.getItem("token");
-      const isAuth = !!token;
-      setIsAuthenticated(isAuth);
-
-      // If authenticated, fetch current user profile to check if viewing own profile
-      if (isAuth && token) {
-        try {
-          const response = await fetch(
-            "https://api.foresighta.co/api/account/profile",
-            {
-              headers: {
-                "Content-Type": "application/json",
-                Accept: "application/json",
-                "Accept-Language": locale,
-                Authorization: `Bearer ${token}`,
-                "X-Timezone": Intl.DateTimeFormat().resolvedOptions().timeZone,
-              },
-            }
-          );
-
-          if (response.ok) {
-            const userData = await response.json();
-            // Compare UUIDs to determine if this is the user's own profile
-            if (userData?.data?.uuid === uuid) {
-              setIsOwnProfile(true);
-            }
-          }
-        } catch (error) {
-          console.error("Error fetching user profile:", error);
-        }
+      // Get token from cookies
+      const token = typeof window !== "undefined" ? getAuthToken() : null;
+      
+      // If no token, user is not authenticated
+      if (!token) {
+        setIsAuthenticated(false);
+        setAuthChecked(true);
+        return;
       }
 
-      setAuthChecked(true);
+      // Verify token is valid by making an API call
+      try {
+        const response = await fetch(
+          "https://api.foresighta.co/api/account/profile",
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/json",
+              "Accept-Language": locale,
+              Authorization: `Bearer ${token}`,
+              "X-Timezone": Intl.DateTimeFormat().resolvedOptions().timeZone,
+            },
+          }
+        );
+
+        if (response.ok) {
+          const userData = await response.json();
+          setIsAuthenticated(true);
+          // Compare UUIDs to determine if this is the user's own profile
+          if (userData?.data?.uuid === uuid) {
+            setIsOwnProfile(true);
+          }
+        } else {
+          // Token is invalid or expired
+          setIsAuthenticated(false);
+        }
+      } catch (error) {
+        console.error("Error fetching user profile:", error);
+        setIsAuthenticated(false);
+      } finally {
+        setAuthChecked(true);
+      }
     };
 
     // Safe check for browser environment
@@ -589,8 +597,8 @@ function ProfilePageContent() {
 
     setLoadingMeetings(true);
     try {
-      // Get auth token
-      const token = localStorage.getItem("token");
+      // Get auth token from cookies
+      const token = getAuthToken();
 
       // Calculate start and end date (3 months range starting from tomorrow)
       const today = new Date();
@@ -605,7 +613,7 @@ function ProfilePageContent() {
       endDate.setFullYear(tomorrow.getFullYear() + 1);
       const endDateStr = endDate.toISOString().split("T")[0]; // YYYY-MM-DD format
       const response = await axios.post(
-        `https://api.foresighta.co/api/account/meeting/available/hours/${uuid}`,
+        `https://api.foresighta.co/api/platform/insighter/meeting/available/hours/${uuid}`,
         {
           start_date: startDate,
           end_date: endDateStr,
