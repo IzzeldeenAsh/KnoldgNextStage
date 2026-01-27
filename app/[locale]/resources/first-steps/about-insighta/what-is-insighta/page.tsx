@@ -26,7 +26,7 @@ export default async function WhatIsInsightaPage({ params }: { params: Promise<{
       <div className="relative overflow-hidden pb-16">
            {/* Breadcrumbs + Hero Title Section (with bg + overlay) */}
            <div className="relative overflow-hidden px-4 sm:px-12 py-8 md:py-20 mb-6 md:mb-8">
-           <div
+            <div
               className="absolute inset-0 bg-center bg-cover"
               style={{
                 backgroundImage:
