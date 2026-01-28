@@ -11,7 +11,7 @@ type PusherOpts = {
 }
 
 function getConfig(): PusherOpts {
-  const key = '81566bb993a074e07d41';
+  const key = '81566bb993a074e07d41 ';
   const cluster =  'eu';
   const authEndpoint = 'https://api.foresighta.co/broadcasting/auth';
   if (!key || !authEndpoint) {
