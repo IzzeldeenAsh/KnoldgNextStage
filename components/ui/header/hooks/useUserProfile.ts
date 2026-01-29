@@ -20,7 +20,7 @@ export interface User {
 }
 
 export function useUserProfile() {
-  const { user, roles, isLoading, refreshProfile } = useGlobalProfile();
+  const { user, roles, isLoading, isAuthResolved, refreshProfile } = useGlobalProfile();
   const pathname = usePathname();
 
   const handleSignOut = () => {
@@ -61,5 +61,5 @@ export function useUserProfile() {
     window.location.href = `https://app.foresighta.co/auth/logout?redirect_uri=${encodeURIComponent(`https://foresighta.co/${locale}?t=${timestamp}`)}`;    
   };
 
-  return { user, roles, isLoading, handleSignOut };
+  return { user, roles, isLoading, isAuthResolved, handleSignOut };
 }
