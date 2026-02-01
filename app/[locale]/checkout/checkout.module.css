@@ -3,12 +3,27 @@
   margin: 0 auto;
   padding: 2rem;
 }
+@media screen and (max-width: 576px) {
+  .container {
+    max-width: 100%;
+    width: 100%;
+   margin: 0;
+   padding: 0;
+  }
+}
 
 .checkoutGrid {
   display: grid;
-  grid-template-columns: 1.5fr 1fr;
+  grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
   gap: 2rem;
   align-items: start;
+}
+@media screen and (max-width: 576px) {
+  .checkoutGrid {
+   display: flex;
+   flex-direction: column;
+    gap: 1rem;
+  }
 }
 
 .singleColumn {
@@ -39,6 +54,22 @@
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   transition: all 0.2s ease;
+  min-width: 0;
+}
+@media screen and (max-width: 576px) {
+  .documentRow {
+    padding: 2px;
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    white-space: nowrap;
+    max-width: 280px;
+  }
+}
+
+.documentRow {
+  width: 100%;
+  min-width: 0;
 }
 
 .documentCard:hover {
@@ -59,7 +90,7 @@
   margin-bottom: 0.75rem;
   display: flex;
   align-items: center;
-  height: 100px;
+  min-height: 92px;
   background: #fff;
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
@@ -133,7 +164,8 @@
   }
 }
 .freeDownloadButton {
-  max-width: 200px;
+  width: 100%;
+  max-width: 420px;
   margin: 0 auto;
 }
 
@@ -142,13 +174,32 @@
   .container {
     padding: 1rem;
   }
+
+  .paymentMethodCard {
+    padding: 0.875rem;
+    min-height: unset;
+    height: auto;
+  }
   
   .documentCard {
     padding: 0.75rem;
   }
+
+  .paymentIconsContainer {
+    gap: 0.5rem;
+  }
+
+  .paymentIcon {
+    width: 52px;
+    height: 28px;
+  }
   
   .confirmButton {
     width: 100%;
+  }
+
+  .freeDownloadButton {
+    max-width: 100%;
   }
 }
 

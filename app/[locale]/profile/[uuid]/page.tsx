@@ -1436,11 +1436,7 @@ function ProfilePageContent() {
                                         className="block"
                                       >
                                         <div
-                                          className={`rounded-full ${
-                                            isOwner
-                                              ? "ring-2 ring-amber-300 ring-offset-2 ring-offset-white dark:ring-offset-slate-800"
-                                              : ""
-                                          }`}
+                                         
                                         >
                                           <Avatar
                                             src={insighter.profile_photo_url || undefined}
@@ -1690,7 +1686,7 @@ function ProfilePageContent() {
                             href={`/${locale}/profile/${insighter.uuid}?entity=insighter`}
                             className={`flex flex-col justify-between gap-4 bg-white rounded-lg border overflow-hidden duration-300 p-5 hover:-translate-y-1 hover:shadow-md ${
                               isOwner
-                                ? "border-amber-200 ring-1 ring-amber-100"
+                                ? "border-blue-200 ring-1 ring-blue-100"
                                 : "border-gray-200"
                             }`}
                             style={{
@@ -1704,7 +1700,7 @@ function ProfilePageContent() {
                               <div
                                 className={`relative w-16 h-16 rounded-full border overflow-hidden bg-blue-50 flex items-center justify-center ${
                                   isOwner
-                                    ? "border-amber-500 ring-2 ring-amber-200"
+                                    ? "border-blue-500 ring-2 ring-blue-200"
                                     : "border-blue-500"
                                 }`}
                               >
@@ -1720,32 +1716,26 @@ function ProfilePageContent() {
                                     {getInitials(insighter.name)}
                                   </span>
                                 )}
-                                {isOwner && (
-                                  <span
-                                    className={`absolute -top-2 ${
-                                      locale === "ar" ? "-left-2" : "-right-2"
-                                    } rounded-full bg-amber-500 text-white text-[10px] font-bold px-2 py-0.5 shadow-sm`}
-                                  >
-                                    {managerLabel}
-                                  </span>
-                                )}
+                              
                               </div>
                               <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-2">
-                                  <p className="font-semibold text-gray-900 truncate">
-                                    {insighter.name}
-                                  </p>
-                                  <IconRosetteDiscountCheckFilled className="w-4 h-4 text-blue-500 flex-shrink-0" />
-                                  {isOwner && (
-                                    <span
-                                      className={`inline-flex items-center rounded-full border border-amber-200 bg-amber-50 text-amber-800 text-[11px] font-semibold px-2 py-0.5 ${
-                                        locale === "ar" ? "flex-row-reverse" : ""
-                                      }`}
-                                      dir={locale === "ar" ? "rtl" : "ltr"}
-                                    >
-                                      {managerLabel}
-                                    </span>
-                                  )}
+                                <div className="flex flex-col items-center gap-2">
+                                      <div className="flex items-center gap-2">
+                                      <p className="font-semibold text-gray-900 truncate">
+                                            {insighter.name}
+                                          </p>
+                                          <IconRosetteDiscountCheckFilled className="w-4 h-4 text-blue-500 flex-shrink-0" />
+                                      </div>
+                                          {isOwner && (
+                                            <span
+                                              className={`inline-flex items-center rounded-full border mb-2 border-amber-200 bg-amber-50 text-amber-800 text-[11px] font-semibold px-2 py-0.5 ${
+                                                locale === "ar" ? "flex-row-reverse" : ""
+                                              }`}
+                                              dir={locale === "ar" ? "rtl" : "ltr"}
+                                            >
+                                              {managerLabel}
+                                            </span>
+                                          )}
                                 </div>
                                 {insighter.country && (
                                   <div className="mt-1 justify-center flex items-center gap-2 text-xs text-gray-600">
