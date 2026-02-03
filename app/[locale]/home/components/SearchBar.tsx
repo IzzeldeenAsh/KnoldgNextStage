@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useRef, useEffect, useState, memo, useCallback } from 'react';
+import React, { useRef, useEffect, useState, memo, useCallback, useMemo, useDeferredValue } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { IconSearch, IconX, IconBuildingBank, IconWorldSearch, IconLock } from '@tabler/icons-react';
 import { useSuggestions, useClickAway } from '../utils/hooks';
@@ -8,6 +8,166 @@ import styles from '../utils/custom-search-engine-styles.module.css';
 import { Modal, Loader, Popover } from '@mantine/core';
 import { getApiUrl } from '@/app/config';
 import { createPortal } from 'react-dom';
+
+// Arabic search normalization (hamza/diacritics tolerant)
+const ARABIC_DIACRITICS_AND_TATWEEL_RE = /[\u0640\u064B-\u065F\u0670\u06D6-\u06ED]/g;
+
+function normalizeSearchText(input: string): string {
+  if (!input) return '';
+  // Lowercasing is harmless for Arabic and helpful for Latin.
+  let s = input.toLowerCase().trim();
+  // Remove Arabic diacritics (tashkeel) + tatweel.
+  s = s.replace(ARABIC_DIACRITICS_AND_TATWEEL_RE, '');
+  // Normalize common hamza/alif variants.
+  s = s.replace(/[إأآٱ]/g, 'ا');
+  s = s.replace(/[ؤ]/g, 'و');
+  s = s.replace(/[ئ]/g, 'ي');
+  // Drop standalone hamza.
+  s = s.replace(/[ء]/g, '');
+  // Normalize alif-maqsura to ya.
+  s = s.replace(/[ى]/g, 'ي');
+  // Collapse whitespace.
+  s = s.replace(/\s+/g, ' ');
+  return s;
+}
+
+function escapeRegExpLiteral(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function buildArabicFuzzyRegex(rawNeedle: string): RegExp | null {
+  const needle = normalizeSearchText(rawNeedle);
+  if (!needle) return null;
+
+  // Allow diacritics/tatweel between characters.
+  const gap = '[\\u0640\\u064B-\\u065F\\u0670\\u06D6-\\u06ED]*';
+
+  let pattern = '';
+  for (const ch of needle) {
+    if (ch === ' ') {
+      pattern += '\\s+';
+      continue;
+    }
+
+    // Hamza-tolerant groups.
+    if (ch === 'ا') pattern += '[اأإآٱ]';
+    else if (ch === 'و') pattern += '[وؤ]';
+    else if (ch === 'ي') pattern += '[يىئ]';
+    else pattern += escapeRegExpLiteral(ch);
+
+    pattern += gap;
+  }
+
+  try {
+    return new RegExp(pattern, 'i');
+  } catch {
+    return null;
+  }
+}
+
+function arabicFuzzyMatch(haystack: string, needle: string): { index: number; length: number } | null {
+  if (!haystack) return null;
+  const re = buildArabicFuzzyRegex(needle);
+  if (!re) return null;
+  const m = re.exec(haystack);
+  if (!m || typeof m.index !== 'number') return null;
+  return { index: m.index, length: m[0]?.length ?? 0 };
+}
+
+type ISICNode = {
+  key: number;
+  code: string;
+  label?: string;
+  names?: { en: string; ar: string };
+  children: ISICNode[];
+};
+
+type HSCode = {
+  id: number;
+  code: string;
+  isic_code_id: number;
+  names: { en: string; ar: string };
+};
+
+const IsicLeafNodesList = memo(function IsicLeafNodesList(props: {
+  nodes: ISICNode[];
+  locale: string;
+  onSelect: (node: ISICNode) => void;
+}) {
+  const { nodes, locale, onSelect } = props;
+  return (
+    <>
+      {nodes.map((node) => (
+        <button
+          key={node.key}
+          className={`py-2 px-3 rounded-md text-sm flex text-start items-start w-full transition-colors hover:bg-gray-100 border border-gray-200`}
+          onClick={() => onSelect(node)}
+        >
+          <span className={`font-mono text-xs bg-gray-100 px-1.5 py-0.5 rounded ${locale === 'ar' ? 'ml-2' : 'mr-2'}`}>{node.code}</span>
+          <span className="flex-1">{locale === 'ar' ? (node.names?.ar || node.code) : (node.names?.en || node.code)}</span>
+        </button>
+      ))}
+    </>
+  );
+});
+
+const HsCodesList = memo(function HsCodesList(props: {
+  codes: HSCode[];
+  locale: string;
+  onSelect: (code: HSCode) => void;
+}) {
+  const { codes, locale, onSelect } = props;
+  return (
+    <>
+      {codes.map((code) => (
+        <button
+          key={code.id}
+          className={`py-2 px-3 rounded-md text-sm flex text-start items-start w-full transition-colors hover:bg-gray-100 border border-gray-200`}
+          onClick={() => onSelect(code)}
+        >
+          <span className={`font-mono text-xs bg-gray-100 px-1.5 py-0.5 rounded ${locale === 'ar' ? 'ml-2' : 'mr-2'}`}>{code.code}</span>
+          <span className="flex-1">{locale === 'ar' ? code.names.ar : code.names.en}</span>
+        </button>
+      ))}
+    </>
+  );
+});
+
+const HsBucketsList = memo(function HsBucketsList(props: {
+  related: HSCode[];
+  others: HSCode[];
+  locale: string;
+  onSelect: (code: HSCode) => void;
+}) {
+  const { related, others, locale, onSelect } = props;
+  return (
+    <>
+      {related.length > 0 && (
+        <>
+          <div className="text-sm font-semibold text-blue-500 px-1">
+            {locale === 'ar' ? 'ذات صلة' : 'Related'}
+          </div>
+          <HsCodesList codes={related} locale={locale} onSelect={onSelect} />
+        </>
+      )}
+
+      {others.length > 0 && (
+        <>
+          <div className="text-sm font-semibold text-gray-700 px-1 mt-2">
+            {locale === 'ar' ? 'أكواد HS كل' : 'All Products'}
+          </div>
+          <HsCodesList codes={others} locale={locale} onSelect={onSelect} />
+        </>
+      )}
+
+      {related.length === 0 && others.length === 0 && (
+        <div className="flex flex-col items-center justify-center py-8 text-center text-gray-500 text-sm">
+          {locale === 'ar' ? 'لا توجد رموز HS متاحة' : 'No Products available'}
+        </div>
+      )}
+    </>
+  );
+});
 
 interface SearchBarProps {
   searchQuery: string;
@@ -74,20 +234,6 @@ const SearchBar: React.FC<SearchBarProps> = ({
   const [isAccuracyOpen, setIsAccuracyOpen] = useState(false);
 
   // ISIC/HS data state
-  type ISICNode = {
-    key: number;
-    code: string;
-    label?: string;
-    names?: { en: string; ar: string };
-    children: ISICNode[];
-  };
-  type HSCode = {
-    id: number;
-    code: string;
-    isic_code_id: number;
-    names: { en: string; ar: string };
-  };
-
   const [isicTree, setIsicTree] = useState<ISICNode[]>([]);
   const [isicLeafNodes, setIsicLeafNodes] = useState<ISICNode[]>([]);
   const [filteredIsicLeafNodes, setFilteredIsicLeafNodes] = useState<ISICNode[]>([]);
@@ -124,6 +270,10 @@ const SearchBar: React.FC<SearchBarProps> = ({
     allowSuggestions
   } = useSuggestions(searchQuery, locale);
   
+  // Defer expensive filtering work so typing stays responsive
+  const deferredIsicSearch = useDeferredValue(isicSearch);
+  const deferredHsSearch = useDeferredValue(hsSearch);
+
   // Handle clicking outside the suggestions dropdown
   const suggestionsRef = useClickAway(() => {
     hideSuggestions();
@@ -256,7 +406,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
     }
   }, [isicCodeFilter, isicLeafNodes, locale]);
 
-  // Fetch all HS codes once (independent of ISIC)
+  // Fetch all Products once (independent of ISIC)
   useEffect(() => {
     const fetchAllHs = async () => {
       try {
@@ -268,17 +418,16 @@ const SearchBar: React.FC<SearchBarProps> = ({
             'X-Timezone': Intl.DateTimeFormat().resolvedOptions().timeZone,
           },
         });
-        if (!resp.ok) throw new Error('Failed to fetch HS codes');
+        if (!resp.ok) throw new Error('Failed to fetch Products');
         const data = await resp.json();
         const list: HSCode[] = data?.data || [];
         setHsCodes(list);
         setFilteredHsCodes(list);
         
-        // Restore pending HS code after list loads
+        // Restore pending Products after list loads
         if (pendingHsCode && !hasRestoredHsCode && list.length > 0) {
           const found = list.find(c => c.code === pendingHsCode);
           if (found) {
-            console.log('[SearchBar] Restoring pending HS code:', found.code);
             setSelectedHs({ id: found.id, code: found.code, label: locale === 'ar' ? found.names.ar : found.names.en });
             if (setHsCodeFilter) {
               setHsCodeFilter(found.code);
@@ -318,7 +467,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
       return;
     }
     
-    // Skip if we're waiting to restore a pending HS code
+    // Skip if we're waiting to restore a pending Products
     if (pendingHsCode && !hasRestoredHsCode) {
       return;
     }
@@ -329,40 +478,67 @@ const SearchBar: React.FC<SearchBarProps> = ({
     }
   }, [hsCodeFilter, hsCodes, locale, pendingHsCode, hasRestoredHsCode]);
 
-  // Note: ISIC/HS codes are now supported for both knowledge and insighter search types
+  // Note: ISIC/Products are now supported for both knowledge and insighter search types
   // No need to clear them when switching between search types
+
+  // Build lightweight search indexes (normalized text cached once per dataset)
+  const isicSearchIndex = useMemo(() => {
+    return isicLeafNodes.map((n) => ({
+      node: n,
+      normCode: normalizeSearchText(n.code),
+      normEn: normalizeSearchText(n.names?.en || ''),
+      normAr: normalizeSearchText(n.names?.ar || ''),
+    }));
+  }, [isicLeafNodes]);
+
+  const hsSearchIndex = useMemo(() => {
+    return hsCodes.map((c) => ({
+      code: c,
+      normCode: normalizeSearchText(c.code),
+      normEn: normalizeSearchText(c.names.en),
+      normAr: normalizeSearchText(c.names.ar),
+    }));
+  }, [hsCodes]);
 
   // ISIC search filter
   useEffect(() => {
-    if (!isicSearch.trim()) {
+    if (!deferredIsicSearch.trim()) {
       setFilteredIsicLeafNodes(isicLeafNodes);
       return;
     }
-    const q = isicSearch.toLowerCase();
+    const q = normalizeSearchText(deferredIsicSearch);
     setFilteredIsicLeafNodes(
-      isicLeafNodes.filter(n =>
-        n.code.toLowerCase().includes(q) ||
-        (n.names?.en?.toLowerCase().includes(q) ?? false) ||
-        (n.names?.ar?.toLowerCase().includes(q) ?? false)
-      )
+      isicSearchIndex
+        .filter((x) => x.normCode.includes(q) || x.normEn.includes(q) || x.normAr.includes(q))
+        .map((x) => x.node)
     );
-  }, [isicSearch, isicLeafNodes]);
+  }, [deferredIsicSearch, isicLeafNodes, isicSearchIndex]);
 
   // HS search filter
   useEffect(() => {
-    if (!hsSearch.trim()) {
+    if (!deferredHsSearch.trim()) {
       setFilteredHsCodes(hsCodes);
       return;
     }
-    const q = hsSearch.toLowerCase();
+    const q = normalizeSearchText(deferredHsSearch);
     setFilteredHsCodes(
-      hsCodes.filter(c =>
-        c.code.toLowerCase().includes(q) ||
-        c.names.en.toLowerCase().includes(q) ||
-        c.names.ar.toLowerCase().includes(q)
-      )
+      hsSearchIndex
+        .filter((x) => x.normCode.includes(q) || x.normEn.includes(q) || x.normAr.includes(q))
+        .map((x) => x.code)
     );
-  }, [hsSearch, hsCodes]);
+  }, [deferredHsSearch, hsCodes, hsSearchIndex]);
+
+  // Avoid recalculating "related vs others" lists on every render
+  const hsModalBuckets = useMemo(() => {
+    if (!selectedIsic) return null;
+    const related: HSCode[] = [];
+    const others: HSCode[] = [];
+    for (const c of filteredHsCodes) {
+      if (c.isic_code_id === selectedIsic.id) related.push(c);
+      else others.push(c);
+    }
+    return { related, others };
+  }, [filteredHsCodes, selectedIsic]);
 
   const handleSelectIsic = useCallback((node: ISICNode) => {
     if (node.children && node.children.length > 0) return;
@@ -372,13 +548,11 @@ const SearchBar: React.FC<SearchBarProps> = ({
     
     // Update URL: set isic_code, do not clear hs_code, reset page
     try {
-      console.log('[SearchBar] handleSelectIsic -> node:', { id: node.key, code: node.code });
       const params = new URLSearchParams(searchParams.toString());
       params.set('isic_code', node.code);
       params.delete('page');
       params.set('search_type', searchType);
       const nextUrl = `/${locale}/home?${params.toString()}`;
-      console.log('[SearchBar] handleSelectIsic -> push URL:', nextUrl);
       router.push(nextUrl, { scroll: false });
     } catch {}
     setIsIsicModalOpen(false);
@@ -386,19 +560,17 @@ const SearchBar: React.FC<SearchBarProps> = ({
 
   const handleSelectHs = useCallback((code: HSCode) => {
     setSelectedHs({ id: code.id, code: code.code, label: locale === 'ar' ? code.names.ar : code.names.en });
-    // Use HS code string for URL/state
+    // Use Products string for URL/state
     if (setHsCodeFilter) {
       setHsCodeFilter(code.code);
     }
     // Update URL: set hs_code, reset page
     try {
-      console.log('[SearchBar] handleSelectHs -> code:', { id: code.id, code: code.code });
       const params = new URLSearchParams(searchParams.toString());
       params.set('hs_code', code.code);
       params.delete('page');
       params.set('search_type', searchType);
       const nextUrl = `/${locale}/home?${params.toString()}`;
-      console.log('[SearchBar] handleSelectHs -> push URL:', nextUrl);
       router.push(nextUrl, { scroll: false });
     } catch {}
     setIsHsModalOpen(false);
@@ -413,7 +585,6 @@ const SearchBar: React.FC<SearchBarProps> = ({
       params.delete('page');
       params.set('search_type', searchType);
       const nextUrl = `/${locale}/home?${params.toString()}`;
-      console.log('[SearchBar] clear ISIC -> push URL:', nextUrl);
       router.push(nextUrl, { scroll: false });
     } catch {}
   }, [locale, router, searchParams, searchType, setIsicCodeFilter]);
@@ -427,7 +598,6 @@ const SearchBar: React.FC<SearchBarProps> = ({
       params.delete('page');
       params.set('search_type', searchType);
       const nextUrl = `/${locale}/home?${params.toString()}`;
-      console.log('[SearchBar] clear HS -> push URL:', nextUrl);
       router.push(nextUrl, { scroll: false });
     } catch {}
   }, [locale, router, searchParams, searchType, setHsCodeFilter]);
@@ -535,11 +705,12 @@ const SearchBar: React.FC<SearchBarProps> = ({
   const searchTypeChipActiveClasses = 'bg-[#299af8] border-[#299af8] text-white shadow-md';
   const searchTypeChipInactiveClasses = 'bg-blue-50 border-blue-100 text-blue-600 hover:bg-blue-100';
   const searchTypeChipDisabledClasses = 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed opacity-70';
-  const filterChipBaseClasses =
-    'flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-medium transition-all duration-200 shadow-sm';
-  const filterChipActiveClasses = 'bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100';
-  const filterChipInactiveClasses = 'bg-white border-gray-200 text-gray-700 hover:border-[#299af8] hover:text-[#299af8]';
-  const filterChipDisabledClasses = 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed';
+  // Filter chips (ISIC/HS) style — match screenshot pill layout
+  const filterPillBaseClasses =
+    'group flex items-center gap-3 rounded-full border bg-white px-3 py-1 transition-colors';
+  const filterPillActiveClasses = 'border-[#D7E9FF]';
+  const filterPillInactiveClasses = 'border-gray-200 hover:border-[#299af8]/50';
+  const filterPillDisabledClasses = 'border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed opacity-80';
 
   const typeLabels = {
     knowledge: isRtl ? 'المنشورات' : 'By Insight',
@@ -599,20 +770,62 @@ const SearchBar: React.FC<SearchBarProps> = ({
                     </span>
   );
 
-  const renderHsIcon = (isActive: boolean) => (
-    <span
-      className={`flex items-center justify-center w-6 h-6 rounded-full border ${
-        isActive ? 'bg-blue-100 border-blue-200 text-blue-700' : 'bg-blue-50 border-blue-100 text-[#299af8]'
-      }`}
-    >
-      <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" viewBox="0 0 64 64" fill="none">
-        <g transform="matrix(0.99,0,0,0.99,0.32,0.3)" stroke="none" fill="currentColor">
-          <path d="m49.5 34c-.82842712 0-1.5.67157288-1.5 1.5v13c0 .82842712.67157288 1.5 1.5 1.5s1.5-.67157288 1.5-1.5v-13c0-.82842712-.67157288-1.5-1.5-1.5zm-6 0c-.82842712 0-1.5.67157288-1.5 1.5v13c0 .82842712.67157288 1.5 1.5 1.5s1.5-.67157288 1.5-1.5v-13c0-.82842712-.67157288-1.5-1.5-1.5zm-6 0c-.82842712 0-1.5.67157288-1.5 1.5v13c0 .82842712.67157288 1.5 1.5 1.5s1.5-.67157288 1.5-1.5v-13c0-.82842712-.67157288-1.5-1.5-1.5zm-6 0c-.82842712 0-1.5.67157288-1.5 1.5v13c0 .82842712.67157288 1.5 1.5 1.5s1.5-.67157288 1.5-1.5v-13c0-.82842712-.67157288-1.5-1.5-1.5z" />
-          <path d="m32 3c-.82842712 0-1.5.67157288-1.5 1.5v2.8007812c-1.2649826.52060382-2.2043206 1.6749789-2.4335938 3.0566406l-14.742188 16.642578h-6.8242188c-1.3590542 0-2.5 1.1409458-2.5 2.5v25c0 1.3590542 1.1409458 2.5 2.5 2.5h51c1.3590542 0 2.5-1.1409458 2.5-2.5v-25c0-1.3590542-1.1409361-2.5000073-2.5-2.5h-28c-.82842712 0-1.5.67157288-1.5 1.5s.67157288 1.5 1.5 1.5h27.5v24h-33v-24.5c0-1.3590542-1.1409458-2.5-2.5-2.5h-4.1679688l11.761719-13.279297c.73236176.78125202 1.7636799 1.2792969 2.90625 1.2792969 1.1727683 0 2.2019554-.53489178 2.9160156-1.359375l9.125 9.765625c.56539461.60477567 1.51386.63711965 2.1191406.0722656.60606614-.56559238.63843164-1.5155634.0722656-2.1210937l-10.396484-11.123047c-.26624623-1.3120561-1.1427571-2.4088386-2.3359375-2.9199219v-2.8144531c0-.82842712-.67157288-1.5-1.5-1.5zm-17 27h5c.554 0 1 .446 1 1v22c0 .554-.446 1-1 1h-5c-.554 0-1-.446-1-1v-22c0-.554.446-1 1-1z" />
-                            </g>
-                          </svg>
-                    </span>
-  );
+  const renderFilterPill = (opts: {
+    title: string;
+    subtitle: string;
+    ariaLabel: string;
+    icon: React.ReactNode;
+    disabled?: boolean;
+    active?: boolean;
+    onClick: () => void;
+    onClear?: () => void;
+  }) => {
+    const disabled = !!opts.disabled;
+    const active = !!opts.active;
+
+    return (
+      <button
+        type="button"
+        disabled={disabled}
+        aria-disabled={disabled}
+        aria-label={opts.ariaLabel}
+        onClick={() => {
+          if (!disabled) opts.onClick();
+        }}
+        className={`${filterPillBaseClasses} ${
+          disabled ? filterPillDisabledClasses : active ? filterPillActiveClasses : filterPillInactiveClasses
+        } ${isRtl ? 'flex-row-reverse' : ''}`}
+      >
+        <span
+          className={`flex items-center justify-center w-8 h-8 rounded-full border ${
+            disabled ? 'bg-gray-100 border-gray-200 text-gray-400' : 'bg-[#EFF8FF] border-[#D7E9FF] text-[#299AF8]'
+          }`}
+        >
+          {opts.icon}
+        </span>
+
+        <span className={`flex flex-col leading-tight ${isRtl ? 'items-end' : 'items-start'}`}>
+          <span className="text-xs font-medium text-gray-900">{opts.title}</span>
+          <span className="text-[10px] font-light text-[#299AF8]">{opts.subtitle}</span>
+        </span>
+
+        {opts.onClear && (
+          <span
+            className={`text-gray-400 hover:text-red-500 transition-colors ${isRtl ? 'ml-0 mr-auto' : 'ml-auto'}`}
+            role="button"
+            aria-label={isRtl ? 'مسح' : 'Clear'}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              opts.onClear?.();
+            }}
+          >
+            <IconX size={16} />
+          </span>
+        )}
+      </button>
+    );
+  };
   
   return (
     <form onSubmit={(e) => {
@@ -629,9 +842,8 @@ const SearchBar: React.FC<SearchBarProps> = ({
             const isActive = searchType === type;
             const isLocked = type === 'insighter';
             return (
-              <div className="flex flex-col">
+              <div key={type} className="flex flex-col">
                          <button
-                key={type}
                         type="button"
                 disabled={isLocked}
                 aria-disabled={isLocked}
@@ -671,6 +883,39 @@ const SearchBar: React.FC<SearchBarProps> = ({
             className={`${styles.searchBar} flex items-center bg-white border border-[#299af8] rounded-[6px] w-full px-3 py-2 gap-2`}
             style={{ fontSize: '16px' }}
           >
+            <button 
+              type="button"
+              className={`${isRtl ? 'mr-2' : 'ml-2'} bg-[#299af8] text-white p-2 rounded-[4px] flex items-center justify-center hover:bg-[#2185d6] transition-colors duration-150`}
+              onClick={async (e) => {
+                e.preventDefault();
+                hideSuggestions();
+                setSuggestionSelected(true);
+                setInputFocused(false);
+                
+                if (onSearch) {
+                  onSearch(searchQuery.trim());
+                } else {
+                  // Fallback: navigate preserving existing filters
+                  try {
+                    const params = new URLSearchParams(searchParams.toString());
+                    if (searchQuery.trim().length > 0) {
+                      params.set('keyword', searchQuery.trim());
+                    } else {
+                      params.delete('keyword');
+                    }
+                    params.set('search_type', searchType);
+                    params.delete('page');
+                    const nextUrl = `/${locale}/home?${params.toString()}`;
+                    router.push(nextUrl, { scroll: false });
+                  } catch {
+                    onSubmit(e as any);
+                  }
+                }
+              }}
+              aria-label={isRtl ? 'ابحث' : 'Search'}
+            >
+              <IconSearch size={18} />
+            </button>
             <input
               ref={searchInputRef}
               type="text"
@@ -710,124 +955,58 @@ const SearchBar: React.FC<SearchBarProps> = ({
                 </svg>
               </div>
             )}
-            
+            <div
+              aria-hidden="true"
+              className={`h-6 w-px bg-gray-200 mx-2 `}
+              style={{ alignSelf: 'center' }}
+            />
             {/* Filter chips inline on md+ screens */}
             <div className="hidden md:flex items-center gap-2">
-              <button
-                type="button"
-                disabled={isLoadingIsic}
-                onClick={() => !isLoadingIsic && setIsIsicModalOpen(true)}
-                className={`${filterChipBaseClasses} ${isLoadingIsic ? filterChipDisabledClasses : selectedIsic ? filterChipActiveClasses : filterChipInactiveClasses} ${isRtl ? 'flex-row-reverse' : ''}`}
-                aria-label={isRtl ? 'اختر رمز ISIC' : 'Select ISIC code'}
-              >
-                <span
-                  className={`flex items-center justify-center w-6 h-6 rounded-full border ${selectedIsic ? 'bg-blue-100 border-blue-200 text-blue-700' : 'bg-blue-50 border-blue-100 text-[#299af8]'}`}
-                >
-                  {isLoadingIsic ? (
-                    <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                  ) : (
-                    <IconBuildingBank className="w-[14px] h-[14px]" />
-                  )}
-                </span>
-                <span className="font-medium text-gray-900">
-                 {locale === 'ar' ? ' رمز ISIC' : 'ISIC code'}
-                </span>
-                {selectedIsic && (
-                  <span className={`font-mono text-[11px] bg-gray-100 px-1.5 py-0.5 rounded ${isRtl ? 'mr-2' : 'ml-2'}`}>
-                    {selectedIsic.code}
-                  </span>
-                )}
-                {selectedIsic && (
-                  <span
-                    className={`text-gray-400 hover:text-red-500 transition-colors ${isRtl ? 'mr-1' : 'ml-1'}`}
-                    role="button"
-                    aria-label={isRtl ? 'مسح اختيار ISIC' : 'Clear ISIC'}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      clearIsicSelection();
-                    }}
-                  >
-                    <IconX size={14} />
-                  </span>
-                )}
-              </button>
+              {renderFilterPill({
+                title: locale === 'ar' ? 'القطاع' : 'Industry',
+                subtitle: selectedIsic ? selectedIsic.code : (locale === 'ar' ? 'رمز ISIC' : 'ISIC code'),
+                ariaLabel: isRtl ? 'اختر القطاع (ISIC)' : 'Select Industry (ISIC code)',
+                disabled: isLoadingIsic,
+                active: !!selectedIsic,
+                icon: isLoadingIsic ? (
+                  <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                ) : (
+                  <IconBuildingBank className="w-[18px] h-[18px]" />
+                ),
+                onClick: () => setIsIsicModalOpen(true),
+                onClear: selectedIsic ? () => clearIsicSelection() : undefined,
+              })}
 
-              <button
-                type="button"
-                disabled={isHsDisabled}
-                onClick={() => {
-                  if (!isHsDisabled) {
-                    setIsHsModalOpen(true);
-                  }
-                }}
-                className={`${filterChipBaseClasses} ${isHsDisabled ? filterChipDisabledClasses : selectedHs ? filterChipActiveClasses : filterChipInactiveClasses} ${isRtl ? 'flex-row-reverse' : ''}`}
-                aria-label={isRtl ? 'اختر رمز HS' : 'Select HS code'}
-              >
-                {renderHsIcon(!!selectedHs && !isHsDisabled)}
-                <span className="font-medium text-gray-900">
-                 {locale === 'ar' ? ' رمز HS' : 'HS code'}
-                </span>
-                {selectedHs && !isHsDisabled && (
-                  <span className={`font-mono text-[11px] bg-gray-100 px-1.5 py-0.5 rounded ${isRtl ? 'mr-2' : 'ml-2'}`}>
-                    {selectedHs.code}
-                  </span>
-                )}
-                {selectedHs && !isHsDisabled && (
-                  <span
-                    className={`text-gray-400 hover:text-red-500 transition-colors ${isRtl ? 'mr-1' : 'ml-1'}`}
-                    role="button"
-                    aria-label={isRtl ? 'مسح اختيار HS' : 'Clear HS'}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      clearHsSelection();
-                    }}
-                  >
-                    <IconX size={14} />
-                  </span>
-                )}
-              </button>
+              {renderFilterPill({
+                title: locale === 'ar' ? 'المنتج' : 'Products',
+                subtitle: selectedHs ? selectedHs.code : (locale === 'ar' ? 'رمز HS' : 'HS code'),
+                ariaLabel: isRtl ? 'اختر رمز المنتج (HS Code)' : 'Select Product (HS Code)',
+                disabled: isHsDisabled,
+                active: !!selectedHs && !isHsDisabled,
+                icon: isHsDisabled ? (
+                  <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                ) : (
+                  <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 64 64" fill="none">
+                    <g transform="matrix(0.99,0,0,0.99,0.32,0.3)" stroke="none" fill="currentColor">
+                      <path d="m49.5 34c-.82842712 0-1.5.67157288-1.5 1.5v13c0 .82842712.67157288 1.5 1.5 1.5s1.5-.67157288 1.5-1.5v-13c0-.82842712-.67157288-1.5-1.5-1.5zm-6 0c-.82842712 0-1.5.67157288-1.5 1.5v13c0 .82842712.67157288 1.5 1.5 1.5s1.5-.67157288 1.5-1.5v-13c0-.82842712-.67157288-1.5-1.5-1.5zm-6 0c-.82842712 0-1.5.67157288-1.5 1.5v13c0 .82842712.67157288 1.5 1.5 1.5s1.5-.67157288 1.5-1.5v-13c0-.82842712-.67157288-1.5-1.5-1.5zm-6 0c-.82842712 0-1.5.67157288-1.5 1.5v13c0 .82842712.67157288 1.5 1.5 1.5s1.5-.67157288 1.5-1.5v-13c0-.82842712-.67157288-1.5-1.5-1.5z" />
+                      <path d="m32 3c-.82842712 0-1.5.67157288-1.5 1.5v2.8007812c-1.2649826.52060382-2.2043206 1.6749789-2.4335938 3.0566406l-14.742188 16.642578h-6.8242188c-1.3590542 0-2.5 1.1409458-2.5 2.5v25c0 1.3590542 1.1409458 2.5 2.5 2.5h51c1.3590542 0 2.5-1.1409458 2.5-2.5v-25c0-1.3590542-1.1409361-2.5000073-2.5-2.5h-28c-.82842712 0-1.5.67157288-1.5 1.5s.67157288 1.5 1.5 1.5h27.5v24h-33v-24.5c0-1.3590542-1.1409458-2.5-2.5-2.5h-4.1679688l11.761719-13.279297c.73236176.78125202 1.7636799 1.2792969 2.90625 1.2792969 1.1727683 0 2.2019554-.53489178 2.9160156-1.359375l9.125 9.765625c.56539461.60477567 1.51386.63711965 2.1191406.0722656.60606614-.56559238.63843164-1.5155634.0722656-2.1210937l-10.396484-11.123047c-.26624623-1.3120561-1.1427571-2.4088386-2.3359375-2.9199219v-2.8144531c0-.82842712-.67157288-1.5-1.5-1.5zm-17 27h5c.554 0 1 .446 1 1v22c0 .554-.446 1-1 1h-5c-.554 0-1-.446-1-1v-22c0-.554.446-1 1-1z" />
+                    </g>
+                  </svg>
+                ),
+                onClick: () => setIsHsModalOpen(true),
+                onClear: selectedHs ? () => clearHsSelection() : undefined,
+              })}
               
               {/* Accuracy filter moved below the search field */}
             </div>
             
-            <button 
-              type="button"
-              className={`${isRtl ? 'mr-2' : 'ml-2'} bg-[#299af8] text-white p-2 rounded-[4px] flex items-center justify-center hover:bg-[#2185d6] transition-colors duration-150`}
-              onClick={async (e) => {
-                e.preventDefault();
-                hideSuggestions();
-                setSuggestionSelected(true);
-                setInputFocused(false);
-                
-                if (onSearch) {
-                  onSearch(searchQuery.trim());
-                } else {
-                  // Fallback: navigate preserving existing filters
-                  try {
-                    const params = new URLSearchParams(searchParams.toString());
-                    if (searchQuery.trim().length > 0) {
-                      params.set('keyword', searchQuery.trim());
-                    } else {
-                      params.delete('keyword');
-                    }
-                    params.set('search_type', searchType);
-                    params.delete('page');
-                    const nextUrl = `/${locale}/home?${params.toString()}`;
-                    router.push(nextUrl, { scroll: false });
-                  } catch {
-                    onSubmit(e as any);
-                  }
-                }
-              }}
-              aria-label={isRtl ? 'ابحث' : 'Search'}
-            >
-              <IconSearch size={18} />
-            </button>
+            
         </div>
         {/* Accuracy control under the search field */}
         <div className={`mt-2 flex ${isRtl ? 'justify-end' : 'justify-end'}`}>
@@ -890,157 +1069,106 @@ const SearchBar: React.FC<SearchBarProps> = ({
         </div>
         {/* Filter chips below the input on small screens */}
         <div className={`mt-2 md:hidden flex flex-wrap gap-2 ${isRtl ? 'justify-end' : 'justify-start'}`}>
-          <button
-            type="button"
-            disabled={isLoadingIsic}
-            onClick={() => !isLoadingIsic && setIsIsicModalOpen(true)}
-            className={`${filterChipBaseClasses} ${isLoadingIsic ? filterChipDisabledClasses : selectedIsic ? filterChipActiveClasses : filterChipInactiveClasses} ${isRtl ? 'flex-row-reverse' : ''}`}
-            aria-label={isRtl ? 'اختر رمز ISIC' : 'Select ISIC code'}
-          >
-            <span
-              className={`flex items-center justify-center w-6 h-6 rounded-full border ${selectedIsic ? 'bg-blue-100 border-blue-200 text-blue-700' : 'bg-blue-50 border-blue-100 text-[#299af8]'}`}
-            >
-              {isLoadingIsic ? (
-                <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-              ) : (
-                <IconBuildingBank className="w-[14px] h-[14px]" />
-              )}
-            </span>
-            <span className="font-medium text-gray-900">
-             {locale === 'ar' ? ' رمز ISIC' : 'ISIC code'}
-            </span>
-            {selectedIsic && (
-              <span className={`font-mono text-[11px] bg-gray-100 px-1.5 py-0.5 rounded ${isRtl ? 'mr-2' : 'ml-2'}`}>
-                {selectedIsic.code}
-              </span>
-            )}
-            {selectedIsic && (
-              <span
-                className={`text-gray-400 hover:text-red-500 transition-colors ${isRtl ? 'mr-1' : 'ml-1'}`}
-                role="button"
-                aria-label={isRtl ? 'مسح اختيار ISIC' : 'Clear ISIC'}
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  clearIsicSelection();
-                }}
-              >
-                <IconX size={14} />
-              </span>
-            )}
-          </button>
+          {renderFilterPill({
+            title: locale === 'ar' ? 'الصناعة' : 'Industry',
+            subtitle: selectedIsic ? selectedIsic.code : (locale === 'ar' ? 'رمز ISIC' : 'ISIC code'),
+            ariaLabel: isRtl ? 'اختر القطاع (ISIC)' : 'Select Industry (ISIC code)',
+            disabled: isLoadingIsic,
+            active: !!selectedIsic,
+            icon: isLoadingIsic ? (
+              <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+            ) : (
+              <IconBuildingBank className="w-[18px] h-[18px]" />
+            ),
+            onClick: () => setIsIsicModalOpen(true),
+            onClear: selectedIsic ? () => clearIsicSelection() : undefined,
+          })}
 
-          <button
-            type="button"
-            disabled={isHsDisabled}
-            onClick={() => {
-              if (!isHsDisabled) {
-                setIsHsModalOpen(true);
-              }
-            }}
-            className={`${filterChipBaseClasses} ${isHsDisabled ? filterChipDisabledClasses : selectedHs ? filterChipActiveClasses : filterChipInactiveClasses} ${isRtl ? 'flex-row-reverse' : ''}`}
-            aria-label={isRtl ? 'اختر رمز HS' : 'Select HS code'}
-          >
-            {renderHsIcon(!!selectedHs && !isHsDisabled)}
-            <span className="font-medium text-gray-900">
-             {locale === 'ar' ? ' رمز HS' : 'HS code'}
-            </span>
-            {selectedHs && !isHsDisabled && (
-              <span className={`font-mono text-[11px] bg-gray-100 px-1.5 py-0.5 rounded ${isRtl ? 'mr-2' : 'ml-2'}`}>
-                {selectedHs.code}
-              </span>
-            )}
-            {selectedHs && !isHsDisabled && (
-              <span
-                className={`text-gray-400 hover:text-red-500 transition-colors ${isRtl ? 'mr-1' : 'ml-1'}`}
-                role="button"
-                aria-label={isRtl ? 'مسح اختيار HS' : 'Clear HS'}
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  clearHsSelection();
-                }}
-              >
-                <IconX size={14} />
-              </span>
-            )}
-          </button>
+          {renderFilterPill({
+            title: locale === 'ar' ? 'المنتج' : 'Products',
+            subtitle: selectedHs ? selectedHs.code : (locale === 'ar' ? 'رمز HS' : 'HS code'),
+            ariaLabel: isRtl ? 'اختر رمز المنتج (HS Code)' : 'Select Product (HS Code)',
+            disabled: isHsDisabled,
+            active: !!selectedHs && !isHsDisabled,
+            icon: isHsDisabled ? (
+              <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+            ) : (
+              <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 64 64" fill="none">
+                <g transform="matrix(0.99,0,0,0.99,0.32,0.3)" stroke="none" fill="currentColor">
+                  <path d="m49.5 34c-.82842712 0-1.5.67157288-1.5 1.5v13c0 .82842712.67157288 1.5 1.5 1.5s1.5-.67157288 1.5-1.5v-13c0-.82842712-.67157288-1.5-1.5-1.5zm-6 0c-.82842712 0-1.5.67157288-1.5 1.5v13c0 .82842712.67157288 1.5 1.5 1.5s1.5-.67157288 1.5-1.5v-13c0-.82842712-.67157288-1.5-1.5-1.5zm-6 0c-.82842712 0-1.5.67157288-1.5 1.5v13c0 .82842712.67157288 1.5 1.5 1.5s1.5-.67157288 1.5-1.5v-13c0-.82842712-.67157288-1.5-1.5-1.5zm-6 0c-.82842712 0-1.5.67157288-1.5 1.5v13c0 .82842712.67157288 1.5 1.5 1.5s1.5-.67157288 1.5-1.5v-13c0-.82842712-.67157288-1.5-1.5-1.5z" />
+                  <path d="m32 3c-.82842712 0-1.5.67157288-1.5 1.5v2.8007812c-1.2649826.52060382-2.2043206 1.6749789-2.4335938 3.0566406l-14.742188 16.642578h-6.8242188c-1.3590542 0-2.5 1.1409458-2.5 2.5v25c0 1.3590542 1.1409458 2.5 2.5 2.5h51c1.3590542 0 2.5-1.1409458 2.5-2.5v-25c0-1.3590542-1.1409361-2.5000073-2.5-2.5h-28c-.82842712 0-1.5.67157288-1.5 1.5s.67157288 1.5 1.5 1.5h27.5v24h-33v-24.5c0-1.3590542-1.1409458-2.5-2.5-2.5h-4.1679688l11.761719-13.279297c.73236176.78125202 1.7636799 1.2792969 2.90625 1.2792969 1.1727683 0 2.2019554-.53489178 2.9160156-1.359375l9.125 9.765625c.56539461.60477567 1.51386.63711965 2.1191406.0722656.60606614-.56559238.63843164-1.5155634.0722656-2.1210937l-10.396484-11.123047c-.26624623-1.3120561-1.1427571-2.4088386-2.3359375-2.9199219v-2.8144531c0-.82842712-.67157288-1.5-1.5-1.5zm-17 27h5c.554 0 1 .446 1 1v22c0 .554-.446 1-1 1h-5c-.554 0-1-.446-1-1v-22c0-.554.446-1 1-1z" />
+                </g>
+              </svg>
+            ),
+            onClick: () => setIsHsModalOpen(true),
+            onClear: selectedHs ? () => clearHsSelection() : undefined,
+          })}
           
           {/* Accuracy chip removed on mobile; control placed under search field */}
         </div>
         
-        {shouldShowSuggestions && isMounted &&
-          createPortal(
-            <div
-              ref={suggestionsRef}
-              style={{
-                position: 'fixed',
-                top: dropdownRect.top,
-                left: dropdownRect.left,
-                width: dropdownRect.width,
-                zIndex: 10000,
-              }}
-              className="mt-0 bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-y-auto custom-scrollbar"
-              onMouseEnter={() => setMouseInSuggestions(true)}
-              onMouseLeave={() => setMouseInSuggestions(false)}
-            >
-              {suggestions.map((suggestion, index) => (
-                <div
-                  key={index}
-                  className={`px-4 py-2 cursor-pointer hover:bg-blue-50 ${activeSuggestionIndex === index ? 'bg-blue-50' : ''}`}
-                  onClick={() => handleSuggestionSelect(suggestion)}
-                  onMouseEnter={() => setActiveSuggestionIndex(index)}
-                  dir={isRtl ? 'rtl' : 'ltr'}
-                >
-                  <div className="flex items-center">
-                    <svg
-                      className={`w-5 h-5 text-gray-400 ${isRtl ? 'ml-2' : 'mr-2'}`}
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
-                    <span className="text-gray-800">
-                      {searchQuery && suggestion.toLowerCase().includes(searchQuery.toLowerCase()) ? (
-                        <>
-                          {(() => {
-                            const lowerSuggestion = suggestion.toLowerCase();
-                            const lowerSearchTerm = searchQuery.toLowerCase();
-                            const matchIndex = lowerSuggestion.indexOf(lowerSearchTerm);
-                            
-                            if (matchIndex >= 0) {
-                              const beforeMatch = suggestion.substring(0, matchIndex);
-                              const match = suggestion.substring(matchIndex, matchIndex + searchQuery.length);
-                              const afterMatch = suggestion.substring(matchIndex + searchQuery.length);
-                              
-                              return (
-                                <>
-                                  {beforeMatch}
-                                  <strong className="font-bold">{match}</strong>
-                                  {afterMatch}
-                                </>
-                              );
-                            }
-                            
-                            return suggestion;
-                          })()}
-                        </>
-                      ) : (
-                        suggestion
-                      )}
-                    </span>
+        {shouldShowSuggestions && isMounted
+          ? (createPortal(
+              <div
+                ref={suggestionsRef}
+                style={{
+                  position: 'fixed',
+                  top: dropdownRect.top,
+                  left: dropdownRect.left,
+                  width: dropdownRect.width,
+                  zIndex: 10000,
+                }}
+                className="mt-0 bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-y-auto custom-scrollbar"
+                onMouseEnter={() => setMouseInSuggestions(true)}
+                onMouseLeave={() => setMouseInSuggestions(false)}
+              >
+                {suggestions.map((suggestion, index) => (
+                  <div
+                    key={`${suggestion}-${index}`}
+                    className={`px-4 py-2 cursor-pointer hover:bg-blue-50 ${activeSuggestionIndex === index ? 'bg-blue-50' : ''}`}
+                    onClick={() => handleSuggestionSelect(suggestion)}
+                    onMouseEnter={() => setActiveSuggestionIndex(index)}
+                    dir={isRtl ? 'rtl' : 'ltr'}
+                  >
+                    <div className="flex items-center">
+                      <svg
+                        className={`w-5 h-5 text-gray-400 ${isRtl ? 'ml-2' : 'mr-2'}`}
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                      </svg>
+                      <span className="text-gray-800">
+                        {(() => {
+                          const match = searchQuery ? arabicFuzzyMatch(suggestion, searchQuery) : null;
+                          if (!match || match.length <= 0) return suggestion;
+                          const beforeMatch = suggestion.substring(0, match.index);
+                          const matchedText = suggestion.substring(match.index, match.index + match.length);
+                          const afterMatch = suggestion.substring(match.index + match.length);
+                          return (
+                            <>
+                              {beforeMatch}
+                              <strong className="font-bold">{matchedText}</strong>
+                              {afterMatch}
+                            </>
+                          );
+                        })()}
+                      </span>
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>,
-            document.body
-          )
-        }
+                ))}
+              </div>,
+              document.body
+            ) as any)
+          : null}
         {/* Selected ISIC/HS details under the search bar */}
         {(selectedIsic || selectedHs) && (
           <div className={`mt-2 flex flex-wrap gap-2 items-start ${isRtl ? 'justify-start' : 'justify-start'} text-xs`}>
@@ -1067,9 +1195,9 @@ const SearchBar: React.FC<SearchBarProps> = ({
             {selectedHs && (
               <div
                 className={`flex items-center gap-1 px-2 py-1 rounded-full border bg-blue-50 border-blue-200 text-blue-700 ${isRtl ? 'flex-row-reverse' : ''}`}
-                aria-label={isRtl ? 'تفاصيل رمز HS المحدد' : 'Selected HS details'}
+                aria-label={isRtl ? 'تفاصيل رمز المنتج المحدد' : 'Selected HS details'}
               >
-                <span className="font-medium">{isRtl ? 'رمز HS:' : 'HS Code:'}</span>
+                <span className="font-medium">{isRtl ? 'رمز المنتج (HS Code):' : 'Products (HS Code):'}</span>
                 <span className="line-clamp-1 truncate max-w-[260px]">{selectedHs.label}</span>
                 <button
                   type="button"
@@ -1094,32 +1222,24 @@ const SearchBar: React.FC<SearchBarProps> = ({
         <Modal
           opened={isIsicModalOpen}
           onClose={() => setIsIsicModalOpen(false)}
-          title={locale === 'ar' ? 'اختر رمز ISIC' : 'Select ISIC Code'}
+          title={locale === 'ar' ? 'ابحث عن التقارير والبيانات والرؤى حسب القطاع' : 'Search data, reports, and insights by industry'}
           size="lg"
           overlayProps={{ backgroundOpacity: 0.55, blur: 3 }}
         >
           <div className="space-y-4">
             <input
               type="text"
-              placeholder={locale === 'ar' ? 'ابحث عن رمز ISIC...' : 'Search ISIC codes...'}
+              placeholder={locale === 'ar' ? ' ابحث هنا' : ' search here'}
               value={isicSearch}
               onChange={(e) => setIsicSearch(e.target.value)}
               className={`w-full px-3 py-2 mt-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
+              dir={isRtl ? 'rtl' : 'ltr'}
             />
             {isLoadingIsic ? (
               <div className="flex justify-center py-8"><Loader size="md" /></div>
             ) : (
               <div className="grid grid-cols-1 gap-2 max-h-[60vh] overflow-y-auto pr-2">
-                {filteredIsicLeafNodes.map((node) => (
-                  <button
-                    key={node.key}
-                    className={`py-2 px-3 rounded-md text-sm flex text-start items-start w-full transition-colors hover:bg-gray-100 border border-gray-200`}
-                    onClick={() => handleSelectIsic(node)}
-                  >
-                    <span className={`font-mono text-xs bg-gray-100 px-1.5 py-0.5 rounded ${locale === 'ar' ? 'ml-2' : 'mr-2'}`}>{node.code}</span>
-                    <span className="flex-1">{locale === 'ar' ? (node.names?.ar || node.code) : (node.names?.en || node.code)}</span>
-                  </button>
-                ))}
+                <IsicLeafNodesList nodes={filteredIsicLeafNodes} locale={locale} onSelect={handleSelectIsic} />
               </div>
             )}
           </div>
@@ -1128,17 +1248,18 @@ const SearchBar: React.FC<SearchBarProps> = ({
         <Modal
           opened={isHsModalOpen}
           onClose={() => setIsHsModalOpen(false)}
-          title={locale === 'ar' ? 'اختر رمز HS' : 'Select HS Code'}
+          title={locale === 'ar' ? 'ابحث عن التقارير والبيانات والرؤى حسب المنتج' : 'Search data, reports, and insights by product'}
           size="lg"
           overlayProps={{ backgroundOpacity: 0.55, blur: 3 }}
         >
           <div className="space-y-4">
             <input
               type="text"
-              placeholder={locale === 'ar' ? 'ابحث عن رمز HS...' : 'Search HS codes...'}
+              placeholder={locale === 'ar' ? 'ابحث عن رمز المنتج...' : 'Search Products...'}
               value={hsSearch}
               onChange={(e) => setHsSearch(e.target.value)}
               className={`w-full px-3 py-2 mt-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
+              dir={isRtl ? 'rtl' : 'ltr'}
             />
             {isLoadingHs ? (
               <div className="flex justify-center py-8"><Loader size="md" /></div>
@@ -1146,69 +1267,21 @@ const SearchBar: React.FC<SearchBarProps> = ({
               <div className="grid grid-cols-1 gap-2 max-h-[60vh] overflow-y-auto pr-2">
                 {selectedIsic ? (
                   <>
-                    {(() => {
-                      const related = filteredHsCodes.filter(c => c.isic_code_id === selectedIsic.id);
-                      const others = filteredHsCodes.filter(c => c.isic_code_id !== selectedIsic.id);
-                      return (
-                        <>
-                          {related.length > 0 && (
-                            <>
-                              <div className="text-sm font-semibold text-blue-500 px-1">
-                                {locale === 'ar' ? 'ذات صلة' : 'Related'}
-                              </div>
-                              {related.map((code) => (
-                                <button
-                                  key={code.id}
-                                  className={`py-2 px-3 rounded-md text-sm flex text-start items-start w-full transition-colors hover:bg-gray-100 border border-gray-200`}
-                                  onClick={() => handleSelectHs(code)}
-                                >
-                                  <span className={`font-mono text-xs bg-gray-100 px-1.5 py-0.5 rounded ${locale === 'ar' ? 'ml-2' : 'mr-2'}`}>{code.code}</span>
-                                  <span className="flex-1">{locale === 'ar' ? code.names.ar : code.names.en}</span>
-                                </button>
-                              ))}
-                            </>
-                          )}
-                          {others.length > 0 && (
-                            <>
-                              <div className="text-sm font-semibold text-gray-700 px-1 mt-2">
-                                {locale === 'ar' ? 'أكواد HS كل' : 'All HS code'}
-                              </div>
-                              {others.map((code) => (
-                                <button
-                                  key={code.id}
-                                  className={`py-2 px-3 rounded-md text-sm flex text-start items-start w-full transition-colors hover:bg-gray-100 border border-gray-200`}
-                                  onClick={() => handleSelectHs(code)}
-                                >
-                                  <span className={`font-mono text-xs bg-gray-100 px-1.5 py-0.5 rounded ${locale === 'ar' ? 'ml-2' : 'mr-2'}`}>{code.code}</span>
-                                  <span className="flex-1">{locale === 'ar' ? code.names.ar : code.names.en}</span>
-                                </button>
-                              ))}
-                            </>
-                          )}
-                          {related.length === 0 && others.length === 0 && (
-                            <div className="flex flex-col items-center justify-center py-8 text-center text-gray-500 text-sm">
-                              {locale === 'ar' ? 'لا توجد رموز HS متاحة' : 'No HS codes available'}
-                            </div>
-                          )}
-                        </>
-                      );
-                    })()}
+                    {hsModalBuckets && (
+                      <HsBucketsList
+                        related={hsModalBuckets.related}
+                        others={hsModalBuckets.others}
+                        locale={locale}
+                        onSelect={handleSelectHs}
+                      />
+                    )}
                   </>
                 ) : (
                   <>
-                    {filteredHsCodes.map((code) => (
-                      <button
-                        key={code.id}
-                        className={`py-2 px-3 rounded-md text-sm flex text-start items-start w-full transition-colors hover:bg-gray-100 border border-gray-200`}
-                        onClick={() => handleSelectHs(code)}
-                      >
-                        <span className={`font-mono text-xs bg-gray-100 px-1.5 py-0.5 rounded ${locale === 'ar' ? 'ml-2' : 'mr-2'}`}>{code.code}</span>
-                        <span className="flex-1">{locale === 'ar' ? code.names.ar : code.names.en}</span>
-                      </button>
-                    ))}
+                    <HsCodesList codes={filteredHsCodes} locale={locale} onSelect={handleSelectHs} />
                     {filteredHsCodes.length === 0 && (
                       <div className="flex flex-col items-center justify-center py-8 text-center text-gray-500 text-sm">
-                        {locale === 'ar' ? 'لا توجد رموز HS متاحة' : 'No HS codes available'}
+                        {locale === 'ar' ? 'لا توجد رموز HS متاحة' : 'No Products available'}
                       </div>
                     )}
                   </>

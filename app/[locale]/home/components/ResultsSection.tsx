@@ -1,6 +1,6 @@
 'use client'
 
-import React, { Suspense } from 'react';
+import React, { Suspense, memo, useEffect, useMemo, useRef } from 'react';
 import { Title, Group, Pagination } from '@mantine/core';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
@@ -12,7 +12,7 @@ import type { KnowledgeItem } from '../../topic/[id]/[slug]/KnowledgeGrid';
 import type { SearchResultItem } from '../SearchResultsGrid';
 import TestSearchResults from './TestSearchResults'; // Import the test component
 import styles from '../../profile/[uuid]/profile.module.css';
-
+import { Text } from '@mantine/core';
 // Dynamically import components with no SSR to avoid hydration issues
 const KnowledgeGrid = dynamic(
   () => import('../../topic/[id]/[slug]/KnowledgeGrid'),
@@ -74,9 +74,29 @@ const ResultsSection: React.FC<ResultsSectionProps> = ({
   const t4 = useTranslations('Features4');
   const isRtl = locale === 'ar';
   const searchParams = useSearchParams();
+  const keywordFromUrl = (searchParams.get('keyword') || '').trim();
+  const hasKeyword = ((searchQuery || '').trim() || keywordFromUrl).length > 0;
   
   // Get current page directly from URL - this is the source of truth!
   const urlCurrentPage = searchParams.get('page') ? parseInt(searchParams.get('page')!) : 1;
+
+  // We are inside a scrollable container on `/home` (not the window).
+  // So we scroll THIS section into view to ensure the new page starts from the top.
+  const resultsTopRef = useRef<HTMLDivElement | null>(null);
+  const scrollResultsToTop = useMemo(() => {
+    return () => {
+      // Scroll the nearest scroll container (the content column) to the top of results.
+      resultsTopRef.current?.scrollIntoView({ behavior: 'auto', block: 'start' });
+      // Fallback for layouts where window is the scroller.
+      window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+    };
+  }, []);
+
+  useEffect(() => {
+    // Whenever the page changes, jump back to the top of results.
+    scrollResultsToTop();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentPage]);
   
   // Loading state component with a nice spinner
   const LoadingSpinner = () => (
@@ -114,11 +134,19 @@ const ResultsSection: React.FC<ResultsSectionProps> = ({
   
   return (
     <div dir={isRtl ? 'rtl' : 'ltr'}>
+    <div ref={resultsTopRef} />
     <div className="px-10">
     <Group justify="space-between" align="center" mb="md">
         <div className="flex items-center gap-2">
+          
           {searchType === 'knowledge' && selectedCategory !== undefined && onCategoryChange && getCategoryCount && (
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="flex flex-col gap-2">
+              {keywordFromUrl.length > 0 && (
+                <div className="text-sm font-light text-gray-800">
+                  {isRtl ? 'نتائج البحث:' : 'Search Results:'}
+                </div>
+              )}
+              <div className="flex flex-wrap items-center gap-2">
               {(() => {
                 const categories = [
                   { name: 'all', label: 'All', arLabel: 'الكل', filterClass: styles.filterAllActive, iconClass: styles.iconData },
@@ -226,7 +254,9 @@ const ResultsSection: React.FC<ResultsSectionProps> = ({
                 };
                 return categories.map((cat) => {
                   const isActive = selectedCategory === cat.name;
-                  const count = cat.name === 'all' ? getCategoryCount('all') : getCategoryCount(cat.name);
+                  const count = hasKeyword
+                    ? (cat.name === 'all' ? getCategoryCount('all') : getCategoryCount(cat.name))
+                    : 0;
                   return (
                     <button
                       key={cat.name}
@@ -240,7 +270,7 @@ const ResultsSection: React.FC<ResultsSectionProps> = ({
                         <span className={`${isRtl ? 'me-2' : 'ml-2'} font-medium text-xs`}>
                         {isRtl ? cat.arLabel : cat.label}
                       </span>
-                        {cat.name !== 'all' && (
+                        {hasKeyword && cat.name !== 'all' && (
                           <span className={`${styles.countBadge} ${isRtl ? 'me-0' : 'ml-2'}`}>
                             {count > 999 ? '999+' : count}
                           </span>
@@ -250,6 +280,7 @@ const ResultsSection: React.FC<ResultsSectionProps> = ({
                   );
                 });
               })()}
+              </div>
             </div>
           )}
         </div>
@@ -310,27 +341,49 @@ const ResultsSection: React.FC<ResultsSectionProps> = ({
                   total={totalPages} 
                   value={urlCurrentPage}
                   onChange={(page) => {
-                    // Simply call the pagination handler - it will update URL which will update our display
+                    // Scroll to top of results (inner scroll container)
+                    scrollResultsToTop();
+                    
+                    // Then call the pagination handler to update URL and fetch new data
                     if (onPageChange) {
                       onPageChange(page);
                     }
-                    
-                    // Scroll back to top of results for better UX
-                    window.scrollTo({
-                      top: 0,
-                      behavior: 'smooth'
-                    });
                   }}
                   withControls
                   boundaries={1}
                 />
+
               </div>
             )}
           </>
         )}
       </Suspense>
+      <footer className="mt-10 border-t border-gray-200 bg-white/60 py-6">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-2 text-center">
+          <Image src="/images/smallLogo.png" alt="Logo" width={20 } height={20} />
+          <Text size="xs" c="dimmed" dir="ltr" lang="en">
+        © 2025 insightabusiness.com
+          </Text>
+          <Text size="xs" c="dimmed" dir="ltr" lang="en" className="whitespace-nowrap">
+            v1.1.1
+          </Text>
+        </div>
+      </footer>
     </div>
   );
 };
 
-export default ResultsSection;
+// Memoize to prevent unnecessary re-renders when parent state changes
+export default memo(ResultsSection, (prevProps, nextProps) => {
+  // Only re-render if these key props change
+  return (
+    prevProps.searchResults === nextProps.searchResults &&
+    prevProps.loading === nextProps.loading &&
+    prevProps.currentPage === nextProps.currentPage &&
+    prevProps.totalPages === nextProps.totalPages &&
+    prevProps.totalItems === nextProps.totalItems &&
+    prevProps.viewMode === nextProps.viewMode &&
+    prevProps.selectedCategory === nextProps.selectedCategory &&
+    prevProps.searchType === nextProps.searchType
+  );
+});

@@ -139,7 +139,7 @@ export async function fetchStatisticsPerType(
       url.searchParams.append('tag', tagFilter);
     }
     
-    // Add HS code parameter
+    // Add Products parameter
     if (hsCodeFilter !== null) {
       url.searchParams.append('hs_code', hsCodeFilter);
     }
@@ -191,7 +191,7 @@ export async function fetchStatisticsPerType(
     
     const response = await fetch(url.toString(), {
       headers,
-      cache: 'no-store'
+      next: { revalidate: 30 } // Cache for 30 seconds for better performance
     });
     
     // Handle 422 validation errors specifically
@@ -306,7 +306,7 @@ export async function fetchSearchResults(
       url.searchParams.append('isic_code', isicCodeFilter);
     }
     
-    // Add HS code parameter for the API
+    // Add Products parameter for the API
     if (hsCodeFilter !== null) {
       url.searchParams.append('hs_code', hsCodeFilter);
     }
@@ -366,12 +366,9 @@ export async function fetchSearchResults(
       headers.Authorization = `Bearer ${token}`;
     }
     
-    try {
-      console.log('[fetchSearchResults] URL:', url.toString());
-    } catch {}
     const response = await fetch(url.toString(), {
       headers,
-      cache: 'no-store'
+      next: { revalidate: 30 } // Cache for 30 seconds for better performance
     });
     
     // Handle 422 validation errors specifically

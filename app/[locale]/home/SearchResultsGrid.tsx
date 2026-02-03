@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, memo } from 'react';
 import { Text, Card, Badge, Group, Avatar, Rating } from "@mantine/core";
 import Link from "next/link";
 import Image from "next/image";
@@ -183,7 +183,7 @@ function formatCoverageRange(start?: number, end?: number): string {
   return '';
 }
 
-export default function SearchResultsGrid({
+function SearchResultsGridComponent({
   results,
   colNumbers = 3,
   locale,
@@ -575,15 +575,15 @@ export default function SearchResultsGrid({
                               </Link>
                           )}
 
-                          <Link href={`/${currentLocale}/profile/${item.insighter.company?.uuid}`}>
                           {item.insighter.roles.includes("company-insighter") && (
-                            item.insighter.company
-                              ? (<Link href={`/${currentLocale}/profile/${item.insighter?.uuid}?entity=insighter`}>
+                            item.insighter.company ? (
+                              <Link href={`/${currentLocale}/profile/${item.insighter?.uuid}?entity=insighter`}>
                                 {translations.by} {item.insighter.name.toLowerCase()}
-                                </Link>)
-                              : translations.company
+                              </Link>
+                            ) : (
+                              <span>{translations.company}</span>
+                            )
                           )}
-                          </Link>
                         </Text>
                       </div>
                     </div>
@@ -711,6 +711,9 @@ export default function SearchResultsGrid({
           </div>
         </div>
       )}
+
+
+      
           {/* Auth Modal */}
     <AuthModal
       opened={authModalOpened}
@@ -720,3 +723,15 @@ export default function SearchResultsGrid({
     </div>
   );
 }
+
+// Memoize to prevent unnecessary re-renders
+const SearchResultsGrid = memo(SearchResultsGridComponent, (prevProps, nextProps) => {
+  return (
+    prevProps.results === nextProps.results &&
+    prevProps.viewMode === nextProps.viewMode &&
+    prevProps.filtersVisible === nextProps.filtersVisible &&
+    prevProps.locale === nextProps.locale
+  );
+});
+
+export default SearchResultsGrid;
