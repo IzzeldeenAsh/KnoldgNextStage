@@ -40,7 +40,7 @@ export default async function GettingStartedPage({ params }: { params: Promise<{
 
           <div className="relative z-10 px-4 sm:px-12">
             {/* Breadcrumbs */}
-            <nav className={`mb-6 text-xs md:text-sm ${isRTL ? 'text-right' : 'text-left'}`} aria-label="Breadcrumb">
+            <nav className={`mb-6 text-xs md:text-sm ps-6 md:ps-0 ${isRTL ? 'text-right' : 'text-left'}`} aria-label="Breadcrumb">
               <ol className="flex items-center gap-2 text-gray-700/80 flex-wrap">
                 <li>
                   <a href={`/${locale}/resources/first-steps`} className="hover:text-gray-900 transition-colors">
@@ -145,8 +145,8 @@ export default async function GettingStartedPage({ params }: { params: Promise<{
                       </div>
                       <div className="text-gray-600">
                         {locale === 'ar'
-                          ? 'تعرّف على كيفية نشر وبيع المعرفة وإدارة الطلبات والاجتماعات.'
-                          : 'Learn how to publish, sell, and manage orders and meetings.'}
+                          ? 'تعرّف على كيفية نشر وبيع المعرفة وإدارة الطلبات والجلسات الاستشارية.'
+                          : 'Learn how to publish, sell, and manage orders and sessions.'}
                       </div>
                     </div>
                   </div>

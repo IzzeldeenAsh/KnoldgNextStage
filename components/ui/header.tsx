@@ -46,8 +46,8 @@ const INDUSTRIES_CACHE_DURATION = 300000; // 5 minutes cache for industries
 const ANGULAR_APP_URL: string =
   process.env.NEXT_PUBLIC_ANGULAR_APP_URL ||
   (process.env.NODE_ENV === 'development'
-    ? 'https://app.foresighta.co'
-    : 'https://app.foresighta.co');
+    ? 'https://app.insightabusiness.com'
+    : 'https://app.insightabusiness.com');
 
 async function getIndustries(locale: string = 'en', forceRefresh: boolean = false): Promise<Industry[]> {
   const now = Date.now();
@@ -76,7 +76,7 @@ async function getIndustries(locale: string = 'en', forceRefresh: boolean = fals
 
 async function fetchIndustriesFromAPI(locale: string): Promise<Industry[]> {
   try {
-    const res = await fetch("https://api.foresighta.co/api/platform/industries/menu", {
+    const res = await fetch("https://api.insightabusiness.com/api/platform/industries/menu", {
       method: "POST",
       next: { revalidate: 3600 },
       headers: {
@@ -244,10 +244,10 @@ const { isLoading: isAppLoading, setIsLoading: setAppLoading } = useLoading();
     
     // Check for production domains
     if (hostname.includes('insightabusiness.com')) {
-      return '.foresighta.co';
+      return '.insightabusiness.com';
     }
     if (hostname.includes('foresighta.co')) {
-      return '.foresighta.co';
+      return '.insightabusiness.com';
     }
     
     // Local development - no domain needed
@@ -383,10 +383,11 @@ const { isLoading: isAppLoading, setIsLoading: setAppLoading } = useLoading();
           </div>
 
           {/* Desktop navigation */}
-          <nav className="hidden md:flex flex-1 overflow-visible min-w-0">
+          <nav className="hidden lg:flex flex-1 overflow-visible min-w-0">
             <ul className="flex justify-start items-center w-full gap-0.5 md:gap-1">
               <li>
                 <HoverCard  
+                  id={`industries-hovercard-${currentLocale}`}
                   position='bottom'
                   radius="sm" shadow="md" withinPortal>
                   <HoverCard.Target>
@@ -470,10 +471,10 @@ const { isLoading: isAppLoading, setIsLoading: setAppLoading } = useLoading();
               <li>
                 <Link className={`font-medium text-xs md:text-sm ${menuTextColorClass} text-white xl:mx-1 ${isActiveLink('statistic')}`} href={`/${currentLocale}/industries/statistic`}>{t('navigation.statistics')}</Link>
               </li>
-              <li className='xl:block hidden'>
+              <li className='md:block hidden'>
                 <Link className={`font-medium text-xs md:text-sm ${menuTextColorClass} text-white xl:mx-1 ${isActiveLink('manual')}`} href={`/${currentLocale}/industries/manual`}>{t('navigation.manuals')}</Link>
               </li>
-              <li className='xl:block hidden'>
+              <li className='md:block hidden'>
                 <Link className={`font-medium text-xs md:text-sm ${menuTextColorClass} text-white xl:mx-1 ${isActiveLink('course')}`} href={`/${currentLocale}/industries/course`}>{t('navigation.courses')}</Link>
               </li>
             </ul>
@@ -484,6 +485,7 @@ const { isLoading: isAppLoading, setIsLoading: setAppLoading } = useLoading();
             <div className="hidden xl:flex items-center mx-4">
               <form onSubmit={handleSearchSubmit} className="flex items-center">
                 <TextInput
+                  id={`header-search-${currentLocale}`}
                   placeholder={currentLocale === 'ar' ? 'البحث...' : 'Search...'}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.currentTarget.value)}

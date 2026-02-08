@@ -332,9 +332,9 @@ const getNotificationIcon = (subType: string, color?: string): React.ReactNode =
 // Helper function to determine display name based on notification sub_type and language
 const getNotificationName = (subType: string, language: string): string => {
   const nameMap: Record<string, { en: string; ar: string }> = {
-    'accept_knowledge': { en: 'Insights Accepted', ar: 'قبول الرؤى' },
-    'declined': { en: 'Insights Declined', ar: 'رفض الرؤى' },
-    'approved': { en: 'Insights Approved', ar: 'تمت الموافقة على الرؤى' },
+    'accept_knowledge': { en: 'Insights Accepted', ar: 'قبول المستندات' },
+    'declined': { en: 'Insights Declined', ar: 'رفض المستندات' },
+    'approved': { en: 'Insights Approved', ar: 'تمت الموافقة على المستندات' },
     'activate_insighter': { en: 'Insighter Activated', ar: 'تفعيل حساب الانسايتر' },
     'deactivate_insighter': { en: 'Insighter Deactivated', ar: 'إلغاء تفعيل حساب الانسايتر' },
     'deactivate_insighter_with_delete': { en: 'Insighter Deactivated', ar: 'إلغاء تفعيل حساب الانسايتر' },
@@ -348,18 +348,18 @@ const getNotificationName = (subType: string, language: string): string => {
     'save': { en: 'Save', ar: 'حفظ' },
     'share': { en: 'Share', ar: 'مشاركة' },
     'view': { en: 'View', ar: 'عرض' },
-    'knowledge_accept': { en: 'Insights Accepted', ar: 'قبول الرؤى' },
-    'knowledge_declined': { en: 'Insights Declined', ar: 'رفض الرؤى' },
+    'knowledge_accept': { en: 'Insights Accepted', ar: 'قبول المستندات' },
+    'knowledge_declined': { en: 'Insights Declined', ar: 'رفض المستندات' },
     'activate_company': { en: 'Active Company', ar: 'تفعيل الشركة' },
-    'client_meeting_new': { en: 'New Meeting Request', ar: 'طلب اجتماع جديد' },
-    'insighter_meeting_client_new': { en: 'New Meeting Request', ar: 'طلب اجتماع جديد' },
-    'insighter_meeting_approved': { en: 'Meeting Approved', ar: 'تمت الموافقة على الاجتماع' },
-    'client_meeting_insighter_approved': { en: 'Meeting Approved', ar: 'تمت الموافقة على الاجتماع' },
-    'client_meeting_insighter_postponed': { en: 'Meeting Postponed', ar: 'تم تأجيل الاجتماع' },
-    'client_meeting_reschedule': { en: 'Meeting Rescheduled', ar: 'تمت إعادة جدولة الاجتماع' },
-    'insighter_meeting_client_reschedule': { en: 'Meeting Rescheduled', ar: 'تمت إعادة جدولة الاجتماع' },
-    'client_meeting_reminder': { en: 'Meeting Reminder', ar: 'تذكير بالاجتماع' },
-    'insighter_meeting_reminder': { en: 'Meeting Reminder', ar: 'تذكير بالاجتماع' },
+    'client_meeting_new': { en: 'New Session Request', ar: 'طلب جلسة استشارية جديدة' },
+    'insighter_meeting_client_new': { en: 'New Session Request', ar: 'طلب جلسة استشارية جديدة' },
+    'insighter_meeting_approved': { en: 'Session Approved', ar: 'تمت الموافقة على الجلسة الاستشارية' },
+    'client_meeting_insighter_approved': { en: 'Session Approved', ar: 'تمت الموافقة على الجلسة الاستشارية' },
+    'client_meeting_insighter_postponed': { en: 'Session Postponed', ar: 'تم تأجيل الجلسة الاستشارية' },
+    'client_meeting_reschedule': { en: 'Session Rescheduled', ar: 'تمت إعادة جدولة الجلسة الاستشارية' },
+    'insighter_meeting_client_reschedule': { en: 'Session Rescheduled', ar: 'تمت إعادة جدولة الجلسة الاستشارية' },
+    'client_meeting_reminder': { en: 'Session Reminder', ar: 'تذكير بالجلسة الاستشارية' },
+    'insighter_meeting_reminder': { en: 'Session Reminder', ar: 'تذكير بالجلسة الاستشارية' },
     'deactivate_delete_company': { en: 'Company Deactivation', ar: 'إلغاء تفعيل الشركة' },
     'deactivate_company': { en: 'Company Deactivation', ar: 'إلغاء تفعيل الشركة' },
   };
@@ -528,7 +528,7 @@ export default function NotificationsInner({
       // Compute destination
       // Case 1: Knowledge page opens in new tab (must be synchronous to keep user gesture)
       if (notification.type === 'knowledge' && notification.category) {
-        const knowledgeUrl = `https://foresighta.co/${currentLanguage}/knowledge/${notification.category}/${notification.param || ''}?tab=ask`
+        const knowledgeUrl = `https://insightabusiness.com/${currentLanguage}/knowledge/${notification.category}/${notification.param || ''}?tab=ask`
         const win = window.open(knowledgeUrl, '_blank', 'noopener,noreferrer')
         if (win) win.opener = null
         // Fire-and-forget mark-as-read
@@ -539,33 +539,33 @@ export default function NotificationsInner({
       // Case 2: Compute single-page redirects
       let url: string | null = null
       if (notification.type === 'order') {
-        url = 'https://app.foresighta.co/app/insighter-dashboard/sales?tab=2'
+        url = 'https://app.insightabusiness.com/app/insighter-dashboard/sales?tab=2'
       } else if (notification.sub_type.startsWith('client_meeting_reminder')) {
-        url = 'https://app.foresighta.co/app/insighter-dashboard/my-meetings?tab=client'
+        url = 'https://app.insightabusiness.com/app/insighter-dashboard/my-meetings?tab=client'
       } else if (notification.sub_type === 'accept_knowledge') {
-        url = 'https://app.foresighta.co/app/insighter-dashboard/my-requests'
+        url = 'https://app.insightabusiness.com/app/insighter-dashboard/my-requests'
       } else if (notification.sub_type === 'client_meeting_new') {
-        url = 'https://app.foresighta.co/app/insighter-dashboard/my-meetings?tab=client'
+        url = 'https://app.insightabusiness.com/app/insighter-dashboard/my-meetings?tab=client'
       } else if (notification.sub_type === 'declined' && notification.type === 'knowledge') {
-        url = `https://app.foresighta.co/app/my-knowledge-base/view-my-knowledge/${notification.param}/details`
+        url = `https://app.insightabusiness.com/app/my-knowledge-base/view-my-knowledge/${notification.param}/details`
       } else if (notification.sub_type.startsWith('client_')) {
-        url = 'https://app.foresighta.co/app/insighter-dashboard/my-meetings?tab=client'
+        url = 'https://app.insightabusiness.com/app/insighter-dashboard/my-meetings?tab=client'
       } else if (notification.sub_type.startsWith('insighter_')) {
-        url = 'https://app.foresighta.co/app/insighter-dashboard/my-meetings?tab=client'
+        url = 'https://app.insightabusiness.com/app/insighter-dashboard/my-meetings?tab=client'
       } else if (notification.type === 'knowledge' && notification.sub_type === 'approved') {
-        url = `https://app.foresighta.co/app/my-knowledge-base/view-my-knowledge/${notification.param}/details`
+        url = `https://app.insightabusiness.com/app/my-knowledge-base/view-my-knowledge/${notification.param}/details`
       } else if (notification.sub_type.startsWith('client_meeting_insighter_postponed')) {
-        url = 'https://app.foresighta.co/app/insighter-dashboard/my-meetings/sent'
+        url = 'https://app.insightabusiness.com/app/insighter-dashboard/my-meetings/sent'
       } else if (notification.sub_type.startsWith('client_meeting_reschedule')) {
-        url = 'https://app.foresighta.co/app/insighter-dashboard/my-meetings/sent'
+        url = 'https://app.insightabusiness.com/app/insighter-dashboard/my-meetings/sent'
       } else if (notification.sub_type.startsWith('insighter_meeting_client_reschedule')) {
-        url = 'https://app.foresighta.co/app/insighter-dashboard/my-meetings?tab=client'
+        url = 'https://app.insightabusiness.com/app/insighter-dashboard/my-meetings?tab=client'
       } else if (notification.sub_type.startsWith('insighter_meeting_reminder')) {
-        url = 'https://app.foresighta.co/app/insighter-dashboard/my-meetings?tab=client'
+        url = 'https://app.insightabusiness.com/app/insighter-dashboard/my-meetings?tab=client'
       }else if (notification.sub_type ==='activate_insighter') {
-        url = 'https://app.foresighta.co/app/profile/overview'
+        url = 'https://app.insightabusiness.com/app/profile/overview'
       }else if (notification.sub_type ==='deactivate_insighter') {
-        url = 'https://app.foresighta.co/app/profile/overview'
+        url = 'https://app.insightabusiness.com/app/profile/overview'
       }
 
       // Mark-as-read BEFORE redirect to avoid request being cancelled by navigation
