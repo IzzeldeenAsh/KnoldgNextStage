@@ -7,7 +7,7 @@ import 'aos/dist/aos.css'
 // Globa dl flag to prevent multiple AOS initializations
 let aosInitialized = false
 
-// Safe AOS utility function that can be used by components
+// Safe AOS dutility function that can be used by components
 export const safeAOSInit = (config = {}) => {
   try {
     if (typeof AOS !== 'undefined' && typeof AOS.init === 'function' && !aosInitialized) {
