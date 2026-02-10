@@ -29,9 +29,7 @@ export function useIndustriesByType({ type, topSubIndustry = 2 }: UseIndustriesB
           },
           body: JSON.stringify({
             top_sub_industry: topSubIndustry,
-          }),
-          cache: "force-cache",
-          next: { revalidate: 3600 },
+          })
         });
 
         if (!res.ok) {

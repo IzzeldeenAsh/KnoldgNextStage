@@ -522,9 +522,14 @@ export default async function KnowledgePage({ params }: Props) {
                 <span className="text-sm font-bold text-gray-700">
                   {knowledge.published_at === null
                     ? "N/A"
-                    : new Date(
-                        knowledge.published_at
-                      ).toLocaleDateString(isRTL ? 'en-US' : undefined)}
+                    : (() => {
+                        const date = new Date(knowledge.published_at);
+                        // Format as "02 Jan 2024"
+                        const day = date.getDate().toString().padStart(2, '0');
+                        const month = date.toLocaleString(isRTL ? 'en-US' : locale || 'en', { month: 'short' });
+                        const year = date.getFullYear();
+                        return `${day} ${month} ${year}`;
+                      })()}
                 </span>
               </div>
               {knowledge.review && knowledge.review.length > 0 && (
