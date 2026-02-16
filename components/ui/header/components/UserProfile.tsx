@@ -148,7 +148,7 @@ export function UserProfile({ isHome }: { isHome: boolean }) {
 
       try {
         const res = await fetch(
-          `${API_BASE_URL}/api/insighter/library/knowledge/status/statistics`,
+          `https://api.foresighta.co/api/insighter/library/knowledge/status/statistics`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
