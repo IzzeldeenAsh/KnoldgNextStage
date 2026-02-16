@@ -1,6 +1,11 @@
 import TransferFormTab from './components/TransferFormTab';
 
-export default function InsighterTransferFormPage({ params }: { params: { id: string } }) {
-  return <TransferFormTab insighterId={params.id} />;
+type Props = {
+  params: Promise<{ id: string }>;
+};
+
+export default async function InsighterTransferFormPage({ params }: Props) {
+  const { id } = await params;
+  return <TransferFormTab insighterId={id} />;
 }
 

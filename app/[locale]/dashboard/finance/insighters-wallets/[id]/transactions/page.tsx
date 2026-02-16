@@ -1,6 +1,11 @@
 import InsighterTransactionsTab from './components/InsighterTransactionsTab';
 
-export default function InsighterWalletTransactionsPage({ params }: { params: { id: string } }) {
-  return <InsighterTransactionsTab insighterId={params.id} />;
+type Props = {
+  params: Promise<{ id: string }>;
+};
+
+export default async function InsighterWalletTransactionsPage({ params }: Props) {
+  const { id } = await params;
+  return <InsighterTransactionsTab insighterId={id} />;
 }
 
