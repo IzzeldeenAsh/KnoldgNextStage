@@ -10,9 +10,9 @@ import SendEmailModal from './SendEmailModal';
 import type { TransferFormRecord, TransferFormResponse } from './types';
 
 const SECONDARY_BUTTON_CLASS =
-  'h-8 rounded-md border border-slate-200 bg-white px-4 text-xs font-medium text-slate-700 transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 focus-visible:ring-offset-2 disabled:opacity-50 disabled:hover:bg-white';
+  'h-8 rounded-md border border-slate-200 bg-white px-4 text-xs font-medium text-slate-700 shadow-sm hover:bg-slate-50 disabled:opacity-50 disabled:hover:bg-white';
 const PRIMARY_BUTTON_CLASS =
-  'h-8 rounded-md border border-blue-600 bg-blue-600 px-4 text-xs font-medium text-white transition-colors hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50 focus-visible:ring-offset-2 disabled:opacity-50';
+  'h-8 rounded-md border border-blue-600 bg-blue-600 px-4 text-xs font-medium text-white shadow-sm hover:bg-blue-700 disabled:opacity-50';
 
 function normalizeText(value: unknown): string {
   return typeof value === 'string' ? value.trim() : '';
@@ -35,45 +35,20 @@ function InfoRow({
   label,
   value,
   icon,
-  valueClassName,
 }: {
   label: string;
   value: string;
   icon: ReactNode;
-  valueClassName?: string;
 }) {
-  const display = value || '-';
   return (
-    <div className="group flex items-start gap-3 rounded-lg border border-slate-200/80 bg-white px-3 py-2.5 transition-colors hover:bg-slate-50/60">
-      <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-slate-50 text-slate-500 ring-1 ring-slate-200 transition-colors group-hover:bg-white">
-        {icon}
-      </div>
+    <div className="flex items-start gap-3 rounded-md border border-slate-200 bg-white px-3 py-2">
+      <div className="mt-0.5 text-slate-400">{icon}</div>
       <div className="min-w-0 flex-1">
-        <div className="text-[11px] font-semibold tracking-wide text-slate-500">{label}</div>
-        <div
-          className={`mt-0.5 break-words text-xs font-semibold text-slate-900 ${valueClassName ?? ''}`}
-          title={display}
-        >
-          {display}
-        </div>
+        <div className="text-[11px] font-semibold text-slate-500">{label}</div>
+        <div className="mt-0.5 truncate text-xs font-semibold text-slate-900">{value || '-'}</div>
       </div>
     </div>
   );
-}
-
-function getStatusBadgeClass(status: string): string {
-  const normalized = normalizeText(status).toLowerCase();
-  if (!normalized) return 'bg-slate-100 text-slate-700 ring-1 ring-slate-200';
-  if (normalized.includes('pending') || normalized.includes('waiting') || normalized.includes('processing')) {
-    return 'bg-amber-50 text-amber-800 ring-1 ring-amber-200';
-  }
-  if (normalized.includes('approved') || normalized.includes('completed') || normalized.includes('complete') || normalized.includes('paid')) {
-    return 'bg-emerald-50 text-emerald-800 ring-1 ring-emerald-200';
-  }
-  if (normalized.includes('rejected') || normalized.includes('failed') || normalized.includes('canceled') || normalized.includes('cancelled')) {
-    return 'bg-rose-50 text-rose-800 ring-1 ring-rose-200';
-  }
-  return 'bg-slate-100 text-slate-700 ring-1 ring-slate-200';
 }
 
 function getFlagSrc(flag: string | null | undefined): string | null {
@@ -236,7 +211,6 @@ export default function TransferFormTab({ insighterId }: { insighterId: string }
   }, [fetchForm]);
 
   const defaultEmail = useMemo(() => normalizeText(form?.user_email) || '', [form?.user_email]);
-  const statusText = useMemo(() => normalizeText(form?.status) || 'Unknown', [form?.status]);
 
   const onPrint = () => {
     if (!form) return;
@@ -286,71 +260,35 @@ export default function TransferFormTab({ insighterId }: { insighterId: string }
   const bankFlag = getFlagSrc(form?.bank_country?.flag);
 
   return (
-    <div className="mt-4 space-y-4">
-      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
-        <div className="h-1 w-full bg-gradient-to-r from-blue-600/50 via-indigo-600/40 to-cyan-600/40" />
-        <div className="p-4">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-            <div className="min-w-0">
-              <div className="flex items-start gap-3">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-700 ring-1 ring-blue-100">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-4 w-4" aria-hidden="true">
-                    <path d="M3 10h18" />
-                    <path d="M4 10V7l8-4 8 4v3" />
-                    <path d="M6 10v10" />
-                    <path d="M10 10v10" />
-                    <path d="M14 10v10" />
-                    <path d="M18 10v10" />
-                    <path d="M4 20h16" />
-                  </svg>
-                </div>
-                <div className="min-w-0">
-                  <div className="text-sm font-semibold text-slate-900">Transfer Form</div>
-                  <div className="mt-0.5 text-xs text-slate-500">Insighter ID: {insighterId}</div>
-                  {normalizeText(form?.user_name) ? (
-                    <div className="mt-1 truncate text-xs font-medium text-slate-700" title={form?.user_name}>
-                      Beneficiary: {form?.user_name}
-                    </div>
-                  ) : null}
-                </div>
-              </div>
+    <div className="mt-4">
+      <div className="rounded-md border border-slate-200 bg-white p-4 shadow-sm">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <div className="min-w-0">
+            <div className="text-md font-semibold text-slate-900">Transfer Form</div>
+            <div className="mt-0.5 text-xs text-slate-500">Insighter ID: {insighterId}</div>
+          </div>
 
-              {form ? (
-                <div className="mt-3 flex flex-wrap items-center gap-2">
-                  <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${getStatusBadgeClass(statusText)}`}>
-                    {statusText}
-                  </span>
-                  <div className="rounded-lg bg-slate-50 px-3 py-1.5 ring-1 ring-slate-200">
-                    <div className="text-[10px] font-semibold text-slate-600">Dues</div>
-                    <div className="text-base font-bold tabular-nums text-slate-900">{formatCurrency(form.user_balance)}</div>
-                  </div>
-                </div>
-              ) : null}
-            </div>
-
-            <div className="flex flex-wrap items-center gap-2">
-           
-             
-              <button type="button" onClick={onPrint} className={SECONDARY_BUTTON_CLASS} disabled={!form}>
-                Print
-              </button>
-              <button type="button" onClick={onShareWhatsapp} className={SECONDARY_BUTTON_CLASS} disabled={!form}>
-                Share WhatsApp
-              </button>
-              <button
-                type="button"
-                onClick={() => setEmailModalOpen(true)}
-                className={PRIMARY_BUTTON_CLASS}
-                disabled={!form}
-              >
-                Send to Email
-              </button>
-            </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <Link href={backHref} className={SECONDARY_BUTTON_CLASS}>
+              Back
+            </Link>
+            <button type="button" onClick={fetchForm} className={SECONDARY_BUTTON_CLASS}>
+              Refresh
+            </button>
+            <button type="button" onClick={onPrint} className={SECONDARY_BUTTON_CLASS} disabled={!form}>
+              Print
+            </button>
+            <button type="button" onClick={onShareWhatsapp} className={SECONDARY_BUTTON_CLASS} disabled={!form}>
+              Share WhatsApp
+            </button>
+            <button type="button" onClick={() => setEmailModalOpen(true)} className={PRIMARY_BUTTON_CLASS} disabled={!form}>
+              Send to Email
+            </button>
           </div>
         </div>
       </div>
 
-      <div className="rounded-xl border border-slate-200 bg-white p-4">
+      <div className="mt-4 rounded-md border border-slate-200 bg-white p-4 shadow-sm">
         {isLoading ? (
           <div className="py-10 text-center text-xs text-slate-500">Loading...</div>
         ) : error ? (
@@ -359,17 +297,18 @@ export default function TransferFormTab({ insighterId }: { insighterId: string }
           <div className="py-10 text-center text-xs text-slate-500">No transfer form found.</div>
         ) : (
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-            <div className="rounded-xl border border-slate-200/80 bg-slate-50/40 p-4">
+            <div className="rounded-md border border-slate-200 bg-white p-4">
               <div className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-2 text-sm font-semibold text-slate-900">
-                  <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-white text-slate-600 ring-1 ring-slate-200">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-4 w-4" aria-hidden="true">
-                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                      <circle cx="12" cy="7" r="4" />
-                    </svg>
-                  </span>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-4 w-4 text-slate-500" aria-hidden="true">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                    <circle cx="12" cy="7" r="4" />
+                  </svg>
                   Beneficiary Information
                 </div>
+                <span className="rounded-full bg-slate-50 px-2 py-0.5 text-[10px] font-semibold text-slate-700 ring-1 ring-slate-200">
+                  {normalizeText(form.status) ? normalizeText(form.status) : 'unknown'}
+                </span>
               </div>
 
               <div className="mt-4 grid grid-cols-1 gap-2">
@@ -397,7 +336,6 @@ export default function TransferFormTab({ insighterId }: { insighterId: string }
                 <InfoRow
                   label="Dues"
                   value={formatCurrency(form.user_balance)}
-                  valueClassName="text-sm font-bold tabular-nums"
                   icon={
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-4 w-4" aria-hidden="true">
                       <path d="M12 1v22" />
@@ -443,19 +381,17 @@ export default function TransferFormTab({ insighterId }: { insighterId: string }
               </div>
             </div>
 
-            <div className="rounded-xl border border-slate-200/80 bg-slate-50/40 p-4">
+            <div className="rounded-md border border-slate-200 bg-white p-4">
               <div className="flex items-center gap-2 text-sm font-semibold text-slate-900">
-                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-white text-slate-600 ring-1 ring-slate-200">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-4 w-4" aria-hidden="true">
-                    <path d="M3 10h18" />
-                    <path d="M4 10V7l8-4 8 4v3" />
-                    <path d="M6 10v10" />
-                    <path d="M10 10v10" />
-                    <path d="M14 10v10" />
-                    <path d="M18 10v10" />
-                    <path d="M4 20h16" />
-                  </svg>
-                </span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-4 w-4 text-slate-500" aria-hidden="true">
+                  <path d="M3 10h18" />
+                  <path d="M4 10V7l8-4 8 4v3" />
+                  <path d="M6 10v10" />
+                  <path d="M10 10v10" />
+                  <path d="M14 10v10" />
+                  <path d="M18 10v10" />
+                  <path d="M4 20h16" />
+                </svg>
                 Bank Information
               </div>
 
