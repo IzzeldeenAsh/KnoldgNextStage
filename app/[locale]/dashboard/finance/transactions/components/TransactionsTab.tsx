@@ -718,11 +718,7 @@ export default function TransactionsTab() {
               />
             </div>
 
-            <select value={perPage} onChange={(e) => setPerPage(Number(e.target.value))} className={INPUT_CLASS}>
-              <option value={10}>10 / page</option>
-              <option value={25}>25 / page</option>
-              <option value={50}>50 / page</option>
-            </select>
+           
           </div>
         </div>
 

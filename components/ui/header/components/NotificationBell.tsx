@@ -245,6 +245,7 @@ export default function NotificationBell({ parent = 'client' }: NotificationBell
       >
         <NotificationIcon />
         <span
+          dir="ltr"
           className={`absolute -top-1 ${isRTL ? '-left-1' : '-right-1'} flex items-center justify-center w-5 h-5 text-xs font-bold text-white rounded-full shadow-sm ${notificationCount > 0 ? 'bg-red-600' : 'bg-transparent'}`}
         >
           {notificationCount > 0 ? notificationCount : ''}

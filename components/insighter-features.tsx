@@ -160,7 +160,7 @@ export default function InsighterFeatures() {
 
                   {/* Role buttons with floating animation - column on small screens, row on larger screens */}
                   <div className="absolute w-full z-20">
-                    <div className="flex flex-col md:flex-row justify-center items-center gap-4 md:gap-6 lg:gap-8 mt-8 md:mt-0">
+                    <div className="flex flex-col pt-20 sm:pt-0 md:flex-row justify-center items-center gap-1 md:gap-6 lg:gap-8 mt-8 md:mt-0">
                       {/* Field Expert */}
                       <div className="animate-[float_4s_ease-in-out_infinite]">
                         <div className="border border-white border-opacity-30 w-[160px] bg-slate-900/40 backdrop-blur-sm text-slate-300 px-6 py-3 rounded-xl text-lg cursor-default hover:border-opacity-50 transition-all duration-300 mb-3 md:mb-0">

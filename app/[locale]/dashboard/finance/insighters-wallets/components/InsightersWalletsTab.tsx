@@ -27,7 +27,7 @@ function SearchIcon() {
 }
 
 const INPUT_WITH_ICON_CLASS =
-  'h-8 w-full rounded-md border border-slate-200 bg-white pl-9 pr-3 text-xs text-slate-700 shadow-sm outline-none focus:border-blue-400 focus:border-[1px]';
+  'h-8 w-full max-w-[300px] rounded-md border border-slate-200 bg-white pl-9 pr-3 text-xs text-slate-700 shadow-sm outline-none focus:border-blue-400 focus:border-[1px]';
 const INPUT_CLASS =
   'h-8 w-full rounded-md border border-slate-200 bg-white px-3 text-xs text-slate-700 shadow-sm outline-none focus:border-blue-400 focus:border-[1px]';
 const SECONDARY_BUTTON_CLASS =
@@ -242,20 +242,29 @@ export default function InsightersWalletsTab() {
         </div>
 
         <div className="mt-4 flex flex-col gap-2 lg:flex-row lg:items-center">
-          <div className="relative flex-1">
-            <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
-              <SearchIcon />
-            </span>
-            <input
-              type="search"
-              value={searchInput}
-              onChange={(event) => setSearchInput(event.target.value)}
-              onKeyDown={onSearchKeyDown}
-              placeholder="Search (current page)..."
-              className={INPUT_WITH_ICON_CLASS}
-            />
-          </div>
+     
 
+        
+        </div>
+      </div>
+
+      <div className="mt-4 rounded-md border border-slate-200 bg-white p-4 shadow-sm">
+      <div className="relative flex-1">
+                  <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+                    <SearchIcon />
+                  </span>
+                  <input
+                    type="search"
+                    value={searchInput}
+                    onChange={(event) => setSearchInput(event.target.value)}
+                    onKeyDown={onSearchKeyDown}
+                    placeholder="Search (current page)..."
+                    className={INPUT_WITH_ICON_CLASS}
+                  />
+                </div>
+       <div className="flex justify-end">
+            
+                
           <div className="flex flex-wrap items-center gap-2">
             <select
               value={balanceStatus}
@@ -273,22 +282,10 @@ export default function InsightersWalletsTab() {
               Overdue Wired (+60 days)
             </label>
 
-            <span className={`inline-flex h-8 items-center rounded-full px-3 text-[11px] font-semibold ${getBalanceStatusBadgeClass(balanceStatus)}`}>
-              {toTitle(balanceStatus)}
-            </span>
           </div>
-        </div>
-      </div>
-
-      <div className="mt-4 rounded-md border border-slate-200 bg-white p-4 shadow-sm">
-        <div className="flex items-center justify-between gap-2">
-          <div className="text-xs text-slate-500">total: {meta.total}</div>
-          <button type="button" onClick={() => refresh(meta.current_page)} className={SECONDARY_BUTTON_CLASS}>
-            Refresh
-          </button>
-        </div>
-
+       </div>
         <div className="mt-3 overflow-x-auto rounded-md border border-slate-200 bg-white shadow-sm">
+          
           <table className="w-full min-w-[1100px] border-collapse text-xs text-slate-700">
             <thead className="bg-slate-50 text-[11px] font-semibold uppercase text-slate-500">
               <tr>
