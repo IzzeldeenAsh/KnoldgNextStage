@@ -152,6 +152,8 @@ export function GlobalProfileProvider({ children }: { children: React.ReactNode 
           company: data.data.company,
           country: data.data.country,
           country_id: data.data.country_id,
+          whatsapp_country_code: data.data.whatsapp_country_code ?? null,
+          whatsapp_number: data.data.whatsapp_number ?? null,
         };
 
     
@@ -166,7 +168,7 @@ export function GlobalProfileProvider({ children }: { children: React.ReactNode 
         globalProfileCache.lastFetchTime = Date.now();
 
         // Persist only for non-admin users (admin users are typically redirected to Angular).
-        if (!rolesFromApi.includes('admin')) {
+        if (!rolesFromApi.includes('admin') && !rolesFromApi.includes('staff')) {
           localStorage.setItem('user', JSON.stringify(userData));
         }
 
