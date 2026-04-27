@@ -31,6 +31,7 @@ export function UserProfile({ isHome }: { isHome: boolean }) {
   const { user, roles, isLoading, isAuthResolved, handleSignOut } = useUserProfile();
   const pathname = usePathname();
   const isRtl = pathname.startsWith("/ar");
+  const localeFromPath = isRtl ? "ar" : "en";
   const isWhatsAppMissing = String(user?.whatsapp_number ?? "").trim().length === 0;
   const promoCardSrc = isRtl
     ? "https://res.cloudinary.com/dsiku9ipv/image/upload/v1771682845/promo-ar-card_nwfawc.png"
@@ -52,7 +53,7 @@ export function UserProfile({ isHome }: { isHome: boolean }) {
     left: null,
     right: null,
   });
-  
+
   // Client-only values must be read after mount to avoid hydration mismatch.
   const [hasToken, setHasToken] = useState<boolean>(false);
   const [returnUrl, setReturnUrl] = useState<string>("");
@@ -224,12 +225,12 @@ export function UserProfile({ isHome }: { isHome: boolean }) {
   }, [menuOpen, canHaveDrafts, isRtl]);
 
   const isClient$ = () => {
-    return roles.includes("client") && 
-      !roles.includes("insighter") && 
-      !roles.includes("company") && 
+    return roles.includes("client") &&
+      !roles.includes("insighter") &&
+      !roles.includes("company") &&
       !roles.includes("company-insighter");
   };
-  
+
   if (!isAuthResolved) {
     return hasToken ? (
       <div className="w-10 h-10 bg-white animate-pulse rounded-full overflow-hidden border border-gray-200"></div>
@@ -290,7 +291,7 @@ export function UserProfile({ isHome }: { isHome: boolean }) {
             </div>
           )} */}
 
-{  user.profile_photo_url ? (
+          {user.profile_photo_url ? (
             <div className="w-8 h-8 md:w-10 md:h-10 rounded-full overflow-hidden">
               <Image
                 src={user.profile_photo_url}
@@ -357,7 +358,7 @@ export function UserProfile({ isHome }: { isHome: boolean }) {
                 </div>
               )} */}
               {
-                 user.profile_photo_url ? (
+                user.profile_photo_url ? (
                   <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0">
                     <Image
                       src={user.profile_photo_url}
@@ -379,37 +380,37 @@ export function UserProfile({ isHome }: { isHome: boolean }) {
                   <p className="text-sm font-bold text-gray-900 truncate">
                     {user.first_name} {user.last_name}
                   </p>
-                 
+
                 </div>
-               <div className="flex flex-wrap gap-1">
-               {roles.includes("insighter") && (
+                <div className="flex flex-wrap gap-1">
+                  {roles.includes("insighter") && (
                     <span className="bg-[#DFFEE9] text-[#1BC653] text-xs font-bold px-1.5 rounded-sm dark:bg-blue-900 dark:text-blue-300 whitespace-nowrap">
                       {t("insighter")}
                     </span>
                   )}
                   {(
                     roles.includes("company-insighter")) && (
-                   <>
-                    <span className="bg-[#EFF8FF] text-[#299AF8]  text-xs font-semibold px-1.5 rounded-sm dark:bg-yellow-900 dark:text-yellow-300 whitespace-nowrap">
-                    <span className="bg-[#EFF8FF] text-[#299AF8]  text-xs font-semibold px-1.5 rounded-sm dark:bg-yellow-900 dark:text-yellow-300 whitespace-nowrap">
-                     {t("insighter")} {isRtl ? "في" : "at"} { " "+user.company?.legal_name}
-                    </span>
-                    
-                    </span>
-                   </>
-                  )}
-                   {(roles.includes("company") &&
+                      <>
+                        <span className="bg-[#EFF8FF] text-[#299AF8]  text-xs font-semibold px-1.5 rounded-sm dark:bg-yellow-900 dark:text-yellow-300 whitespace-nowrap">
+                          <span className="bg-[#EFF8FF] text-[#299AF8]  text-xs font-semibold px-1.5 rounded-sm dark:bg-yellow-900 dark:text-yellow-300 whitespace-nowrap">
+                            {t("insighter")} {isRtl ? "في" : "at"} {" " + user.company?.legal_name}
+                          </span>
+
+                        </span>
+                      </>
+                    )}
+                  {(roles.includes("company") &&
                     !roles.includes("company-insighter")) && (
-                   <div className="flex gap-1 pt-1">
-                    
-                    <span className="bg-[#EFF8FF] text-[#299AF8]  text-xs font-semibold px-1.5 rounded-sm dark:bg-yellow-900 dark:text-yellow-300 whitespace-nowrap">
-                     {user.company?.legal_name}
-                    </span>
-                    <span className="bg-[#EFF8FF] text-[#299AF8]  text-xs font-semibold px-1.5 rounded-sm dark:bg-yellow-900 dark:text-yellow-300 whitespace-nowrap">
-                     {t("manager")}
-                      </span>
-                   </div>
-                  )}
+                      <div className="flex gap-1 pt-1">
+
+                        <span className="bg-[#EFF8FF] text-[#299AF8]  text-xs font-semibold px-1.5 rounded-sm dark:bg-yellow-900 dark:text-yellow-300 whitespace-nowrap">
+                          {user.company?.legal_name}
+                        </span>
+                        <span className="bg-[#EFF8FF] text-[#299AF8]  text-xs font-semibold px-1.5 rounded-sm dark:bg-yellow-900 dark:text-yellow-300 whitespace-nowrap">
+                          {t("manager")}
+                        </span>
+                      </div>
+                    )}
                   {roles.includes("client") &&
                     !roles.some((role) =>
                       ["insighter", "company", "company-insighter"].includes(
@@ -420,75 +421,104 @@ export function UserProfile({ isHome }: { isHome: boolean }) {
                         {t("client")}
                       </span>
                     )}
-               </div>
+                </div>
               </div>
             </div>
           </div>
 
-          <div className="py-2 px-3">
-          <div className={roles.includes("insighter") || roles.includes("company") || roles.includes("company-insighter") ? "border-b border-slate-100" : ""}>
-              {(roles.includes("insighter") ||
-              roles.includes("company") ||
-              roles.includes("company-insighter")) && (
-            <>
-              <Link
-                href={`https://app.foresighta.co/app/add-knowledge/stepper`}
-                className="block px-4 py-2.5 text-sm font-medium text-sky-600 hover:bg-indigo-50 hover:text-sky-700"
-                onClick={() => setMenuOpen(false)}
-                style={{fontSize: '13px'}}
-              >
-                {t("addInsight")}
-              </Link>
-               <Link
-               href={`https://app.foresighta.co/app/insighter-dashboard/my-knowledge/general`}
-               className="flex items-center gap-2 px-4 py-2.5 font-semibold text-slate-900 hover:bg-indigo-50 hover:text-sky-700"
-               onClick={() => setMenuOpen(false)}
-               style={{fontSize: '13px'}}
-             >
-               <span>{t("insightBase")}</span>
-               {unpublishedDraftCount > 0 && (
-                 <span className="bg-[#fff8dd] text-[#e8af13] text-[11px] font-bold px-2 py-0.5  rounded-[0.425rem]">
-                   {unpublishedDraftCount} {isRtl ? "محفوظ" : "Draft"} - {isRtl ? "أكمل الان!" : "Complete Now!"}
-                 </span>
-               )}
-             </Link>
-             </>
-            )}
+          {/* Dashboard — prominent top item */}
+          <div className="px-3 pt-3 pb-3 border-b border-slate-100">
+            <Link
+              href={`https://app.foresighta.co/app/insighter-dashboard/my-dashboard`}
+              className="flex items-center gap-2.5 px-1 py-1 rounded-lg border border-indigo-50 bg-gradient-to-r from-white to-indigo-50 text-indigo-700 font-semibold hover:to-indigo-100 transition-colors"
+              onClick={() => setMenuOpen(false)}
+              style={{ fontSize: '13px' }}
+            >
+              <svg width="33" height="33" viewBox="0 0 33 33" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <g filter="url(#filter0_d_667_189)">
+                  <rect x="3.75" y="2.43994" width="25" height="25" rx="6.25" fill="white" shape-rendering="crispEdges" />
+                  <path d="M9.375 21.8149V19.9399H11.875V21.8149" fill="#FFC657" />
+                  <path d="M9.375 19.9399V18.0649H11.875V19.9399" fill="#FFE0A6" />
+                  <path d="M13.125 21.8149V18.3774H15.625V21.8149" fill="#1072FF" />
+                  <path d="M13.125 18.3774V14.9399H15.625V18.3774" fill="#CBE1FF" />
+                  <path d="M20.625 21.8149V15.5649H23.125V21.8149" fill="#1072FF" />
+                  <path d="M20.625 15.5649V9.31494H23.125V15.5649" fill="#CBE1FF" />
+                  <path d="M16.875 21.8149V17.1274H19.375V21.8149" fill="#FFC657" />
+                  <path d="M16.875 17.1274V12.4399H19.375V17.1274" fill="#FFE0A6" />
+                </g>
+                <defs>
+                  <filter id="filter0_d_667_189" x="0" y="-5.8651e-05" width="32.5" height="32.5" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+                    <feFlood flood-opacity="0" result="BackgroundImageFix" />
+                    <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha" />
+                    <feOffset dy="1.31" />
+                    <feGaussianBlur stdDeviation="1.875" />
+                    <feComposite in2="hardAlpha" operator="out" />
+                    <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.12 0" />
+                    <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_667_189" />
+                    <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_667_189" result="shape" />
+                  </filter>
+                </defs>
+              </svg>
 
-            {(roles.includes('company') && (
-              <Link
-                href={`https://app.foresighta.co/app/insighter-dashboard/my-company-settings`}
-                className="block px-4 py-2.5  font-semibold text-slate-900 hover:bg-indigo-50 hover:text-sky-700"
-                onClick={() => setMenuOpen(false)}
-                style={{fontSize: '13px'}}
-              >
-                {t("myCompany")}
-              </Link>
-            ))}
-              </div>
-           {!isClient$() && (  <Link 
+
+              {t("dashboard")}
+            </Link>
+          </div>
+
+          <div className="py-2 px-3">
+            <div className={roles.includes("insighter") || roles.includes("company") || roles.includes("company-insighter") ? "border-b border-slate-100" : ""}>
+              {(roles.includes("insighter") ||
+                roles.includes("company") ||
+                roles.includes("company-insighter")) && (
+                  <>
+                    <Link
+                      href={`https://app.foresighta.co/app/add-knowledge/stepper`}
+                      className="block px-4 py-2.5 text-sm font-medium text-sky-600 hover:bg-indigo-50 hover:text-sky-700"
+                      onClick={() => setMenuOpen(false)}
+                      style={{ fontSize: '13px' }}
+                    >
+                      {t("addInsight")}
+                    </Link>
+                    <Link
+                      href={`https://app.foresighta.co/app/insighter-dashboard/my-knowledge/general`}
+                      className="flex items-center gap-2 px-4 py-2.5 font-semibold text-slate-900 hover:bg-indigo-50 hover:text-sky-700"
+                      onClick={() => setMenuOpen(false)}
+                      style={{ fontSize: '13px' }}
+                    >
+                      <span>{t("insightBase")}</span>
+                      {unpublishedDraftCount > 0 && (
+                        <span className="bg-[#fff8dd] text-[#e8af13] text-[11px] font-bold px-2 py-0.5  rounded-[0.425rem]">
+                          {unpublishedDraftCount} {isRtl ? "محفوظ" : "Draft"} - {isRtl ? "أكمل الان!" : "Complete Now!"}
+                        </span>
+                      )}
+                    </Link>
+                  </>
+                )}
+
+              {(roles.includes('company') && (
+                <Link
+                  href={`https://app.foresighta.co/app/insighter-dashboard/my-company-settings`}
+                  className="block px-4 py-2.5  font-semibold text-slate-900 hover:bg-indigo-50 hover:text-sky-700"
+                  onClick={() => setMenuOpen(false)}
+                  style={{ fontSize: '13px' }}
+                >
+                  {t("myCompany")}
+                </Link>
+              ))}
+            </div>
+            {!isClient$() && (<Link
               href={`https://foresighta.co/en/profile/${user.uuid}?entity=insighter`}
               className="block px-4 py-2.5  font-semibold text-slate-900 hover:bg-indigo-50 hover:text-sky-700"
-              style={{fontSize: '13px'}}
+              style={{ fontSize: '13px' }}
               onClick={() => setMenuOpen(false)}
             >
               {t("myInsighterPage")}
             </Link>)}
-          
-            {/* Show dashboard for all users */}
-            <Link
-              href={`https://app.foresighta.co/app/insighter-dashboard/my-dashboard`}
-              className="block px-4 py-2.5 font-semibold text-slate-900 hover:bg-indigo-50 hover:text-sky-700"
-              onClick={() => setMenuOpen(false)}
-              style={{fontSize: '13px'}}
-            >
-              {t("dashboard")}
-            </Link>
             <Link
               href={`https://app.foresighta.co/app/insighter-dashboard/my-downloads`}
               className="block px-4 py-2.5 font-semibold text-slate-900 hover:bg-indigo-50 hover:text-sky-700"
               onClick={() => setMenuOpen(false)}
-              style={{fontSize: '13px'}}
+              style={{ fontSize: '13px' }}
             >
               {isRtl ? "التحميلات" : "My Downloads"}
             </Link>
@@ -500,45 +530,23 @@ export function UserProfile({ isHome }: { isHome: boolean }) {
             >
               {t("myConsultingSchedule")}
             </Link> */}
-            {/* Hide requests, received meetings and account settings for client-only role */}
             <Link
-              href={`https://app.foresighta.co/app/profile/overview`}
+              href={`/${localeFromPath}/profile/settings`}
               className="block px-4 py-3  font-semibold text-slate-900 hover:bg-indigo-50 hover:text-sky-700"
-              style={{fontSize: '13px'}}
+              style={{ fontSize: '13px' }}
               onClick={() => setMenuOpen(false)}
             >
               {t("myProfile")}
             </Link>
-            {!isClient$() && (
-              <>
-                {/* <Link
-                  href="https://app.foresighta.co/app/insighter-dashboard/my-requests"
-                  className="block px-4 py-2.5 font-semibold text-slate-900 hover:bg-indigo-50 hover:text-sky-700"
-                  onClick={() => setMenuOpen(false)}
-                  style={{fontSize: '13px'}}
-                >
-                  {t("myRequests")}
-                </Link> */}
-                {/* <Link
-                  href="https://app.foresighta.co/app/insighter-dashboard/my-meetings/received"
-                  className="block px-4 py-2.5 font-semibold text-slate-900 hover:bg-indigo-50 hover:text-sky-700"
-                  onClick={() => setMenuOpen(false)}
-                  style={{fontSize: '13px'}}
-                >
-                  {t("ReceivedMeetings")}
-                </Link> */}
-                <Link
-                  href={`https://app.foresighta.co/app/insighter-dashboard/account-settings/general-settings`}
-                  className="block px-4 py-2.5 font-semibold text-slate-900 hover:bg-indigo-50 hover:text-sky-700"
-                  onClick={() => setMenuOpen(false)}
-                  style={{fontSize: '13px'}}
-                >
-                  {t("settings")}
-                </Link>
-              
-              </>
-            )}
-            
+            <Link
+              href={`https://app.foresighta.co/app/insighter-dashboard/account-settings/general-settings`}
+              className="block px-4 py-2.5 font-semibold text-slate-900 hover:bg-indigo-50 hover:text-sky-700"
+              onClick={() => setMenuOpen(false)}
+              style={{ fontSize: '13px' }}
+            >
+              {t("settings")}
+            </Link>
+
             {/* Show company settings only for company role */}
             {/* {roles.includes('company') && 
               <Link
@@ -555,23 +563,23 @@ export function UserProfile({ isHome }: { isHome: boolean }) {
               !roles.includes("company") &&
               !roles.includes("company-insighter") && (
                 <>
-                <Link
-                  href={`https://app.foresighta.co/app/insighter-register/vertical`}
-                  className="block px-4 py-2.5  font-semibold bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-teal-400"
-                  onClick={() => setMenuOpen(false)}
-                  style={{fontSize: '13px'}}
-                >
-                  {t("becomeInsighter")}
-                </Link>
-                <p
-                  className="block px-4 pt-1 text-gray-500 pb-2"
-                  style={{ fontSize: '12px', lineHeight: '1.4' }}
-                >
-                  {t("becomeInsighterDescription")}
-                </p>
-               </>
+                  <Link
+                    href={`https://app.foresighta.co/app/insighter-register/vertical`}
+                    className="block px-4 py-2.5  font-semibold bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-teal-400"
+                    onClick={() => setMenuOpen(false)}
+                    style={{ fontSize: '13px' }}
+                  >
+                    {t("becomeInsighter")}
+                  </Link>
+                  <p
+                    className="block px-4 pt-1 text-gray-500 pb-2"
+                    style={{ fontSize: '12px', lineHeight: '1.4' }}
+                  >
+                    {t("becomeInsighterDescription")}
+                  </p>
+                </>
               )}
-             
+
             <div className="border-t border-slate-100">
               {isWhatsAppMissing && (
                 <Link
@@ -589,14 +597,14 @@ export function UserProfile({ isHome }: { isHome: boolean }) {
                   />
                 </Link>
               )}
-              
+
               <button
                 onClick={() => {
                   setMenuOpen(false);
                   handleSignOut();
                 }}
                 className="block w-full text-left px-4 py-2.5  font-semibold text-slate-900 hover:bg-indigo-50 hover:text-sky-700"
-                style={{fontSize: '13px'}}
+                style={{ fontSize: '13px' }}
               >
                 {t("signOut")}
               </button>

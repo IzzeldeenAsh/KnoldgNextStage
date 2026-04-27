@@ -104,6 +104,18 @@ export const projectWizardStorage = {
   serviceComponentAnswerKey(locale: WizardLocale, slug: string) {
     return `project:wizard:${locale}:serviceComponent:${slug}`
   },
+  deadlineOfferKey(locale: WizardLocale) {
+    return `project:wizard:${locale}:deadlineOffer`
+  },
+  selectedMatchIdsKey(locale: WizardLocale) {
+    return `project:wizard:${locale}:selectedMatchIds`
+  },
+  proposalMatchUuidKey(locale: WizardLocale) {
+    return `project:wizard:${locale}:proposalMatchUuid`
+  },
+  deadlineKey(locale: WizardLocale) {
+    return `project:wizard:${locale}:deadline`
+  },
 } as const
 
 export function clearProjectWizardStorage(locale: WizardLocale) {

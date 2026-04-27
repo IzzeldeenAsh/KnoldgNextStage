@@ -14,9 +14,13 @@ export const projectWizardStepIds = {
   insighterExperience: 'insighter-experience',
   companyTeamSize: 'company-team-size',
   projectDescription: 'project-description',
+  deadlineOffer: 'deadline-offer',
+  projectDeadline: 'project-deadline',
   addonsIntro: 'addons-intro',
   kickoffMeeting: 'kickoff-meeting',
   projectReview: 'project-review',
+  projectMatches: 'project-matches',
+  projectSubmissionSuccess: 'submission-success',
 } as const
 
 export type ProjectWizardStepId = string
@@ -52,18 +56,6 @@ export function readServiceComponentSlugs(locale: WizardLocale): string[] {
       .filter(Boolean)
   } catch {
     return []
-  }
-}
-
-function readScopeHasChildren(locale: WizardLocale): boolean {
-  if (typeof window === 'undefined') return false
-  try {
-    const raw = window.sessionStorage.getItem(
-      projectWizardStorage.serviceScopeHasChildrenKey(locale)
-    )
-    return raw === '1' || raw === 'true'
-  } catch {
-    return false
   }
 }
 
@@ -111,9 +103,12 @@ export function getProjectWizardStepOrder(locale: WizardLocale): string[] {
     projectWizardStepIds.preferredInsighterType,
     projectWizardStepIds.insighterOrigin,
     ...postOriginSteps,
+    projectWizardStepIds.projectDeadline,
     projectWizardStepIds.projectDescription,
     projectWizardStepIds.addonsIntro,
     ...(skipKickoffMeeting ? [] : [projectWizardStepIds.kickoffMeeting]),
     projectWizardStepIds.projectReview,
+    projectWizardStepIds.projectMatches,
+    projectWizardStepIds.deadlineOffer,
   ]
 }
