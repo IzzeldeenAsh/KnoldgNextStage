@@ -71,6 +71,13 @@ interface OrderDetails {
   knowledge_download_id?: string;
 }
 
+const isSuccessfulPaymentStatus = (order?: { status?: string; payment_status?: string } | null) => {
+  const status = order?.status?.toLowerCase();
+  const paymentStatus = order?.payment_status?.toLowerCase();
+
+  return status === "paid" || status === "completed" || paymentStatus === "completed";
+};
+
 interface PaymentFormProps {
   orderUuid: string;
   amount: string;
@@ -243,13 +250,13 @@ function PaymentForm({ orderUuid, amount, title, locale, isRTL, isGuest, orderDe
     }
 
     if (knowledgeDownloadId) {
-      window.location.href = `https://app.foresighta.co/app/insighter-dashboard/my-downloads?uuids=${knowledgeDownloadId}`;
+      window.location.href = `https://app.insightabusiness.com/app/insighter-dashboard/my-downloads?uuids=${knowledgeDownloadId}`;
       return;
     }
 
     const searchTitle = orderDetails?.orderable?.knowledge?.[0]?.title || "";
     const searchParam = searchTitle ? `?search=${encodeURIComponent(searchTitle)}` : "";
-    window.location.href = `https://app.foresighta.co/app/insighter-dashboard/my-downloads${searchParam}`;
+    window.location.href = `https://app.insightabusiness.com/app/insighter-dashboard/my-downloads${searchParam}`;
   }, [fetchUpdatedOrderDetails, orderDetails, orderUuid, setOrderDetails]);
 
   const handleRedownload = useCallback(async () => {
@@ -366,7 +373,7 @@ function PaymentForm({ orderUuid, amount, title, locale, isRTL, isGuest, orderDe
         }
 
         const data = await response.json();
-        return data.data?.status === "paid";
+        return isSuccessfulPaymentStatus(data.data);
       } catch (error) {
         console.error("Error checking order status:", error);
         return false;
@@ -520,7 +527,7 @@ function PaymentForm({ orderUuid, amount, title, locale, isRTL, isGuest, orderDe
       if (response.status === 204) {
         // After backend confirmation, re-fetch order to verify status
         const updated = await fetchUpdatedOrderDetails(orderUuid, setOrderDetails);
-        if (updated?.status === "paid") {
+        if (isSuccessfulPaymentStatus(updated)) {
           setPaymentStatus("success");
         } else {
           setPaymentStatus("error");
@@ -700,7 +707,7 @@ function PaymentForm({ orderUuid, amount, title, locale, isRTL, isGuest, orderDe
                   <Text size="md" ta="start">
                     {translations.guestSupportNotePrefix}
                     <a
-                      href="https://foresighta.co/en/contact"
+                      href="https://insightabusiness.com/en/contact"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-blue-600 hover:text-blue-700 underline underline-offset-2"
