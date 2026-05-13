@@ -4,6 +4,7 @@ import Image from 'next/image'
 import Particles from './particles'
 import Illustration from '@/public/images/glow-bottom-blue.svg'
 import LogoIcon from '@/public/images/SVG/Logo-icon-white.svg'
+import { getAuthToken } from '@/lib/authToken'
 import { useTranslations } from 'next-intl'
 import { usePathname, useRouter } from 'next/navigation'
 import { useState, useEffect, useRef } from 'react'
@@ -76,11 +77,14 @@ export default function Hero() {
   const router = useRouter();
   const pathname = usePathname();
   const currentLocale = pathname?.split('/')[1] || 'en';
+  const projectIntroHref = `/${currentLocale}/project`;
+  const projectWizardHref = `/${currentLocale}/project/wizard/project-type?fresh=1`;
   const [searchInput, setSearchInput] = useState('');
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(-1);
+  const [projectHref, setProjectHref] = useState(projectIntroHref);
 
 
 
@@ -127,6 +131,10 @@ export default function Hero() {
 
     getSuggestions();
   }, [debouncedSearchTerm, currentLocale]);
+
+  useEffect(() => {
+    setProjectHref(getAuthToken() ? projectWizardHref : projectIntroHref);
+  }, [projectIntroHref, projectWizardHref]);
 
 
 
@@ -215,6 +223,16 @@ export default function Hero() {
 
   const handleProjectButtonLeave = () => {
     updateProjectGlowPosition('86%', '50%');
+  };
+
+  const handleProjectButtonClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    const nextHref = getAuthToken() ? projectWizardHref : projectIntroHref;
+    setProjectHref(nextHref);
+
+    if (nextHref !== e.currentTarget.getAttribute('href')) {
+      e.preventDefault();
+      router.push(nextHref);
+    }
   };
 
   return (
@@ -403,7 +421,8 @@ export default function Hero() {
                     ref={projectButtonRef}
                     onMouseMove={handleProjectButtonMove}
                     onMouseLeave={handleProjectButtonLeave}
-                    href={`/${currentLocale}/project/wizard/project-type?fresh=1`}
+                    onClick={handleProjectButtonClick}
+                    href={projectHref}
                     className="
                     group relative isolate flex h-[46px] w-full max-w-[230px]
                     items-center justify-center overflow-hidden rounded-full

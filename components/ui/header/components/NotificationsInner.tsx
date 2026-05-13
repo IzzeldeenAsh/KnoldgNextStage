@@ -148,6 +148,7 @@ const getVariantForSubType = (subType: string): Variant => {
     case 'download':
     case 'view':
     case 'like':
+    case 'project_proposal_offer':
       return 'info'
     case 'upload':
     case 'share':
@@ -197,6 +198,8 @@ const getNotificationBg = (subType: string): string => {
     case 'reply':
       return 'blue';
     case 'like':
+      return 'blue';
+    case 'project_proposal_offer':
       return 'blue';
     case 'save':
       return 'green';
@@ -292,11 +295,28 @@ const getNotificationIconName = (subType: string): string => {
           return 'duotune/general/Capa_1.svg';
       case 'answer_question':
         return 'duotune/communication/com007.svg';
+    case 'project_proposal_offer':
+      return 'keen:briefcase';
     default:
       return 'duotune/general/gen007.svg';
   }
 }
 
+const renderKeenIcon = (iconName: string, className: string): React.ReactNode => {
+  const pathCounts: Record<string, number> = {
+    briefcase: 2
+  }
+
+  const pathCount = pathCounts[iconName] ?? 0
+
+  return (
+    <i className={`ki-duotone ki-${iconName} ${className}`}>
+      {Array.from({ length: pathCount }, (_, index) => (
+        <span key={index} className={`path${index + 1}`} />
+      ))}
+    </i>
+  )
+}
 
 
 
@@ -316,12 +336,17 @@ const getNotificationIcon = (subType: string, color?: string): React.ReactNode =
     'red': 'text-red-500',
     'green': 'text-green-500'
   };
+  const iconClassName = `h-6 w-6 text-2xl leading-none ${colorClasses[tailwindColor as keyof typeof colorClasses]}`
+
+  if (iconPath.startsWith('keen:')) {
+    return renderKeenIcon(iconPath.replace('keen:', ''), iconClassName)
+  }
   
   // Return a properly styled SVG Icon that can be colored like in Angular
   return (
     <SvgIcon
       src={`/${iconPath}`}
-      className={`h-6 w-6 ${colorClasses[tailwindColor as keyof typeof colorClasses]}`}
+      className={iconClassName}
     />
   );
 }
@@ -351,6 +376,7 @@ const getNotificationName = (subType: string, language: string): string => {
     'knowledge_accept': { en: 'Insights Accepted', ar: 'قبول المستندات' },
     'knowledge_declined': { en: 'Insights Declined', ar: 'رفض المستندات' },
     'activate_company': { en: 'Active Company', ar: 'تفعيل الشركة' },
+    'project_proposal_offer': { en: 'New Project Proposal Offer', ar: 'عرض مقترح مشروع جديد' },
     'client_meeting_new': { en: 'New Session Request', ar: 'طلب جلسة استشارية جديدة' },
     'insighter_meeting_client_new': { en: 'New Session Request', ar: 'طلب جلسة استشارية جديدة' },
     'insighter_meeting_approved': { en: 'Session Approved', ar: 'تمت الموافقة على الجلسة الاستشارية' },

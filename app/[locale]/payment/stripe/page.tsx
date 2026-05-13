@@ -250,13 +250,13 @@ function PaymentForm({ orderUuid, amount, title, locale, isRTL, isGuest, orderDe
     }
 
     if (knowledgeDownloadId) {
-      window.location.href = `https://app.insightabusiness.com/app/insighter-dashboard/my-downloads?uuids=${knowledgeDownloadId}`;
+      window.location.href = `https://app.foresighta.co/app/insighter-dashboard/my-downloads?uuids=${knowledgeDownloadId}`;
       return;
     }
 
     const searchTitle = orderDetails?.orderable?.knowledge?.[0]?.title || "";
     const searchParam = searchTitle ? `?search=${encodeURIComponent(searchTitle)}` : "";
-    window.location.href = `https://app.insightabusiness.com/app/insighter-dashboard/my-downloads${searchParam}`;
+    window.location.href = `https://app.foresighta.co/app/insighter-dashboard/my-downloads${searchParam}`;
   }, [fetchUpdatedOrderDetails, orderDetails, orderUuid, setOrderDetails]);
 
   const handleRedownload = useCallback(async () => {
@@ -707,7 +707,7 @@ function PaymentForm({ orderUuid, amount, title, locale, isRTL, isGuest, orderDe
                   <Text size="md" ta="start">
                     {translations.guestSupportNotePrefix}
                     <a
-                      href="https://insightabusiness.com/en/contact"
+                      href="https://foresighta.co/en/contact"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-blue-600 hover:text-blue-700 underline underline-offset-2"
